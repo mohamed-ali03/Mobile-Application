@@ -1,6 +1,6 @@
 import 'package:dualtheme/components/box.dart';
 import 'package:dualtheme/components/mybutton.dart';
-import 'package:dualtheme/pages/theme_provider.dart';
+import 'package:dualtheme/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

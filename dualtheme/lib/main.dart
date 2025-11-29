@@ -1,5 +1,5 @@
 import 'package:dualtheme/pages/home_page.dart';
-import 'package:dualtheme/pages/theme_provider.dart';
+import 'package:dualtheme/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
