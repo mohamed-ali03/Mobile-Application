@@ -3,6 +3,7 @@ import 'package:first_app/first_page.dart';
 import 'package:first_app/home_page.dart';
 import 'package:first_app/settings_page.dart';
 import 'package:first_app/textfield.dart';
+import 'package:first_app/voicepage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
     List names = ['Mohamed', 'Jack', 'Sparrow'];
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Textfield(),
+      home: Voicepage(),
       routes: {
         '\firstpage': (context) => FirstPage(),
         '\homepage': (context) => HomePage(),
