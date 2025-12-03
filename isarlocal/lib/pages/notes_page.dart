@@ -29,7 +29,11 @@ class _NotesPageState extends State<NotesPage> {
       builder: (context) => AlertDialog(
         content: TextField(
           controller: noteController,
-          decoration: InputDecoration(border: OutlineInputBorder()),
+          decoration: InputDecoration(
+            hint: Text('Add new Note...'),
+            hintStyle: TextStyle(color: Colors.grey[300]),
+            border: OutlineInputBorder(),
+          ),
         ),
         actions: [
           CustomButton(onPressed: () => Navigator.pop(context), text: 'Cancel'),

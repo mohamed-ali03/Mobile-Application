@@ -17,7 +17,6 @@ class CustomDrawer extends StatelessWidget {
             icon: Icon(Icons.home),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/notespage');
             },
           ),
           CustomDrawerListtile(
