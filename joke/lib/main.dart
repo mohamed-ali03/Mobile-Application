@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:joke/joke_service/joke_service.dart';
+import 'package:joke/joke_provider/joke_provider.dart';
 import 'package:joke/pages/joke_page.dart';
 import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => JokeService(),
-      child: const MyApp(),
-    ),
+    ChangeNotifierProvider(create: (_) => JokeProvider(), child: const MyApp()),
   );
 }
 

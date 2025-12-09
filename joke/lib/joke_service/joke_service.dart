@@ -1,56 +1,53 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:joke/models/joke.dart';
 
-class JokeService extends ChangeNotifier {
-  // ignore: constant_identifier_names
-  static const String BASE_URL = 'official-joke-api.appspot.com';
+/*
+    APIs
+*/
 
-  late Joke oneJoke;
-  List<String> _types = [];
-  List<Joke> _jokes = [];
+// get types                   -->  https://official-joke-api.appspot.com/types (get)
 
-  // Getters
-  List<String> get typesList => _types;
-  List<Joke> get jokesList => _jokes;
+// get ten jokes from one type -->  https://official-joke-api.appspot.com/jokes/programming/ten
 
-  // Setters
-  set jokes(List<Joke> value) {
-    _jokes = value;
-    notifyListeners();
-  }
+// get number of random jokes  -->  https://official-joke-api.appspot.com/jokes/random/5
 
-  set types(List<String> value) {
-    _types = value;
-    notifyListeners();
-  }
+class JokeService {
+  static const BASEURL = 'official-joke-api.appspot.com';
 
-  Future<void> getOneRandomJoke() async {
-    final response = await http.get(Uri.https(BASE_URL, '/random_joke'));
+  static Future<List<String>> getTypesService() async {
+    try {
+      final response = await http.get(Uri.https(BASEURL, '/types'));
 
-    if (response.statusCode == 200) {
-      final decoded = jsonDecode(response.body);
-      oneJoke = Joke.fromJson(decoded);
-      notifyListeners();
+      if (response.statusCode == 200) {
+        List<String> typesList = (jsonDecode(response.body) as List)
+            .map((type) => type.toString())
+            .toList();
+        return typesList;
+      } else {
+        throw Exception(response.statusCode);
+      }
+    } catch (e) {
+      print(e.toString());
+      rethrow;
     }
   }
 
-  Future<void> getJokeTypes() async {
-    final response = await http.get(Uri.https(BASE_URL, '/types'));
+  static Future<List<Joke>> getJokesFromOneTypeService(String type) async {
+    try {
+      final response = await http.get(Uri.https(BASEURL, '/jokes/$type/ten'));
 
-    if (response.statusCode == 200) {
-      final decoded = jsonDecode(response.body);
-      types = (decoded as List).map((item) => item.toString()).toList();
-    }
-  }
-
-  Future<void> getNumOfJokes(String type) async {
-    final response = await http.get(Uri.https(BASE_URL, '/jokes/$type/ten'));
-
-    if (response.statusCode == 200) {
-      final decoded = jsonDecode(response.body);
-      jokes = (decoded as List).map((item) => Joke.fromJson(item)).toList();
+      if (response.statusCode == 200) {
+        List<Joke> jokesList = (jsonDecode(response.body) as List)
+            .map((joke) => Joke.fromJson(joke))
+            .toList();
+        return jokesList;
+      } else {
+        throw Exception(response.statusCode);
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 }

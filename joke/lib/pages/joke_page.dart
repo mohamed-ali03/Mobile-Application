@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:joke/joke_service/joke_service.dart';
+import 'package:joke/components/joke_tile.dart';
+import 'package:joke/joke_provider/joke_provider.dart';
 import 'package:joke/models/joke.dart';
 import 'package:provider/provider.dart';
 
@@ -11,102 +12,65 @@ class JokePage extends StatefulWidget {
 }
 
 class _JokePageState extends State<JokePage> {
-  String? selectedType;
+  late Future<bool> getTypes;
 
   @override
   void initState() {
+    getTypes = context.read<JokeProvider>().getTypesProvider();
     super.initState();
-
-    final jokeService = Provider.of<JokeService>(context, listen: false);
-
-    // load types and default jokes
-    jokeService.getJokeTypes();
-    jokeService.getNumOfJokes("general");
   }
 
   @override
   Widget build(BuildContext context) {
-    final jokeService = Provider.of<JokeService>(context);
-    final List<Joke> jokes = jokeService.jokesList;
-
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            // row contain dropdown and search button
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: DropdownButton<String>(
-                      value: selectedType,
-                      hint: const Text("Select type"),
-                      isExpanded: true,
-                      items: jokeService.typesList
-                          .map(
-                            (type) => DropdownMenuItem(
-                              value: type,
-                              child: Text(type),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value == null) return;
+        child: FutureBuilder(
+          future: getTypes,
+          builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-                        setState(() {
-                          selectedType = value;
-                        });
+            return Column(
+              children: [
+                // row contain dropdown and search button
+                _selectTypeWidget(),
 
-                        Provider.of<JokeService>(
-                          context,
-                          listen: false,
-                        ).getNumOfJokes(value);
-                      },
-                    ),
-                  ),
-
-                  Container(
-                    margin: const EdgeInsets.only(left: 20),
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.search, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // list view of jokes
-            Expanded(
-              child: ListView.builder(
-                itemCount: jokes.length,
-                itemBuilder: (context, index) => Container(
-                  padding: EdgeInsets.all(10),
-                  margin: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ListTile(
-                    title: Text(jokes[index].type),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        '${jokes[index].setup}.....${jokes[index].punchline}',
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+                // list the joke
+                Expanded(child: _listJokes()),
+              ],
+            );
+          },
         ),
       ),
+    );
+  }
+
+  Widget _selectTypeWidget() {
+    final provider = context.watch<JokeProvider>();
+    return Container(
+      margin: EdgeInsets.all(20),
+      padding: EdgeInsets.all(10),
+      child: DropdownButton<String>(
+        padding: EdgeInsets.all(10),
+        value: context.watch<JokeProvider>().type,
+        hint: const Text("Select type"),
+        isExpanded: true,
+        items: provider.types
+            .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+            .toList(),
+        onChanged: (value) {
+          provider.getTenJokesFromSpecificTypeProvider(value!);
+        },
+      ),
+    );
+  }
+
+  Widget _listJokes() {
+    List<Joke> jokes = context.watch<JokeProvider>().jokes;
+    return ListView.builder(
+      itemCount: jokes.length,
+      itemBuilder: (context, index) => JokeTile(joke: jokes[index]),
     );
   }
 }
