@@ -1,30 +1,60 @@
-import 'package:first_app/counter_page.dart';
-import 'package:first_app/first_page.dart';
-import 'package:first_app/home_page.dart';
-import 'package:first_app/settings_page.dart';
+import 'package:first_app/provider/my_provider.dart';
 import 'package:first_app/textfield.dart';
-import 'package:first_app/voicepage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(create: (_) => MyProvider(), child: const MyApp()),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  TextEditingController textEditingController = TextEditingController();
+
+  @override
   Widget build(BuildContext context) {
-    List names = ['Mohamed', 'Jack', 'Sparrow'];
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Voicepage(),
-      routes: {
-        '\firstpage': (context) => FirstPage(),
-        '\homepage': (context) => HomePage(),
-        '\settingspage': (context) => SettingsPage(),
-      },
+      home: Scaffold(
+        body: Container(
+          color: Colors.white,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Selector<MyProvider, String>(
+                selector: (_, provider) => provider.name,
+                builder: (_, value, _) => Text(value),
+              ),
+
+              TextField(controller: textEditingController),
+              IconButton(
+                onPressed: () => context.read<MyProvider>().changeName(
+                  textEditingController.text,
+                ),
+                icon: Icon(Icons.send),
+              ),
+
+              Selector<MyProvider, int>(
+                selector: (_, MyProvider provider) => provider.counter,
+                builder: (_, value, _) => Text(value.toString()),
+              ),
+
+              IconButton(
+                onPressed: () => context.read<MyProvider>().incrementCounter(),
+                icon: Icon(Icons.add),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
