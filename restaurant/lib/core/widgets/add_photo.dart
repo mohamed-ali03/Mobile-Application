@@ -5,7 +5,8 @@ import 'package:image_picker/image_picker.dart';
 
 class AddPhoto extends StatefulWidget {
   final ValueNotifier<File?> image;
-  const AddPhoto({super.key, required this.image});
+  final Icon icon;
+  const AddPhoto({super.key, required this.image, required this.icon});
 
   @override
   State<AddPhoto> createState() => _AddPhotoState();
@@ -39,7 +40,7 @@ class _AddPhotoState extends State<AddPhoto> {
                   height: 100,
                   width: 100,
                   decoration: BoxDecoration(shape: BoxShape.circle),
-                  child: Icon(Icons.person, size: 50),
+                  child: widget.icon,
                 ),
         );
       },

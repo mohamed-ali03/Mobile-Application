@@ -8,6 +8,7 @@ import 'package:restaurant/feature/models/user.dart';
 class Firestore {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // --------------------------------------------------USERS CRUD-------------------------------------------------------
   // ================================
   // GET USERS
   // ================================
@@ -50,19 +51,36 @@ class Firestore {
   // ADD USER
   // ================================
   static Future<void> addUserIfNotExists(UserModel user) async {
-    final doc = await _firestore.collection('Users').doc(user.uid).get();
+    try {
+      final doc = await _firestore.collection('Users').doc(user.uid).get();
 
-    if (!doc.exists) {
-      await doc.reference.set(user.toMap());
+      if (!doc.exists) {
+        await doc.reference.set(user.toMap());
+      }
+    } on FirebaseException catch (e) {
+      throw Exception(e.code);
     }
   }
 
   // ================================
   // MODIFY USER
   // ================================
-  static Future<void> modifyUser(UserModel user) async {
+  static Future<void> modifyUser(
+    UserModel user, [
+    String? newName,
+    String? newRole,
+    String? newPhoneNumber,
+    String? newLocation,
+    String? imageURL,
+  ]) async {
     try {
-      await _firestore.collection('Users').doc(user.uid).update(user.toMap());
+      await _firestore.collection('Users').doc(user.uid).update({
+        'name': newName ?? user.name,
+        'role': newRole ?? user.role,
+        'phoneNumber': newPhoneNumber ?? user.phoneNumber,
+        'location': newLocation ?? user.location,
+        'image': imageURL ?? user.imageUrl,
+      });
     } on FirebaseException catch (e) {
       throw Exception(e.code);
     }
@@ -96,20 +114,17 @@ class Firestore {
       for (var doc in categorySnapshot.docs) {
         // Convert category
         Category category = Category.fromJson(doc.data());
-        category.categoryId = doc.id;
 
         // Step 2: Fetch items under category
         final itemsSnapshot = await _firestore
             .collection('Menu')
-            .doc(doc.id)
+            .doc(category.categoryId)
             .collection('items')
             .get();
 
-        List<ProductItem> items = itemsSnapshot.docs.map((itemDoc) {
-          final item = ProductItem.fromJson(itemDoc.data());
-          item.itemId = itemDoc.id;
-          return item;
-        }).toList();
+        List<ProductItem> items = itemsSnapshot.docs
+            .map((itemDoc) => ProductItem.fromJson(itemDoc.data()))
+            .toList();
 
         category.items = items;
 
@@ -124,6 +139,8 @@ class Firestore {
       throw Exception(e.toString());
     }
   }
+
+  // --------------------------------------------------CATEGORY CRUD-------------------------------------------------------
 
   // ================================
   // GET CATEGORY BY ID
@@ -167,10 +184,15 @@ class Firestore {
   // ================================
   // MODIFY CATEGORY
   // ================================
-  static Future<void> modifyCategry(String newName, String categoryID) async {
+  static Future<void> modifyCategry(
+    Category category, [
+    String? newName,
+    String? imageURL,
+  ]) async {
     try {
-      await _firestore.collection('Menu').doc(categoryID).update({
-        'categoryName': newName,
+      await _firestore.collection('Menu').doc(category.categoryId).update({
+        'categoryName': newName ?? category.categoryName,
+        'imageUrl': imageURL ?? category.imageUrl,
       });
     } on FirebaseException catch (e) {
       throw Exception(e.code);
@@ -198,6 +220,8 @@ class Firestore {
       throw Exception(e.code);
     }
   }
+
+  // --------------------------------------------------ITEM CRUD-------------------------------------------------------
 
   // ================================
   // GET ITEM BY ID
@@ -245,14 +269,35 @@ class Firestore {
   // ================================
   // MODIFY ITEM
   // ================================
-  static Future<void> modifyItem(ProductItem product) async {
+  static Future<void> modifyItem(
+    ProductItem product, [
+    String? newName,
+    String? newCategoryId,
+    String? newCategoryName,
+    String? newDescription,
+    List<String>? newIngredients,
+    double? newPrice,
+    double? newRating,
+    String? newImageUrl,
+    bool? newAvailability,
+  ]) async {
     try {
       await _firestore
           .collection('Menu')
           .doc(product.categoryId)
           .collection('items')
           .doc(product.itemId)
-          .set(product.toMap());
+          .update({
+            'itemName': newName ?? product.itemName,
+            'categoryId': newCategoryId ?? product.categoryId,
+            'categoryName': newCategoryName ?? product.categoryName,
+            'description': newDescription ?? product.description,
+            'ingredients': newIngredients ?? product.ingredients,
+            'price': newPrice ?? product.price,
+            'rating': newRating ?? product.rating,
+            'imageUrl': newImageUrl ?? product.imageUrl,
+            'isAvailable': newAvailability ?? product.isAvailable,
+          });
     } on FirebaseException catch (e) {
       throw Exception(e.code);
     }
@@ -273,6 +318,8 @@ class Firestore {
       throw Exception(e.code);
     }
   }
+
+  // --------------------------------------------------ORDER CRUD-------------------------------------------------------
 
   // ================================
   // FETCH ALL ORDERS --> ADMIN
@@ -328,10 +375,21 @@ class Firestore {
   // ================================
   // MODIFY ORDER STATUS
   // ================================
-  static Future<void> modifyOrderStatus(String orderID, String status) async {
+  static Future<void> modifyOrder(
+    OrderModel order, [
+    String? newItemID,
+    String? newUserID,
+    String? newStatus,
+    double? newRate,
+    List<String>? newIngredients,
+  ]) async {
     try {
-      await _firestore.collection('cart').doc(orderID).update({
-        'status': status,
+      await _firestore.collection('cart').doc(order.orderID).update({
+        'itemID': newItemID ?? order.itemID,
+        'userID': newUserID ?? order.userID,
+        'status': newStatus ?? order.status,
+        'rate': newRate ?? order.rate,
+        'ingredients': newIngredients ?? order.ingredients,
       });
     } on FirebaseException catch (e) {
       throw Exception(e.code);
@@ -344,6 +402,24 @@ class Firestore {
   static Future<void> deleteOrder(String orderID) async {
     try {
       await _firestore.collection('cart').doc(orderID).delete();
+    } on FirebaseException catch (e) {
+      throw Exception(e.code);
+    }
+  }
+
+  // ================================
+  // DELETE ALL USER ORDERS
+  // ================================
+  static Future<void> deleteAllUserOrders(String userID) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('cart')
+          .where('userID', isEqualTo: userID)
+          .get();
+
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.delete();
+      }
     } on FirebaseException catch (e) {
       throw Exception(e.code);
     }

@@ -4,9 +4,10 @@ class ProductItem {
   String categoryId;
   String? categoryName;
   String? description;
-  List<String>? ingredients;
+  Map<String, bool>? ingredients;
   double? price;
   double? rating;
+  int? numOfReviews;
   String? imageUrl;
   bool? isAvailable;
 
@@ -19,6 +20,7 @@ class ProductItem {
     this.ingredients,
     this.price,
     this.rating,
+    this.numOfReviews,
     this.isAvailable,
     this.imageUrl,
   });
@@ -32,6 +34,7 @@ class ProductItem {
     'ingredients': ingredients,
     'price': price,
     'rating': rating,
+    'numOfReviews': numOfReviews,
     'isAvailable': isAvailable,
     'imageUrl': imageUrl,
   };
@@ -42,13 +45,16 @@ class ProductItem {
     categoryId: json['categoryId'] ?? '',
     categoryName: json['categoryName'] ?? '',
     description: json['description'] ?? '',
-    ingredients: List<String>.from(json['ingredients'] ?? []),
+    ingredients: Map<String, bool>.from(json['ingredients'] ?? {}),
     price: (json['price'] is int)
         ? (json['price'] as int).toDouble()
         : (json['price'] ?? 0.0),
     rating: (json['rating'] is int)
         ? (json['rating'] as int).toDouble()
         : (json['rating'] ?? 0.0),
+    numOfReviews: (json['numOfReviews'] is int)
+        ? (json['numOfReviews'] as int)
+        : (json['numOfReviews'] ?? 0.0),
     isAvailable: json['isAvailable'] ?? true,
     imageUrl: json['imageUrl'] ?? '',
   );
