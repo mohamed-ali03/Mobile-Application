@@ -1,12 +1,58 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:restaurant/feature/models/category.dart';
-import 'package:restaurant/feature/models/menu.dart';
+import 'package:restaurant/feature/models/modification.dart';
 import 'package:restaurant/feature/models/order_model.dart';
 import 'package:restaurant/feature/models/product_item.dart';
 import 'package:restaurant/feature/models/user.dart';
 
 class Firestore {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // -------------------------------------------------- APP STATUS-------------------------------------------------------
+
+  // watch app status
+  static Stream<Modification> watchAppStatus() {
+    return _firestore
+        .collection('App Status')
+        .doc('app status')
+        .snapshots()
+        .asyncMap((snapshot) => Modification.fromJson(snapshot.data() ?? {}));
+  }
+
+  // create app status for one time
+  static Future createAppStatus() async {
+    Modification modification = Modification(
+      userVersion: 0,
+      menuVersion: 0,
+      cartVersion: 0,
+    );
+    await _firestore
+        .collection('App Status')
+        .doc('app status')
+        .set(modification.toMap());
+  }
+
+  // modifiy app status
+  static Future modifiyAppStatus(Modification modification) async {
+    await _firestore
+        .collection('App Status')
+        .doc('app status')
+        .update(modification.toMap());
+  }
+
+  // get app status
+  static Future<Modification> getAppStatus() async {
+    final doc = await _firestore
+        .collection('App Status')
+        .doc('app status')
+        .get();
+    return Modification.fromJson(
+      doc.data() ??
+          Modification(userVersion: 0, menuVersion: 0, cartVersion: 0).toMap(),
+    );
+  }
 
   // --------------------------------------------------USERS CRUD-------------------------------------------------------
   // ================================
@@ -100,7 +146,7 @@ class Firestore {
   // ================================
   // GET MENU
   // ================================
-  static Future<Menu> getMenu() async {
+  static Future<List<Category>> getMenu() async {
     try {
       // Step 1: Fetch all categories
       final categorySnapshot = await _firestore.collection('Menu').get();
@@ -132,7 +178,7 @@ class Firestore {
         categories.add(category);
       }
 
-      return Menu(categories: categories);
+      return categories;
     } on FirebaseException catch (e) {
       throw Exception("Firebase error: ${e.code}");
     } catch (e) {
@@ -163,9 +209,9 @@ class Firestore {
   // ADD CATEGORY
   // ================================
   static Future<void> addNewCategry(
-    String categoryName, [
-    String? imageURL,
-  ]) async {
+    String categoryName,
+    String imageURL,
+  ) async {
     try {
       final categoryRef = _firestore.collection('Menu').doc();
 
@@ -270,17 +316,17 @@ class Firestore {
   // MODIFY ITEM
   // ================================
   static Future<void> modifyItem(
-    ProductItem product, [
+    ProductItem product, {
     String? newName,
     String? newCategoryId,
     String? newCategoryName,
     String? newDescription,
-    List<String>? newIngredients,
+    String? newIngredients,
     double? newPrice,
     double? newRating,
     String? newImageUrl,
     bool? newAvailability,
-  ]) async {
+  }) async {
     try {
       await _firestore
           .collection('Menu')
@@ -306,13 +352,13 @@ class Firestore {
   // ================================
   // DELETE ITEM
   // ================================
-  static Future<void> deleteItem(ProductItem product) async {
+  static Future<void> deleteItem(String categoryID, String itemID) async {
     try {
       await _firestore
           .collection('Menu')
-          .doc(product.categoryId)
+          .doc(categoryID)
           .collection('items')
-          .doc(product.itemId)
+          .doc(itemID)
           .delete();
     } on FirebaseException catch (e) {
       throw Exception(e.code);

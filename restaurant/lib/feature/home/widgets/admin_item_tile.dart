@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant/core/constants.dart';
-import 'package:restaurant/feature/home/functions.dart';
-import 'package:restaurant/feature/home/pages/admin/add_update_item_page.dart';
+import 'package:provider/provider.dart';
+import 'package:restaurant/core/widgets/show_image.dart';
+import 'package:restaurant/feature/home/pages/admin/supported%20pages/add_update_item_page.dart';
+import 'package:restaurant/feature/home/provider/app_provider.dart';
 import 'package:restaurant/feature/home/widgets/category_name_box.dart';
 import 'package:restaurant/feature/home/widgets/rate_box.dart';
 import 'package:restaurant/feature/models/product_item.dart';
@@ -13,14 +14,19 @@ class AdminItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // make the whole field pressable
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: EdgeInsets.all(10),
+        height: 150,
         color: Colors.transparent,
         child: Row(
           children: [
-            Expanded(flex: 1, child: Center(child: showItemPicture())),
+            Expanded(
+              flex: 2,
+              child: Center(child: ShowImage(imageUrl: item.imageUrl)),
+            ),
             SizedBox(width: 10),
             Expanded(flex: 2, child: _showItemInfo()),
             Expanded(flex: 1, child: _thirdColumn(context)),
@@ -37,9 +43,9 @@ class AdminItemTile extends StatelessWidget {
       children: [
         Text(
           item.itemName,
-          style: TextStyle(fontSize: fontMedium, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
-        CategoryNameBox(catName: item.categoryName!),
+        CategoryNameBox(catName: item.categoryName),
         RateBox(rate: item.rating!, reviews: item.numOfReviews!),
       ],
     );
@@ -58,6 +64,12 @@ class AdminItemTile extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => AddOrUpdateItemPage(item: item),
                 ),
+              );
+            } else if (value == 'delete') {
+              context.read<AppProvider>().deleteItem(
+                item.categoryId,
+                item.itemId,
+                item.imageUrl,
               );
             }
           },

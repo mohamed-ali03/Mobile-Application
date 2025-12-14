@@ -15,7 +15,7 @@ class CategoryNameBox extends StatelessWidget {
       ),
       child: Text(
         catName,
-        style: TextStyle(color: Colors.orange[800], fontSize: fontSmall),
+        style: TextStyle(color: Colors.orange[800], fontSize: fontMedium),
       ),
     );
   }

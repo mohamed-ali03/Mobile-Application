@@ -5,7 +5,9 @@ import 'package:restaurant/core/size_config.dart';
 import 'package:restaurant/core/theme/theme.dart';
 import 'package:restaurant/feature/auth/pages/auth_gate.dart';
 import 'package:restaurant/feature/auth/provider/auth_provider.dart';
+import 'package:restaurant/feature/home/provider/app_provider.dart';
 import 'package:restaurant/firebase_options.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,9 +15,19 @@ void main() async {
     name: 'project-828397665782',
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await Supabase.initialize(
+    url: 'https://iflxomgtgrhoggbhlkfa.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbHhvbWd0Z3Job2dnYmhsa2ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3MDA5NzQsImV4cCI6MjA4MTI3Njk3NH0.ZoKs-L1IfDUccr57RbdbG-wy2xYcDbv9POWtOvcL5RY',
+  );
+
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => AuthProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        ChangeNotifierProvider(create: (context) => AppProvider()),
+      ],
       child: const MyApp(),
     ),
   );

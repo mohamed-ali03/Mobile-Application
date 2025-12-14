@@ -7,7 +7,8 @@ void signInWithGoogle(BuildContext context) async {
   String massege = await context.read<AuthProvider>().signInWithGoogle();
 
   if (massege.isNotEmpty) {
-    showCustomDialog(massege, context);
+    // ignore: use_build_context_synchronously
+    showCustomDialog(context, massege);
   }
 }
 
@@ -15,6 +16,7 @@ void signInAnonymously(BuildContext context) async {
   String massege = await context.read<AuthProvider>().signInAnonymously();
 
   if (massege.isNotEmpty) {
-    showCustomDialog(massege, context);
+    // ignore: use_build_context_synchronously
+    showCustomDialog(context, massege);
   }
 }

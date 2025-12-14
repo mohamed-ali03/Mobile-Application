@@ -1,18 +1,18 @@
 class OrderModel {
-  String? orderID;
+  String orderID;
   String itemID;
   String userID;
-  String? status;
+  String status;
   double? rate;
-  List<String>? ingredients;
+  Map<String, bool> ingredients;
 
   OrderModel({
-    this.orderID,
+    required this.orderID,
     required this.itemID,
     required this.userID,
-    this.status,
+    required this.status,
+    required this.ingredients,
     this.rate,
-    this.ingredients,
   });
 
   Map<String, dynamic> toMap() => {
@@ -26,14 +26,12 @@ class OrderModel {
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      orderID: json['orderID'] as String?,
+      orderID: json['orderID'] as String,
       itemID: json['itemID'] as String? ?? '',
       userID: json['userID'] as String? ?? '',
-      status: json['status'] as String?,
+      status: json['status'] as String,
       rate: (json['rate'] as num?)?.toDouble(),
-      ingredients: json['ingredients'] != null
-          ? List<String>.from(json['ingredients'] as List)
-          : null,
+      ingredients: Map<String, bool>.from(json['ingredients'] ?? {}),
     );
   }
 }

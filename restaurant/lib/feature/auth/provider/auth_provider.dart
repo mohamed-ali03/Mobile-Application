@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:restaurant/feature/auth/firebase/auth_fire_base.dart';
+import 'package:restaurant/feature/home/firestore/firestore.dart';
 import 'package:restaurant/feature/models/user.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -82,6 +83,10 @@ class AuthProvider extends ChangeNotifier {
 
   // logout
   Future<void> logout() async {
+    if (FirebaseAuth.instance.currentUser!.isAnonymous) {
+      await Firestore.deleteUser(FirebaseAuth.instance.currentUser!.uid);
+      await FirebaseAuth.instance.currentUser?.delete();
+    }
     await AuthFireBase.logout();
   }
 }

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:restaurant/core/functions.dart';
 import 'package:restaurant/core/size_config.dart';
 import 'package:restaurant/core/widgets/custom_button.dart';
-import 'package:restaurant/core/widgets/custom_textfield.dart';
+import 'package:restaurant/core/widgets/custom_ar_tf.dart';
 import 'package:restaurant/core/widgets/federated_button.dart';
 import 'package:restaurant/feature/auth/common_functions.dart';
 import 'package:restaurant/feature/auth/provider/auth_provider.dart';
@@ -38,7 +38,7 @@ class _RegisterState extends State<RegisterPage> {
 
     if (!mounted) return;
     if (message.isNotEmpty) {
-      showCustomDialog(message, context);
+      showCustomDialog(context, message);
     }
   }
 
@@ -68,7 +68,7 @@ class _RegisterState extends State<RegisterPage> {
             SizedBox(height: SizeConfig.defaultSize!),
 
             // username field
-            CustomTextField(
+            CustomArTF(
               hint: 'الاسم',
               controller: nameController,
               obscureText: false,
@@ -76,7 +76,7 @@ class _RegisterState extends State<RegisterPage> {
             SizedBox(height: SizeConfig.defaultSize!),
 
             // email field
-            CustomTextField(
+            CustomArTF(
               hint: 'الإيميل',
               controller: emailController,
               obscureText: false,
@@ -84,7 +84,7 @@ class _RegisterState extends State<RegisterPage> {
             SizedBox(height: SizeConfig.defaultSize!),
 
             // password field
-            CustomTextField(
+            CustomArTF(
               hint: 'الرقم السري',
               controller: passwordController,
               obscureText: true,
@@ -93,7 +93,7 @@ class _RegisterState extends State<RegisterPage> {
             SizedBox(height: SizeConfig.defaultSize!),
 
             // confirm password field
-            CustomTextField(
+            CustomArTF(
               hint: 'تأكيد الرقم السري',
               controller: confirmPasswordController,
               obscureText: true,

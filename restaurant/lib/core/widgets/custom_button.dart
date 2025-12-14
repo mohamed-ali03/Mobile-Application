@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant/core/constants.dart';
 import 'package:restaurant/core/size_config.dart';
 
 class CustomButton extends StatelessWidget {
@@ -13,9 +14,17 @@ class CustomButton extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          height: 50,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-          child: Center(child: Text(text)),
+          padding: EdgeInsets.symmetric(vertical: 15),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.orange[800],
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(color: Colors.white, fontSize: fontLarge),
+            ),
+          ),
         ),
       ),
     );
