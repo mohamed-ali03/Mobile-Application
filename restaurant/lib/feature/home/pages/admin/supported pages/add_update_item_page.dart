@@ -70,6 +70,7 @@ class _AddOrUpdateItemPageState extends State<AddOrUpdateItemPage> {
     );
 
     await context.read<AppProvider>().addNewItem(newItem);
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
@@ -91,6 +92,7 @@ class _AddOrUpdateItemPageState extends State<AddOrUpdateItemPage> {
       newAvailability: isAvailable.value,
       newImageUrl: context.read<AppProvider>().imageURL,
     );
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
@@ -210,7 +212,7 @@ class _AddOrUpdateItemPageState extends State<AddOrUpdateItemPage> {
                           builder: (context, value, _) => CupertinoSwitch(
                             value: value,
                             onChanged: (value) => isAvailable.value = value,
-                            activeColor: Colors.orange,
+                            activeTrackColor: Colors.orange,
                           ),
                         ),
                       ],

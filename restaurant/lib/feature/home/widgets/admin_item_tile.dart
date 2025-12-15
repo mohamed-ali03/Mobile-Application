@@ -38,7 +38,7 @@ class AdminItemTile extends StatelessWidget {
 
   Widget _showItemInfo() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly, // TODO : not work
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(

@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:restaurant/feature/home/firestore/firestore.dart';
 import 'package:restaurant/feature/models/user.dart';
 
 class AuthFireBase {
@@ -8,7 +7,7 @@ class AuthFireBase {
   // ================================
   // CREATE ACCOUNT WITH EMAIL & PASSWORD
   // ================================
-  static Future<UserCredential> createAccountWithEmailAndPassword(
+  static Future<UserModel> createAccountWithEmailAndPassword(
     String username,
     String email,
     String password,
@@ -19,7 +18,9 @@ class AuthFireBase {
         password: password,
       );
 
-      await FirebaseAuth.instance.currentUser!.updateDisplayName(username);
+      await FirebaseAuth.instance.currentUser!.updateProfile(
+        displayName: username,
+      );
 
       final user = UserModel(
         uid: userCredential.user!.uid,
@@ -29,10 +30,7 @@ class AuthFireBase {
         providerId: 'password',
       );
 
-      await Firestore.addUserIfNotExists(
-        user,
-      ); // Add user to Firestore if not already
-      return userCredential;
+      return user;
     } on FirebaseAuthException catch (e) {
       throw Exception(e.code);
     }
@@ -41,7 +39,7 @@ class AuthFireBase {
   // ================================
   // SIGN IN WITH EMAIL & PASSWORD
   // ================================
-  static Future<UserCredential> signInWithEmailAndPassword(
+  static Future<UserModel> signInWithEmailAndPassword(
     String email,
     String password,
   ) async {
@@ -59,10 +57,7 @@ class AuthFireBase {
         providerId: 'password',
       );
 
-      await Firestore.addUserIfNotExists(
-        user,
-      ); // Ensure user exists in Firestore
-      return userCredential;
+      return user;
     } on FirebaseAuthException catch (e) {
       throw Exception(e.code);
     }
@@ -71,7 +66,7 @@ class AuthFireBase {
   // ================================
   // SIGN IN WITH GOOGLE
   // ================================
-  static Future<UserCredential> signInWithGoogle() async {
+  static Future<UserModel> signInWithGoogle() async {
     try {
       await GoogleSignIn.instance.initialize();
       final GoogleSignInAccount googleUser = await GoogleSignIn.instance
@@ -94,10 +89,7 @@ class AuthFireBase {
         uid: userCredential.user!.uid,
       );
 
-      await Firestore.addUserIfNotExists(
-        user,
-      ); // Ensure user exists in Firestore
-      return userCredential;
+      return user;
     } on GoogleSignInException catch (e) {
       throw Exception(e.code);
     } catch (e) {
@@ -108,7 +100,7 @@ class AuthFireBase {
   // ================================
   // SIGN IN ANONYMOUSLY
   // ================================
-  static Future<UserCredential> signInAnonymously() async {
+  static Future<UserModel> signInAnonymously() async {
     final userCredential = await _firebaseAuth.signInAnonymously();
 
     final user = UserModel(
@@ -119,8 +111,7 @@ class AuthFireBase {
       providerId: 'anonymous',
     );
 
-    await Firestore.addUserIfNotExists(user); // Add anonymous user to Firestore
-    return userCredential;
+    return user;
   }
 
   // ================================

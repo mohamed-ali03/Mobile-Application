@@ -3,14 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:restaurant/feature/auth/provider/auth_provider.dart';
 import 'package:restaurant/feature/home/provider/app_provider.dart';
 
-class AdminProfilePage extends StatelessWidget {
-  const AdminProfilePage({super.key});
+class UserHomePage extends StatelessWidget {
+  const UserHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile Page'),
         actions: [
           IconButton(
             onPressed: () {

@@ -31,6 +31,7 @@ class _AdminHomeGateState extends State<AdminHomeGate> {
 
   void checkAndListenToAppStatus() async {
     await context.read<AppProvider>().checkAppStatus();
+    if (!mounted) return;
     context.read<AppProvider>().listenToAppStatus();
   }
 

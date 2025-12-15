@@ -33,15 +33,6 @@ class _AdminMenuPageState extends State<AdminMenuPage>
     appProvider = context.read<AppProvider>();
   }
 
-  @override
-  void dispose() {
-    _controllerBNB.dispose();
-    isPressedFAB.dispose();
-    selectedTapBNB.dispose();
-    appProvider.dispose();
-    super.dispose();
-  }
-
   // change the selected tap (go to another category) -- used in Bottom navigation bar
   void onTapBNB(int index) {
     selectedTapBNB.value = index;

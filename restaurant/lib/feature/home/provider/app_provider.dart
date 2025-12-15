@@ -20,7 +20,9 @@ class AppProvider extends ChangeNotifier {
   List<Category> categories = [];
   List<UserModel> users = [];
   List<OrderModel> orders = [];
+  UserModel? currentUser;
   String imageURL = '';
+  bool isUserLoaded = false;
 
   // Call this once, for example in the provider's init or main page init
   void listenToAppStatus() {
@@ -47,6 +49,7 @@ class AppProvider extends ChangeNotifier {
       supportedFunction(temp);
       return RequestStatus.success;
     } catch (e) {
+      debugPrint('checkAppStatus error: $e');
       return RequestStatus.error;
     }
   }
@@ -60,6 +63,7 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
       return RequestStatus.success;
     } catch (e) {
+      debugPrint('getMenu error: $e');
       return RequestStatus.error;
     }
   }
@@ -77,21 +81,25 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
       return RequestStatus.success;
     } catch (e) {
+      debugPrint('getUsers error: $e');
       return RequestStatus.error;
     }
   }
 
   // ================================
   // GET USER BY ID
-  // ================================
-  Future<UserModel?> getUserByID(String userID) async {
+  // ==============================
+  Future<void> getUserByID(String userID) async {
     try {
       if (userID.isNotEmpty) {
-        return await Firestore.getUser(userID);
+        if (isUserLoaded) return;
+        isUserLoaded = true;
+        currentUser = await Firestore.getUser(userID);
+        notifyListeners();
       }
-      return null;
     } catch (e) {
-      return null;
+      debugPrint('getUserByID error: $e');
+      currentUser = UserModel();
     }
   }
 
@@ -100,12 +108,15 @@ class AppProvider extends ChangeNotifier {
   // ================================
   Future<RequestStatus> addUser(UserModel user) async {
     try {
+      // add user to database if not added
       await Firestore.addUserIfNotExists(user);
+      // upgrade the version of
       Modification temp = Modification.fromJson(modification.toMap());
       temp.userVersion++;
       await Firestore.modifiyAppStatus(temp);
       return RequestStatus.success;
     } catch (e) {
+      debugPrint('addUser error: $e');
       return RequestStatus.error;
     }
   }
@@ -125,6 +136,7 @@ class AppProvider extends ChangeNotifier {
       }
       return null;
     } catch (e) {
+      debugPrint('getCategory error: $e');
       return null;
     }
   }
@@ -146,6 +158,7 @@ class AppProvider extends ChangeNotifier {
       }
       return RequestStatus.empty;
     } catch (e) {
+      debugPrint('addNewCategry error: $e');
       return RequestStatus.error;
     }
   }
@@ -169,6 +182,7 @@ class AppProvider extends ChangeNotifier {
       }
       return RequestStatus.empty;
     } catch (e) {
+      debugPrint('modifyCategory error: $e');
       return RequestStatus.error;
     }
   }
@@ -184,6 +198,7 @@ class AppProvider extends ChangeNotifier {
       await Firestore.modifiyAppStatus(temp);
       return RequestStatus.success;
     } catch (e) {
+      debugPrint('deleteCategory error: $e');
       return RequestStatus.error;
     }
   }
@@ -203,6 +218,7 @@ class AppProvider extends ChangeNotifier {
       }
       return RequestStatus.empty;
     } catch (e) {
+      debugPrint('getItem error: $e');
       return RequestStatus.error;
     }
   }
@@ -227,6 +243,7 @@ class AppProvider extends ChangeNotifier {
       }
       return RequestStatus.empty;
     } catch (e) {
+      debugPrint('addNewItem error: $e');
       return RequestStatus.error;
     }
   }
@@ -276,6 +293,7 @@ class AppProvider extends ChangeNotifier {
 
       return RequestStatus.empty;
     } catch (e) {
+      debugPrint('modifyItem error: $e');
       return RequestStatus.error;
     }
   }
@@ -297,6 +315,7 @@ class AppProvider extends ChangeNotifier {
       await Firestore.modifiyAppStatus(temp);
       return RequestStatus.success;
     } catch (e) {
+      debugPrint('deleteItem error: $e');
       return RequestStatus.error;
     }
   }
@@ -325,6 +344,7 @@ class AppProvider extends ChangeNotifier {
       }
       return RequestStatus.empty;
     } catch (e) {
+      debugPrint('uploadImage error: $e');
       return RequestStatus.error;
     }
   }
@@ -340,6 +360,7 @@ class AppProvider extends ChangeNotifier {
       }
       return RequestStatus.empty;
     } catch (e) {
+      debugPrint('deleteImage error: $e');
       return RequestStatus.error;
     }
   }

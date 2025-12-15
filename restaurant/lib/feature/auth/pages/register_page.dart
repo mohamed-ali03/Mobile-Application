@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:restaurant/core/constants.dart';
 import 'package:restaurant/core/functions.dart';
 import 'package:restaurant/core/size_config.dart';
 import 'package:restaurant/core/widgets/custom_button.dart';
@@ -7,6 +8,7 @@ import 'package:restaurant/core/widgets/custom_ar_tf.dart';
 import 'package:restaurant/core/widgets/federated_button.dart';
 import 'package:restaurant/feature/auth/common_functions.dart';
 import 'package:restaurant/feature/auth/provider/auth_provider.dart';
+import 'package:restaurant/feature/home/provider/app_provider.dart';
 import 'package:restaurant/feature/models/user.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -24,21 +26,26 @@ class _RegisterState extends State<RegisterPage> {
   TextEditingController confirmPasswordController = TextEditingController();
 
   void regiserWithEmailAndPassword() async {
-    UserModel user = UserModel(
-      name: nameController.text,
-      email: emailController.text,
-    );
-    String message = await context
-        .read<AuthProvider>()
-        .createAccountWithEmailAndPassword(
-          user,
-          passwordController.text,
-          confirmPasswordController.text,
-        );
+    final authProvider = context.read<AuthProvider>();
+    final appProvider = context.read<AppProvider>();
 
-    if (!mounted) return;
-    if (message.isNotEmpty) {
-      showCustomDialog(context, message);
+    final status = await authProvider.createAccountWithEmailAndPassword(
+      UserModel(name: nameController.text, email: emailController.text),
+      passwordController.text,
+      confirmPasswordController.text,
+    );
+
+    if (status == RequestStatus.success) {
+      final user = authProvider.user!;
+      await appProvider.addUser(user);
+      // 🔥 DO NOT navigate manually
+      // AuthGate will handle routing
+    } else if (status == RequestStatus.error) {
+      if (!mounted) return;
+      showCustomDialog(context, 'Error!! please try again');
+    } else if (status == RequestStatus.empty) {
+      if (!mounted) return;
+      showCustomDialog(context, 'Invalid empty field!!');
     }
   }
 
@@ -56,63 +63,61 @@ class _RegisterState extends State<RegisterPage> {
     return Scaffold(
       backgroundColor: Colors.grey.shade300,
       body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // logo
-            Icon(Icons.food_bank, size: SizeConfig.defaultSize! * 10),
-            SizedBox(height: SizeConfig.defaultSize!),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // logo
+              Icon(Icons.food_bank, size: SizeConfig.defaultSize! * 10),
+              SizedBox(height: 10),
 
-            // welcome message
-            Text('مرحبا بكم في مطعمنا'),
-            SizedBox(height: SizeConfig.defaultSize!),
+              // welcome message
+              Text('مرحبا بكم في مطعمنا'),
+              SizedBox(height: 20),
 
-            // username field
-            CustomArTF(
-              hint: 'الاسم',
-              controller: nameController,
-              obscureText: false,
-            ),
-            SizedBox(height: SizeConfig.defaultSize!),
-
-            // email field
-            CustomArTF(
-              hint: 'الإيميل',
-              controller: emailController,
-              obscureText: false,
-            ),
-            SizedBox(height: SizeConfig.defaultSize!),
-
-            // password field
-            CustomArTF(
-              hint: 'الرقم السري',
-              controller: passwordController,
-              obscureText: true,
-            ),
-
-            SizedBox(height: SizeConfig.defaultSize!),
-
-            // confirm password field
-            CustomArTF(
-              hint: 'تأكيد الرقم السري',
-              controller: confirmPasswordController,
-              obscureText: true,
-            ),
-            SizedBox(height: SizeConfig.defaultSize!),
-
-            // sign in button
-            CustomButton(
-              text: 'تسجيل الحساب',
-              onTap: regiserWithEmailAndPassword,
-            ),
-            SizedBox(height: SizeConfig.defaultSize!),
-
-            // or sign in with other methods
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: SizeConfig.defaultSize!,
+              // username field
+              CustomArTF(
+                hint: 'الاسم',
+                controller: nameController,
+                obscureText: false,
               ),
-              child: Row(
+              SizedBox(height: 20),
+
+              // email field
+              CustomArTF(
+                hint: 'الإيميل',
+                controller: emailController,
+                obscureText: false,
+              ),
+              SizedBox(height: 20),
+
+              // password field
+              CustomArTF(
+                hint: 'الرقم السري',
+                controller: passwordController,
+                obscureText: true,
+              ),
+
+              SizedBox(height: 20),
+
+              // confirm password field
+              CustomArTF(
+                hint: 'تأكيد الرقم السري',
+                controller: confirmPasswordController,
+                obscureText: true,
+              ),
+              SizedBox(height: 20),
+
+              // sign in button
+              CustomButton(
+                text: 'تسجيل الحساب',
+                onTap: regiserWithEmailAndPassword,
+              ),
+              SizedBox(height: 20),
+
+              // or sign in with other methods
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
@@ -124,44 +129,47 @@ class _RegisterState extends State<RegisterPage> {
                   ),
                 ],
               ),
-            ),
-            SizedBox(height: SizeConfig.defaultSize! * 0.5),
+              SizedBox(height: 20),
 
-            // other federated identities
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FederatedButton(
-                  onTap: () => signInWithGoogle(context),
-                  widget: Image.asset('assets/icons/google_logo.png'),
-                ),
-                FederatedButton(
-                  onTap: () {},
-                  widget: Image.asset('assets/icons/Facebook_icon.png'),
-                ),
-                FederatedButton(
-                  onTap: () => signInAnonymously(context),
-                  widget: Icon(
-                    Icons.person,
-                    size: SizeConfig.defaultSize! * 2.5,
+              // other federated identities
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FederatedButton(
+                    onTap: () => signInWithGoogle(context),
+                    widget: Image.asset('assets/icons/google_logo.png'),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: SizeConfig.defaultSize!),
+                  FederatedButton(
+                    onTap: () {},
+                    widget: Image.asset('assets/icons/Facebook_icon.png'),
+                  ),
+                  FederatedButton(
+                    onTap: () => signInAnonymously(context),
+                    widget: Icon(
+                      Icons.person,
+                      size: SizeConfig.defaultSize! * 2.5,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: SizeConfig.defaultSize!),
 
-            // don't have an account
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: widget.onTap,
-                  child: Text('سجل الان', style: TextStyle(color: Colors.blue)),
-                ),
-                Text(' هل لديك حساب ؟'),
-              ],
-            ),
-          ],
+              // don't have an account
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: widget.onTap,
+                    child: Text(
+                      'سجل الان',
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                  Text(' هل لديك حساب ؟'),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

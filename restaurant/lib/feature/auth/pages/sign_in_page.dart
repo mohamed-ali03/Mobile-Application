@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:restaurant/core/constants.dart';
 import 'package:restaurant/core/functions.dart';
 import 'package:restaurant/core/size_config.dart';
 import 'package:restaurant/core/widgets/custom_button.dart';
@@ -7,6 +8,7 @@ import 'package:restaurant/core/widgets/custom_ar_tf.dart';
 import 'package:restaurant/core/widgets/federated_button.dart';
 import 'package:restaurant/feature/auth/common_functions.dart';
 import 'package:restaurant/feature/auth/provider/auth_provider.dart';
+import 'package:restaurant/feature/home/provider/app_provider.dart';
 
 class SignInPage extends StatefulWidget {
   final Function()? onTap;
@@ -21,16 +23,27 @@ class _SignInPageState extends State<SignInPage> {
   TextEditingController passwordController = TextEditingController();
 
   void signInWithEmailAndPassword() async {
-    String messege = await context
+    final authProvider = context.read<AuthProvider>();
+    final appProvider = context.read<AppProvider>();
+
+    RequestStatus status = await context
         .read<AuthProvider>()
         .signInWithEmailAndPassword(
           emailController.text,
           passwordController.text,
         );
 
-    if (!mounted) return;
-    if (messege.isNotEmpty) {
-      showCustomDialog(context, messege);
+    if (status == RequestStatus.success) {
+      final user = authProvider.user!;
+      await appProvider.addUser(user);
+      // 🔥 DO NOT navigate manually
+      // AuthGate will handle routing
+    } else if (status == RequestStatus.error) {
+      if (!mounted) return;
+      showCustomDialog(context, 'Error!! please try again');
+    } else if (status == RequestStatus.empty) {
+      if (!mounted) return;
+      showCustomDialog(context, 'Invalid empty field!!');
     }
   }
 
@@ -46,10 +59,10 @@ class _SignInPageState extends State<SignInPage> {
             children: [
               // logo
               Icon(Icons.food_bank, size: SizeConfig.defaultSize! * 10),
-              SizedBox(height: SizeConfig.defaultSize),
+              SizedBox(height: 10),
               // welcome message
               Text('مرحبا بكم في مطعمنا'),
-              SizedBox(height: SizeConfig.defaultSize),
+              SizedBox(height: 20),
 
               // email field
               CustomArTF(
@@ -66,8 +79,7 @@ class _SignInPageState extends State<SignInPage> {
                 obscureText: true,
               ),
 
-              // forget password
-              SizedBox(height: SizeConfig.defaultSize! * 0.25),
+              SizedBox(height: 5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -81,13 +93,13 @@ class _SignInPageState extends State<SignInPage> {
                 ],
               ),
 
-              SizedBox(height: SizeConfig.defaultSize!),
+              SizedBox(height: 20),
               // sign in button
               CustomButton(
                 text: 'تسجيل الدخول',
                 onTap: signInWithEmailAndPassword,
               ),
-              SizedBox(height: SizeConfig.defaultSize!),
+              SizedBox(height: 30),
 
               // or sign in with other methods
               Padding(
@@ -113,7 +125,7 @@ class _SignInPageState extends State<SignInPage> {
                   ],
                 ),
               ),
-              SizedBox(height: SizeConfig.defaultSize! * 0.5),
+              SizedBox(height: 10),
 
               // or sign in with other methods
               Row(
@@ -136,7 +148,7 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                 ],
               ),
-              SizedBox(height: SizeConfig.defaultSize!),
+              SizedBox(height: 10),
 
               // don't have an account
               Row(

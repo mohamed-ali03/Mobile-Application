@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant/core/constants.dart';
-import 'package:restaurant/core/size_config.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -9,21 +8,18 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: SizeConfig.defaultSize!),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 15),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.orange[800],
-          ),
-          child: Center(
-            child: Text(
-              text,
-              style: TextStyle(color: Colors.white, fontSize: fontLarge),
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.orange[800],
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(color: Colors.white, fontSize: fontLarge),
           ),
         ),
       ),
