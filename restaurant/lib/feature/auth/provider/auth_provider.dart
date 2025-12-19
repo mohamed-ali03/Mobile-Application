@@ -6,9 +6,17 @@ import 'package:restaurant/feature/home/firestore/firestore.dart';
 import 'package:restaurant/feature/models/user.dart';
 
 class AuthProvider extends ChangeNotifier {
-  UserModel? user;
+  UserModel? currentUser;
+  User? authUser;
   Future<User?> getCurrentUser() async {
     return FirebaseAuth.instance.currentUser;
+  }
+
+  AuthProvider() {
+    FirebaseAuth.instance.authStateChanges().listen((u) {
+      authUser = u;
+      notifyListeners();
+    });
   }
 
   // create new account using email and password
@@ -26,7 +34,7 @@ class AuthProvider extends ChangeNotifier {
           confirmedPassword.isEmpty) {
         return RequestStatus.empty;
       } else {
-        this.user = await AuthFireBase.createAccountWithEmailAndPassword(
+        currentUser = await AuthFireBase.createAccountWithEmailAndPassword(
           user.name!.trim(),
           user.email!.trim(),
           password.trim(),
@@ -47,7 +55,7 @@ class AuthProvider extends ChangeNotifier {
   ) async {
     try {
       if (email.trim().isNotEmpty && password.trim().isNotEmpty) {
-        user = await AuthFireBase.signInWithEmailAndPassword(
+        currentUser = await AuthFireBase.signInWithEmailAndPassword(
           email.trim(),
           password.trim(),
         );
@@ -64,7 +72,7 @@ class AuthProvider extends ChangeNotifier {
   // create new account or sign in using google
   Future<RequestStatus> signInWithGoogle() async {
     try {
-      user = await AuthFireBase.signInWithGoogle();
+      currentUser = await AuthFireBase.signInWithGoogle();
 
       return RequestStatus.success;
     } catch (e) {
@@ -78,7 +86,7 @@ class AuthProvider extends ChangeNotifier {
   // access as anonymous
   Future<RequestStatus> signInAnonymously() async {
     try {
-      user = await AuthFireBase.signInAnonymously();
+      currentUser = await AuthFireBase.signInAnonymously();
       return RequestStatus.success;
     } catch (e) {
       debugPrint('Signin Anonymously error: $e');
@@ -95,7 +103,7 @@ class AuthProvider extends ChangeNotifier {
         await FirebaseAuth.instance.currentUser?.delete();
       }
       await AuthFireBase.logout();
-      this.user = null;
+      currentUser = null;
     } catch (e) {
       debugPrint('Logout error: $e');
     }

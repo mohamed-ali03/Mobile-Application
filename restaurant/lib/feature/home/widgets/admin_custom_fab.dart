@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:restaurant/core/size_config.dart';
 import 'package:restaurant/core/widgets/add_photo.dart';
 import 'package:restaurant/core/widgets/custom_en_tf.dart';
 import 'package:restaurant/feature/home/pages/admin/supported%20pages/add_update_item_page.dart';
-import 'package:restaurant/feature/home/provider/app_provider.dart';
+import 'package:restaurant/feature/home/provider/fire_store_provider.dart';
 
 class AdminCustomFab extends StatefulWidget {
   final ValueNotifier<bool> isPressed;
@@ -90,6 +89,7 @@ class _AdminCustomFabState extends State<AdminCustomFab> {
   }
 
   void addModifyCategoryDialog() {
+    FireStoreProvider fireStoreProvider = context.read<FireStoreProvider>();
     // show dialog
     showDialog(
       context: context,
@@ -116,7 +116,7 @@ class _AdminCustomFabState extends State<AdminCustomFab> {
                 // icon that will found before add the photo
                 Icons.photo,
                 color: Colors.orange,
-                size: SizeConfig.defaultSize! * 5,
+                size: 100,
               ),
               folder: 'categories', // category according to supabase bucket
             ),
@@ -137,9 +137,9 @@ class _AdminCustomFabState extends State<AdminCustomFab> {
           ),
           TextButton(
             onPressed: () {
-              context.read<AppProvider>().addCategory(
+              fireStoreProvider.addCategory(
                 nameController.text,
-                context.read<AppProvider>().imageURL,
+                fireStoreProvider.imageURL,
               );
               Navigator.pop(context);
             },

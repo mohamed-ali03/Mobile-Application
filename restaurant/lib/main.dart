@@ -1,11 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:restaurant/core/size_config.dart';
 import 'package:restaurant/core/theme/theme.dart';
 import 'package:restaurant/feature/auth/pages/auth_gate.dart';
 import 'package:restaurant/feature/auth/provider/auth_provider.dart';
-import 'package:restaurant/feature/home/provider/app_provider.dart';
+import 'package:restaurant/feature/home/provider/fire_store_provider.dart';
 import 'package:restaurant/firebase_options.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -26,7 +25,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
-        ChangeNotifierProvider(create: (context) => AppProvider()),
+        ChangeNotifierProvider(create: (context) => FireStoreProvider()),
       ],
       child: const MyApp(),
     ),
@@ -38,7 +37,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SizeConfig.init(context);
+    //SizeConfig.init(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: appTheme,

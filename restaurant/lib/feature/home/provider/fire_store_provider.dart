@@ -11,7 +11,7 @@ import 'package:restaurant/feature/models/order_model.dart';
 import 'package:restaurant/feature/models/product_item.dart';
 import 'package:restaurant/feature/models/user.dart';
 
-class AppProvider extends ChangeNotifier {
+class FireStoreProvider extends ChangeNotifier {
   Modification modification = Modification(
     userVersion: 0,
     menuVersion: 0,
@@ -34,11 +34,20 @@ class AppProvider extends ChangeNotifier {
   // check which collection is modified
   void supportedFunction(Modification updatedModification) {
     if (modification.userVersion != updatedModification.userVersion) {
+      modification.userVersion = updatedModification.userVersion;
       getUsers();
-    } else if (modification.menuVersion != updatedModification.menuVersion) {
+
+      // update local app status
+    }
+    if (modification.menuVersion != updatedModification.menuVersion) {
+      modification.menuVersion = updatedModification.menuVersion;
       getMenu();
-    } else if (modification.cartVersion != updatedModification.cartVersion) {}
-    modification = updatedModification;
+      // update local app status
+    }
+    if (modification.cartVersion != updatedModification.cartVersion) {
+      modification.cartVersion = updatedModification.cartVersion;
+      // update local app status
+    }
     imageURL = '';
   }
 
@@ -99,7 +108,6 @@ class AppProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('getUserByID error: $e');
-      currentUser = UserModel();
     }
   }
 
@@ -108,12 +116,15 @@ class AppProvider extends ChangeNotifier {
   // ================================
   Future<RequestStatus> addUser(UserModel user) async {
     try {
-      // add user to database if not added
-      await Firestore.addUserIfNotExists(user);
-      // upgrade the version of
+      // add user to database if not added and return the user data
+      UserModel userModel = await Firestore.addUserIfNotExists(user);
+      // upgrade the version of user
       Modification temp = Modification.fromJson(modification.toMap());
       temp.userVersion++;
       await Firestore.modifiyAppStatus(temp);
+      // store current user to use later
+      currentUser = UserModel.fromJson(userModel.toMap());
+      notifyListeners();
       return RequestStatus.success;
     } catch (e) {
       debugPrint('addUser error: $e');

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant/core/functions.dart';
-import 'package:restaurant/core/size_config.dart';
 import 'package:restaurant/core/widgets/show_image.dart';
-import 'package:restaurant/feature/home/provider/app_provider.dart';
+import 'package:restaurant/feature/auth/provider/auth_provider.dart';
+import 'package:restaurant/feature/home/provider/fire_store_provider.dart';
 
 class AddPhoto extends StatefulWidget {
   final Icon icon;
@@ -20,6 +20,9 @@ class AddPhoto extends StatefulWidget {
 class _AddPhotoState extends State<AddPhoto> {
   File? image;
   final ImagePicker _picker = ImagePicker();
+
+  late FireStoreProvider fireStoreProvider;
+  late AuthProvider authProvider;
 
   Future<void> pickAndUploadImage() async {
     // pick photo from device
@@ -37,11 +40,7 @@ class _AddPhotoState extends State<AddPhoto> {
       // check if the context is not mounted
       if (!mounted) return;
       // upload photo to supabase storage in in {bucket => widget.folder , fileName => fileName}
-      await context.read<AppProvider>().uploadImage(
-        widget.folder,
-        fileName,
-        file,
-      );
+      await fireStoreProvider.uploadImage(widget.folder, fileName, file);
     } catch (e) {
       if (!mounted) return;
       showCustomDialog(context, 'Error occurs try again');
@@ -49,16 +48,23 @@ class _AddPhotoState extends State<AddPhoto> {
   }
 
   @override
+  void initState() {
+    fireStoreProvider = context.read<FireStoreProvider>();
+    authProvider = context.read<AuthProvider>();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // watch only the image url form app provider
-    return Selector<AppProvider, String>(
+    return Selector<FireStoreProvider, String>(
       selector: (_, provider) => provider.imageURL,
       builder: (context, imageurl, _) {
         // if taped --> get photo and upload it to supabase  using  /* pickAndUploadImage */
         return GestureDetector(
           onTap: pickAndUploadImage,
           child: Container(
-            height: SizeConfig.defaultSize! * 25,
+            height: 250,
             width: double.infinity,
             decoration: BoxDecoration(
               color: Colors.grey.shade100,

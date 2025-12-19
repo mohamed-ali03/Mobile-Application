@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:restaurant/core/size_config.dart';
 import 'package:restaurant/core/widgets/add_photo.dart';
-import 'package:restaurant/feature/home/provider/app_provider.dart';
+import 'package:restaurant/feature/home/provider/fire_store_provider.dart';
 import 'package:restaurant/feature/home/widgets/custom_app_bar.dart';
 import 'package:restaurant/core/widgets/input_field.dart';
 import 'package:restaurant/feature/models/product_item.dart';
@@ -25,15 +24,18 @@ class _AddOrUpdateItemPageState extends State<AddOrUpdateItemPage> {
   ValueNotifier<String> categoryID = ValueNotifier('');
   ValueNotifier<bool> isAvailable = ValueNotifier(false);
 
+  late FireStoreProvider fireStoreProvider;
+
   @override
   void initState() {
     // true if you came to update not to create new item
+    fireStoreProvider = context.read<FireStoreProvider>();
     if (widget.item != null) {
       nameController.text = widget.item!.itemName;
       pricController.text = widget.item!.price.toString();
       descriptionController.text = widget.item!.description;
       categoryID.value = widget.item!.categoryId;
-      context.read<AppProvider>().imageURL = widget.item!.imageUrl;
+      fireStoreProvider.imageURL = widget.item!.imageUrl;
       isAvailable.value = widget.item!.isAvailable;
       ingreidentsController.text = widget.item!.ingredients;
     }
@@ -57,32 +59,28 @@ class _AddOrUpdateItemPageState extends State<AddOrUpdateItemPage> {
       itemId: '',
       itemName: nameController.text,
       categoryId: categoryID.value,
-      categoryName: context
-          .read<AppProvider>()
-          .categories
+      categoryName: fireStoreProvider.categories
           .firstWhere((cat) => cat.categoryId == categoryID.value)
           .categoryName,
       description: descriptionController.text,
       ingredients: ingreidentsController.text,
       price: double.tryParse(pricController.text) ?? 0,
       isAvailable: isAvailable.value,
-      imageUrl: context.read<AppProvider>().imageURL,
+      imageUrl: fireStoreProvider.imageURL,
     );
 
-    await context.read<AppProvider>().addNewItem(newItem);
+    await fireStoreProvider.addNewItem(newItem);
     if (!mounted) return;
     Navigator.pop(context);
   }
 
   // update exist item
   void updateItem() async {
-    await context.read<AppProvider>().modifyItem(
+    await fireStoreProvider.modifyItem(
       widget.item!, // existing product
       newName: nameController.text.trim(),
       newCategoryId: categoryID.value,
-      newCategoryName: context
-          .read<AppProvider>()
-          .categories
+      newCategoryName: fireStoreProvider.categories
           .firstWhere((cat) => cat.categoryId == categoryID.value)
           .categoryName,
       newDescription: descriptionController.text.trim(),
@@ -90,7 +88,7 @@ class _AddOrUpdateItemPageState extends State<AddOrUpdateItemPage> {
           ingreidentsController.text, // make sure this is List<String>
       newPrice: double.tryParse(pricController.text.trim()),
       newAvailability: isAvailable.value,
-      newImageUrl: context.read<AppProvider>().imageURL,
+      newImageUrl: fireStoreProvider.imageURL,
     );
     if (!mounted) return;
     Navigator.pop(context);
@@ -143,9 +141,7 @@ class _AddOrUpdateItemPageState extends State<AddOrUpdateItemPage> {
                       builder: (context, value, _) => DropdownButton<String>(
                         isExpanded: true,
                         value: value.isEmpty ? null : value,
-                        items: context
-                            .read<AppProvider>()
-                            .categories
+                        items: fireStoreProvider.categories
                             .map(
                               (category) => DropdownMenuItem(
                                 value: category.categoryId,
@@ -178,7 +174,7 @@ class _AddOrUpdateItemPageState extends State<AddOrUpdateItemPage> {
                     AddPhoto(
                       icon: Icon(
                         Icons.cloud_upload,
-                        size: SizeConfig.defaultSize! * 5,
+                        size: 100,
                         color: Colors.orange,
                       ),
                       folder: 'items',

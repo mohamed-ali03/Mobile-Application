@@ -96,12 +96,15 @@ class Firestore {
   // ================================
   // ADD USER
   // ================================
-  static Future<void> addUserIfNotExists(UserModel user) async {
+  static Future<UserModel> addUserIfNotExists(UserModel user) async {
     try {
       final doc = await _firestore.collection('Users').doc(user.uid).get();
 
       if (!doc.exists) {
         await doc.reference.set(user.toMap());
+        return user;
+      } else {
+        return UserModel.fromJson(doc.data()!);
       }
     } on FirebaseException catch (e) {
       throw Exception(e.code);
@@ -365,8 +368,6 @@ class Firestore {
     }
   }
 
-  // --------------------------------------------------ORDER CRUD-------------------------------------------------------
-
   // ================================
   // FETCH ALL ORDERS --> ADMIN
   // ================================
@@ -377,7 +378,7 @@ class Firestore {
       if (querySnapshot.docs.isEmpty) return [];
 
       return querySnapshot.docs
-          .map((doc) => OrderModel.fromJson(doc.data()))
+          .map((doc) => OrderModel.fromJson(doc.data(), doc.id))
           .toList();
     } on FirebaseException catch (e) {
       throw Exception('Firebase error: ${e.code}');
@@ -387,17 +388,17 @@ class Firestore {
   // ================================
   // GET USER ORDERS -- USER
   // ================================
-  static Future<List<OrderModel>> getUserOrders(String userID) async {
+  static Future<List<OrderModel>> getUserOrders(String userId) async {
     try {
       final querySnapshot = await _firestore
           .collection('cart')
-          .where('userID', isEqualTo: userID)
+          .where('userId', isEqualTo: userId)
           .get();
 
       if (querySnapshot.docs.isEmpty) return [];
 
       return querySnapshot.docs
-          .map((doc) => OrderModel.fromJson(doc.data()))
+          .map((doc) => OrderModel.fromJson(doc.data(), doc.id))
           .toList();
     } on FirebaseException catch (e) {
       throw Exception('Firebase error: ${e.code}');
@@ -410,64 +411,56 @@ class Firestore {
   static Future<void> makeOrder(OrderModel order) async {
     try {
       final orderRef = _firestore.collection('cart').doc();
-      order.orderID = orderRef.id;
+      order.orderId = orderRef.id;
 
       await orderRef.set(order.toMap());
     } on FirebaseException catch (e) {
-      throw Exception(e.code);
+      throw Exception('Firebase error: ${e.code}');
     }
   }
 
   // ================================
   // MODIFY ORDER STATUS
   // ================================
-  static Future<void> modifyOrder(
-    OrderModel order, [
-    String? newItemID,
-    String? newUserID,
-    String? newStatus,
-    double? newRate,
-    List<String>? newIngredients,
-  ]) async {
+  static Future<void> modifyOrderStatus(
+    String orderId,
+    String newStatus,
+  ) async {
     try {
-      await _firestore.collection('cart').doc(order.orderID).update({
-        'itemID': newItemID ?? order.itemID,
-        'userID': newUserID ?? order.userID,
-        'status': newStatus ?? order.status,
-        'rate': newRate ?? order.rate,
-        'ingredients': newIngredients ?? order.ingredients,
+      await _firestore.collection('cart').doc(orderId).update({
+        'status': newStatus,
       });
     } on FirebaseException catch (e) {
-      throw Exception(e.code);
+      throw Exception('Firebase error: ${e.code}');
     }
   }
 
   // ================================
   // DELETE ORDER
   // ================================
-  static Future<void> deleteOrder(String orderID) async {
+  static Future<void> deleteOrder(String orderId) async {
     try {
-      await _firestore.collection('cart').doc(orderID).delete();
+      await _firestore.collection('cart').doc(orderId).delete();
     } on FirebaseException catch (e) {
-      throw Exception(e.code);
+      throw Exception('Firebase error: ${e.code}');
     }
   }
 
   // ================================
   // DELETE ALL USER ORDERS
   // ================================
-  static Future<void> deleteAllUserOrders(String userID) async {
+  static Future<void> deleteAllUserOrders(String userId) async {
     try {
       final querySnapshot = await _firestore
           .collection('cart')
-          .where('userID', isEqualTo: userID)
+          .where('userId', isEqualTo: userId)
           .get();
 
       for (var doc in querySnapshot.docs) {
         await doc.reference.delete();
       }
     } on FirebaseException catch (e) {
-      throw Exception(e.code);
+      throw Exception('Firebase error: ${e.code}');
     }
   }
 }

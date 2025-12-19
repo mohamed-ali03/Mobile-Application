@@ -3,17 +3,17 @@ import 'package:provider/provider.dart';
 import 'package:restaurant/core/constants.dart';
 import 'package:restaurant/core/functions.dart';
 import 'package:restaurant/feature/auth/provider/auth_provider.dart';
-import 'package:restaurant/feature/home/provider/app_provider.dart';
+import 'package:restaurant/feature/home/provider/fire_store_provider.dart';
 
 void signInWithGoogle(BuildContext context) async {
   final authProvider = context.read<AuthProvider>();
-  final appProvider = context.read<AppProvider>();
+  final fireStoreProvider = context.read<FireStoreProvider>();
 
   RequestStatus status = await context.read<AuthProvider>().signInWithGoogle();
 
   if (status == RequestStatus.success) {
-    final user = authProvider.user!;
-    await appProvider.addUser(user);
+    final user = authProvider.currentUser!;
+    await fireStoreProvider.addUser(user);
     // 🔥 DO NOT navigate manually
     // AuthGate will handle routing
   } else if (status == RequestStatus.error) {
@@ -27,12 +27,12 @@ void signInWithGoogle(BuildContext context) async {
 
 void signInAnonymously(BuildContext context) async {
   final authProvider = context.read<AuthProvider>();
-  final appProvider = context.read<AppProvider>();
+  final fireStoreProvider = context.read<FireStoreProvider>();
   RequestStatus status = await context.read<AuthProvider>().signInAnonymously();
 
   if (status == RequestStatus.success) {
-    final user = authProvider.user!;
-    await appProvider.addUser(user);
+    final user = authProvider.currentUser!;
+    await fireStoreProvider.addUser(user);
     // 🔥 DO NOT navigate manually
     // AuthGate will handle routing
   } else if (status == RequestStatus.error) {

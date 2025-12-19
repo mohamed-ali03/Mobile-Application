@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant/feature/home/pages/admin/supported%20pages/item_page.dart';
-import 'package:restaurant/feature/home/provider/app_provider.dart';
+import 'package:restaurant/feature/home/provider/fire_store_provider.dart';
 import 'package:restaurant/feature/home/widgets/admin_custom_fab.dart';
 import 'package:restaurant/feature/home/widgets/admin_item_tile.dart';
 import 'package:restaurant/feature/home/widgets/admin_tap_bar.dart';
@@ -20,17 +20,17 @@ class _AdminMenuPageState extends State<AdminMenuPage>
   ValueNotifier<bool> isPressedFAB = ValueNotifier(false);
   late TabController _controllerBNB;
   ValueNotifier<int> selectedTapBNB = ValueNotifier(0);
-  late AppProvider appProvider;
+  late FireStoreProvider fireStoreProvider;
 
   // Now you can use it in initializers
   @override
   void initState() {
     super.initState();
+    fireStoreProvider = context.read<FireStoreProvider>();
     _controllerBNB = TabController(
-      length: context.read<AppProvider>().categories.length + 1, // +1 for "All"
+      length: fireStoreProvider.categories.length + 1, // +1 for "All"
       vsync: this,
     );
-    appProvider = context.read<AppProvider>();
   }
 
   // change the selected tap (go to another category) -- used in Bottom navigation bar
@@ -40,7 +40,7 @@ class _AdminMenuPageState extends State<AdminMenuPage>
 
   @override
   Widget build(BuildContext context) {
-    return Selector<AppProvider, List<Category>>(
+    return Selector<FireStoreProvider, List<Category>>(
       selector: (_, provider) => provider.categories,
       builder: (context, categories, _) {
         return Scaffold(

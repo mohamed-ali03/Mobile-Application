@@ -1,37 +1,52 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:restaurant/feature/models/order_item.dart';
+
 class OrderModel {
-  String orderID;
-  String itemID;
-  String userID;
-  String status;
-  double? rate;
-  Map<String, bool> ingredients;
+  String orderId;
+  String userId;
+
+  String status; // pending, accepted, preparing, done, cancelled
+
+  double totalPrice;
+
+  String? address;
+
+  List<OrderItem> items;
+
+  DateTime createdAt;
+  DateTime updatedAt;
 
   OrderModel({
-    required this.orderID,
-    required this.itemID,
-    required this.userID,
+    required this.orderId,
+    required this.userId,
     required this.status,
-    required this.ingredients,
-    this.rate,
+    required this.totalPrice,
+    required this.items,
+    required this.createdAt,
+    required this.updatedAt,
+    this.address,
   });
 
   Map<String, dynamic> toMap() => {
-    'orderID': orderID,
-    'itemID': itemID,
-    'userID': userID,
+    'userId': userId,
     'status': status,
-    'rate': rate,
-    'ingredients': ingredients,
+    'totalPrice': totalPrice,
+    'address': address,
+    'items': items.map((e) => e.toMap()).toList(),
+    'createdAt': createdAt,
+    'updatedAt': updatedAt,
   };
 
-  factory OrderModel.fromJson(Map<String, dynamic> json) {
+  factory OrderModel.fromJson(Map<String, dynamic> json, String docId) {
     return OrderModel(
-      orderID: json['orderID'] as String,
-      itemID: json['itemID'] as String? ?? '',
-      userID: json['userID'] as String? ?? '',
-      status: json['status'] as String,
-      rate: (json['rate'] as num?)?.toDouble(),
-      ingredients: Map<String, bool>.from(json['ingredients'] ?? {}),
+      orderId: docId,
+      userId: json['userId'],
+      status: json['status'],
+      totalPrice: (json['totalPrice'] as num).toDouble(),
+      address: json['address'],
+      items: (json['items'] as List).map((e) => OrderItem.fromJson(e)).toList(),
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
+      updatedAt: (json['updatedAt'] as Timestamp).toDate(),
     );
   }
 }

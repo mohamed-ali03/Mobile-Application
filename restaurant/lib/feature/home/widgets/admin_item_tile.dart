@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant/core/widgets/show_image.dart';
 import 'package:restaurant/feature/home/pages/admin/supported%20pages/add_update_item_page.dart';
-import 'package:restaurant/feature/home/provider/app_provider.dart';
+import 'package:restaurant/feature/home/provider/fire_store_provider.dart';
 import 'package:restaurant/feature/home/widgets/category_name_box.dart';
 import 'package:restaurant/feature/home/widgets/rate_box.dart';
 import 'package:restaurant/feature/models/product_item.dart';
@@ -66,7 +66,7 @@ class AdminItemTile extends StatelessWidget {
                 ),
               );
             } else if (value == 'delete') {
-              context.read<AppProvider>().deleteItem(
+              context.read<FireStoreProvider>().deleteItem(
                 item.categoryId,
                 item.itemId,
                 item.imageUrl,

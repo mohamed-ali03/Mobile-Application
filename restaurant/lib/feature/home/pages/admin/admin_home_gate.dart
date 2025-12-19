@@ -5,7 +5,7 @@ import 'package:restaurant/feature/home/pages/admin/admin_home_page.dart';
 import 'package:restaurant/feature/home/pages/admin/admin_menu_page.dart';
 import 'package:restaurant/feature/home/pages/admin/admin_orders_page.dart';
 import 'package:restaurant/feature/home/pages/admin/admin_profile_page.dart';
-import 'package:restaurant/feature/home/provider/app_provider.dart';
+import 'package:restaurant/feature/home/provider/fire_store_provider.dart';
 
 class AdminHomeGate extends StatefulWidget {
   const AdminHomeGate({super.key});
@@ -15,6 +15,7 @@ class AdminHomeGate extends StatefulWidget {
 }
 
 class _AdminHomeGateState extends State<AdminHomeGate> {
+  late FireStoreProvider fireStoreProvider;
   int _selectedPage = 0;
   final List<Widget> _pages = [
     AdminHomePage(),
@@ -30,13 +31,13 @@ class _AdminHomeGateState extends State<AdminHomeGate> {
   }
 
   void checkAndListenToAppStatus() async {
-    await context.read<AppProvider>().checkAppStatus();
-    if (!mounted) return;
-    context.read<AppProvider>().listenToAppStatus();
+    await fireStoreProvider.checkAppStatus();
+    fireStoreProvider.listenToAppStatus();
   }
 
   @override
   Widget build(BuildContext context) {
+    fireStoreProvider = context.read<FireStoreProvider>();
     checkAndListenToAppStatus();
     return Scaffold(
       bottomNavigationBar: CustomBottomNavigationBar(
