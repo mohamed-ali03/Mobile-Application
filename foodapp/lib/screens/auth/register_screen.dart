@@ -64,6 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           role: role,
                           phoneNumber: phoneController.text.trim(),
                         );
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                       } catch (e) {
                         ScaffoldMessenger.of(

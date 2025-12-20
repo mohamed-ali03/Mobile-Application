@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/providers/menu_provider.dart';
-import 'package:foodapp/screens/admin/menu_screen.dart';
+import 'package:foodapp/providers/order_provider.dart';
+import 'package:foodapp/screens/admin/order_screen.dart';
 import 'package:foodapp/screens/admin_home_screen.dart';
 import 'package:foodapp/screens/auth/login_screen.dart';
 import 'package:foodapp/screens/staff_home_screen.dart';
 import 'package:foodapp/service/isar_local/isar_service.dart';
-import 'package:foodapp/service/supabase_remote/menu_remote_service.dart';
 import 'package:foodapp/service/supabase_remote/supabase_service.dart';
 import 'package:provider/provider.dart';
 
@@ -19,13 +19,15 @@ void main() async {
   // init isar(local DB)
   await IsarService.init();
 
-  MenuRemoteService.listenToMenuChanges();
-
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => MenuProvider()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              OrderProvider(context.read<AuthProvider>().user!.authID),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -55,7 +57,7 @@ class MyApp extends StatelessWidget {
             case 'staff':
               return StaffHomeScreen();
             default:
-              return MenuScreen();
+              return OrdersScreen();
           }
         },
       ),

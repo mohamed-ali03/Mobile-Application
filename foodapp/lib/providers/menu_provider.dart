@@ -14,8 +14,11 @@ class MenuProvider extends ChangeNotifier {
   late StreamSubscription _sub;
 
   MenuProvider() {
-    sync();
-    _sub = _repo.watchMenu().listen((data) {
+    // sync();
+    // watch remote menu and change the isar DB according to changes
+    _repo.watchRemoteMenu();
+    // watch isar and change the UI
+    _sub = _repo.watchLocalMenu().listen((data) {
       items = data;
       notifyListeners();
     });
@@ -25,11 +28,12 @@ class MenuProvider extends ChangeNotifier {
     syncing = true;
     notifyListeners();
 
-    await _repo.syncCat();
     await _repo.syncMenu();
+    await _repo.syncCat();
 
     syncing = false;
     notifyListeners();
+    print('fuck you ');
   }
 
   Future<void> addItem(ItemModel item) async {

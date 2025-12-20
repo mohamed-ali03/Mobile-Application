@@ -6,12 +6,11 @@ part 'order_model.g.dart';
 class OrderModel {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true)
-  late int orderId;
-  @Index()
-  late String userID;
+  int? orderId;
+  late String userId;
   late String status;
   late double totalPrice;
   late String address;
-  late DateTime createdAt;
+  late bool synced;
+  late DateTime? createdAt;
 }

@@ -43,21 +43,7 @@ const CategoryModelSchema = CollectionSchema(
   deserialize: _categoryModelDeserialize,
   deserializeProp: _categoryModelDeserializeProp,
   idName: r'id',
-  indexes: {
-    r'categoryId': IndexSchema(
-      id: -8798048739239305339,
-      name: r'categoryId',
-      unique: true,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'categoryId',
-          type: IndexType.value,
-          caseSensitive: false,
-        )
-      ],
-    )
-  },
+  indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _categoryModelGetId,
@@ -97,7 +83,7 @@ CategoryModel _categoryModelDeserialize(
 ) {
   final object = CategoryModel();
   object.categoryId = reader.readLong(offsets[0]);
-  object.createdAt = reader.readDateTime(offsets[1]);
+  object.createdAt = reader.readDateTimeOrNull(offsets[1]);
   object.id = id;
   object.imageUrl = reader.readString(offsets[2]);
   object.name = reader.readString(offsets[3]);
@@ -114,7 +100,7 @@ P _categoryModelDeserializeProp<P>(
     case 0:
       return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
@@ -137,74 +123,11 @@ void _categoryModelAttach(
   object.id = id;
 }
 
-extension CategoryModelByIndex on IsarCollection<CategoryModel> {
-  Future<CategoryModel?> getByCategoryId(int categoryId) {
-    return getByIndex(r'categoryId', [categoryId]);
-  }
-
-  CategoryModel? getByCategoryIdSync(int categoryId) {
-    return getByIndexSync(r'categoryId', [categoryId]);
-  }
-
-  Future<bool> deleteByCategoryId(int categoryId) {
-    return deleteByIndex(r'categoryId', [categoryId]);
-  }
-
-  bool deleteByCategoryIdSync(int categoryId) {
-    return deleteByIndexSync(r'categoryId', [categoryId]);
-  }
-
-  Future<List<CategoryModel?>> getAllByCategoryId(List<int> categoryIdValues) {
-    final values = categoryIdValues.map((e) => [e]).toList();
-    return getAllByIndex(r'categoryId', values);
-  }
-
-  List<CategoryModel?> getAllByCategoryIdSync(List<int> categoryIdValues) {
-    final values = categoryIdValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'categoryId', values);
-  }
-
-  Future<int> deleteAllByCategoryId(List<int> categoryIdValues) {
-    final values = categoryIdValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'categoryId', values);
-  }
-
-  int deleteAllByCategoryIdSync(List<int> categoryIdValues) {
-    final values = categoryIdValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'categoryId', values);
-  }
-
-  Future<Id> putByCategoryId(CategoryModel object) {
-    return putByIndex(r'categoryId', object);
-  }
-
-  Id putByCategoryIdSync(CategoryModel object, {bool saveLinks = true}) {
-    return putByIndexSync(r'categoryId', object, saveLinks: saveLinks);
-  }
-
-  Future<List<Id>> putAllByCategoryId(List<CategoryModel> objects) {
-    return putAllByIndex(r'categoryId', objects);
-  }
-
-  List<Id> putAllByCategoryIdSync(List<CategoryModel> objects,
-      {bool saveLinks = true}) {
-    return putAllByIndexSync(r'categoryId', objects, saveLinks: saveLinks);
-  }
-}
-
 extension CategoryModelQueryWhereSort
     on QueryBuilder<CategoryModel, CategoryModel, QWhere> {
   QueryBuilder<CategoryModel, CategoryModel, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
-    });
-  }
-
-  QueryBuilder<CategoryModel, CategoryModel, QAfterWhere> anyCategoryId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'categoryId'),
-      );
     });
   }
 }
@@ -279,99 +202,6 @@ extension CategoryModelQueryWhere
       ));
     });
   }
-
-  QueryBuilder<CategoryModel, CategoryModel, QAfterWhereClause>
-      categoryIdEqualTo(int categoryId) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'categoryId',
-        value: [categoryId],
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryModel, CategoryModel, QAfterWhereClause>
-      categoryIdNotEqualTo(int categoryId) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'categoryId',
-              lower: [],
-              upper: [categoryId],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'categoryId',
-              lower: [categoryId],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'categoryId',
-              lower: [categoryId],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'categoryId',
-              lower: [],
-              upper: [categoryId],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<CategoryModel, CategoryModel, QAfterWhereClause>
-      categoryIdGreaterThan(
-    int categoryId, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'categoryId',
-        lower: [categoryId],
-        includeLower: include,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryModel, CategoryModel, QAfterWhereClause>
-      categoryIdLessThan(
-    int categoryId, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'categoryId',
-        lower: [],
-        upper: [categoryId],
-        includeUpper: include,
-      ));
-    });
-  }
-
-  QueryBuilder<CategoryModel, CategoryModel, QAfterWhereClause>
-      categoryIdBetween(
-    int lowerCategoryId,
-    int upperCategoryId, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'categoryId',
-        lower: [lowerCategoryId],
-        includeLower: includeLower,
-        upper: [upperCategoryId],
-        includeUpper: includeUpper,
-      ));
-    });
-  }
 }
 
 extension CategoryModelQueryFilter
@@ -433,7 +263,25 @@ extension CategoryModelQueryFilter
   }
 
   QueryBuilder<CategoryModel, CategoryModel, QAfterFilterCondition>
-      createdAtEqualTo(DateTime value) {
+      createdAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'createdAt',
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryModel, CategoryModel, QAfterFilterCondition>
+      createdAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'createdAt',
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryModel, CategoryModel, QAfterFilterCondition>
+      createdAtEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'createdAt',
@@ -444,7 +292,7 @@ extension CategoryModelQueryFilter
 
   QueryBuilder<CategoryModel, CategoryModel, QAfterFilterCondition>
       createdAtGreaterThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -458,7 +306,7 @@ extension CategoryModelQueryFilter
 
   QueryBuilder<CategoryModel, CategoryModel, QAfterFilterCondition>
       createdAtLessThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -472,8 +320,8 @@ extension CategoryModelQueryFilter
 
   QueryBuilder<CategoryModel, CategoryModel, QAfterFilterCondition>
       createdAtBetween(
-    DateTime lower,
-    DateTime upper, {
+    DateTime? lower,
+    DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -983,7 +831,7 @@ extension CategoryModelQueryProperty
     });
   }
 
-  QueryBuilder<CategoryModel, DateTime, QQueryOperations> createdAtProperty() {
+  QueryBuilder<CategoryModel, DateTime?, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
     });

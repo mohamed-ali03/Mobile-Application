@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:provider/provider.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
 
+  void addorder() async {}
+
   @override
   Widget build(BuildContext context) {
+    final auth = context.read<AuthProvider>();
     return Scaffold(
+      appBar: AppBar(
+        title: Text('menu'),
+        actions: [
+          IconButton(onPressed: () => auth.logout(), icon: Icon(Icons.logout)),
+          IconButton(onPressed: addorder, icon: Icon(Icons.add)),
+        ],
+      ),
       body: Consumer<MenuProvider>(
-        builder: (_, menu, __) {
+        builder: (_, menu, _) {
           if (menu.syncing) {
             return const Center(child: CircularProgressIndicator());
           }

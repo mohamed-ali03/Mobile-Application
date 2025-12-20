@@ -53,21 +53,7 @@ const UserModelSchema = CollectionSchema(
   deserialize: _userModelDeserialize,
   deserializeProp: _userModelDeserializeProp,
   idName: r'id',
-  indexes: {
-    r'authID': IndexSchema(
-      id: 587544164699769457,
-      name: r'authID',
-      unique: true,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'authID',
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    )
-  },
+  indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _userModelGetId,
@@ -122,7 +108,7 @@ UserModel _userModelDeserialize(
 ) {
   final object = UserModel();
   object.authID = reader.readString(offsets[0]);
-  object.createdAt = reader.readDateTime(offsets[1]);
+  object.createdAt = reader.readDateTimeOrNull(offsets[1]);
   object.id = id;
   object.imageUrl = reader.readStringOrNull(offsets[2]);
   object.name = reader.readString(offsets[3]);
@@ -141,7 +127,7 @@ P _userModelDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
@@ -165,61 +151,6 @@ List<IsarLinkBase<dynamic>> _userModelGetLinks(UserModel object) {
 
 void _userModelAttach(IsarCollection<dynamic> col, Id id, UserModel object) {
   object.id = id;
-}
-
-extension UserModelByIndex on IsarCollection<UserModel> {
-  Future<UserModel?> getByAuthID(String authID) {
-    return getByIndex(r'authID', [authID]);
-  }
-
-  UserModel? getByAuthIDSync(String authID) {
-    return getByIndexSync(r'authID', [authID]);
-  }
-
-  Future<bool> deleteByAuthID(String authID) {
-    return deleteByIndex(r'authID', [authID]);
-  }
-
-  bool deleteByAuthIDSync(String authID) {
-    return deleteByIndexSync(r'authID', [authID]);
-  }
-
-  Future<List<UserModel?>> getAllByAuthID(List<String> authIDValues) {
-    final values = authIDValues.map((e) => [e]).toList();
-    return getAllByIndex(r'authID', values);
-  }
-
-  List<UserModel?> getAllByAuthIDSync(List<String> authIDValues) {
-    final values = authIDValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'authID', values);
-  }
-
-  Future<int> deleteAllByAuthID(List<String> authIDValues) {
-    final values = authIDValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'authID', values);
-  }
-
-  int deleteAllByAuthIDSync(List<String> authIDValues) {
-    final values = authIDValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'authID', values);
-  }
-
-  Future<Id> putByAuthID(UserModel object) {
-    return putByIndex(r'authID', object);
-  }
-
-  Id putByAuthIDSync(UserModel object, {bool saveLinks = true}) {
-    return putByIndexSync(r'authID', object, saveLinks: saveLinks);
-  }
-
-  Future<List<Id>> putAllByAuthID(List<UserModel> objects) {
-    return putAllByIndex(r'authID', objects);
-  }
-
-  List<Id> putAllByAuthIDSync(List<UserModel> objects,
-      {bool saveLinks = true}) {
-    return putAllByIndexSync(r'authID', objects, saveLinks: saveLinks);
-  }
 }
 
 extension UserModelQueryWhereSort
@@ -295,51 +226,6 @@ extension UserModelQueryWhere
         upper: upperId,
         includeUpper: includeUpper,
       ));
-    });
-  }
-
-  QueryBuilder<UserModel, UserModel, QAfterWhereClause> authIDEqualTo(
-      String authID) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'authID',
-        value: [authID],
-      ));
-    });
-  }
-
-  QueryBuilder<UserModel, UserModel, QAfterWhereClause> authIDNotEqualTo(
-      String authID) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'authID',
-              lower: [],
-              upper: [authID],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'authID',
-              lower: [authID],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'authID',
-              lower: [authID],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'authID',
-              lower: [],
-              upper: [authID],
-              includeUpper: false,
-            ));
-      }
     });
   }
 }
@@ -476,8 +362,25 @@ extension UserModelQueryFilter
     });
   }
 
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> createdAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'createdAt',
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition>
+      createdAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'createdAt',
+      ));
+    });
+  }
+
   QueryBuilder<UserModel, UserModel, QAfterFilterCondition> createdAtEqualTo(
-      DateTime value) {
+      DateTime? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'createdAt',
@@ -488,7 +391,7 @@ extension UserModelQueryFilter
 
   QueryBuilder<UserModel, UserModel, QAfterFilterCondition>
       createdAtGreaterThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -501,7 +404,7 @@ extension UserModelQueryFilter
   }
 
   QueryBuilder<UserModel, UserModel, QAfterFilterCondition> createdAtLessThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -514,8 +417,8 @@ extension UserModelQueryFilter
   }
 
   QueryBuilder<UserModel, UserModel, QAfterFilterCondition> createdAtBetween(
-    DateTime lower,
-    DateTime upper, {
+    DateTime? lower,
+    DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -1369,7 +1272,7 @@ extension UserModelQueryProperty
     });
   }
 
-  QueryBuilder<UserModel, DateTime, QQueryOperations> createdAtProperty() {
+  QueryBuilder<UserModel, DateTime?, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
     });

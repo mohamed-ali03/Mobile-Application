@@ -1,16 +1,9 @@
-import 'package:foodapp/service/isar_local/menu_local_service.dart';
 import 'package:foodapp/service/supabase_remote/supabase_service.dart';
 
 class MenuRemoteService {
   /// listen to any change in the remote menu
-  static void listenToMenuChanges() {
-    SupabaseService.client.from('menu_items').stream(primaryKey: ['id']).listen(
-      (rows) async {
-        for (final row in rows) {
-          await MenuLocalService.upsertFromRemote(row);
-        }
-      },
-    );
+  Stream<List<Map<String, dynamic>>> listenToMenuChanges() {
+    return SupabaseService.client.from('menu_items').stream(primaryKey: ['id']);
   }
 
   /// 📥 fetch available items

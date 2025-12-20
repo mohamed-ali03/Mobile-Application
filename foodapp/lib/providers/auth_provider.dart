@@ -43,7 +43,7 @@ class AuthProvider extends ChangeNotifier {
     String role = 'user',
     String? phoneNumber,
     String? imageUrl,
-  }) => _repo.resgister(
+  }) => _repo.register(
     name: name,
     email: email,
     password: password,
@@ -53,4 +53,10 @@ class AuthProvider extends ChangeNotifier {
   );
 
   Future<void> logout() => _repo.logout();
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
 }

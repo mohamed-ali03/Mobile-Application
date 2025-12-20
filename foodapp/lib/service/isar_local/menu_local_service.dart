@@ -4,32 +4,31 @@ import 'package:foodapp/service/isar_local/isar_service.dart';
 import 'package:isar/isar.dart';
 
 class MenuLocalService {
-  static Future<void> upsertFromRemote(Map<String, dynamic> data) async {
-    final item = ItemModel()
-      ..itemId = data['id']
-      ..categoryId = data['category_id']
-      ..name = data['name']
-      ..description = data['description']
-      ..price = (data['price'] as num).toDouble()
-      ..imageUrl = data['image_url']
-      ..ingreidents = data['ingreident']
-      ..available = data['available'];
+  Future<void> upsertFromRemote(List<Map<String, dynamic>> data) async {
+    await IsarService.isar.writeTxn(() async {
+      for (final row in data) {
+        final item = ItemModel()
+          ..itemId = row['id']
+          ..categoryId = row['category_id']
+          ..name = row['name']
+          ..description = row['description']
+          ..price = (row['price'] as num).toDouble()
+          ..imageUrl = row['image_url']
+          ..ingreidents = row['ingreident']
+          ..available = row['available']
+          ..createdAt = DateTime.parse(row['created_at']);
 
-    final existing = await IsarService.isar.itemModels
-        .filter()
-        .itemIdEqualTo(item.itemId)
-        .findFirst();
+        final existing = await IsarService.isar.itemModels
+            .filter()
+            .itemIdEqualTo(item.itemId)
+            .findFirst();
 
-    if (existing == null) {
-      await IsarService.isar.writeTxn(() async {
+        if (existing != null) {
+          item.id = existing.id;
+        }
         await IsarService.isar.itemModels.put(item);
-      });
-    } else {
-      item.id = existing.id;
-      await IsarService.isar.writeTxn(() async {
-        await IsarService.isar.itemModels.put(item);
-      });
-    }
+      }
+    });
   }
 
   Future<void> saveMenu(List<ItemModel> items) async {

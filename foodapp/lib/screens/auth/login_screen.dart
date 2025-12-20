@@ -46,6 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           passwordController.text.trim(),
                         );
                       } catch (e) {
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(
                           context,
                         ).showSnackBar(SnackBar(content: Text(e.toString())));
