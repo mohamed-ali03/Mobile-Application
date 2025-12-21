@@ -1,19 +1,22 @@
+import 'package:flutter/material.dart';
 import 'package:foodapp/service/supabase_remote/supabase_service.dart';
 
 class MenuRemoteService {
-  /// listen to any change in the remote menu
-  Stream<List<Map<String, dynamic>>> listenToMenuChanges() {
-    return SupabaseService.client.from('menu_items').stream(primaryKey: ['id']);
-  }
-
   /// 📥 fetch available items
-  Future<List<Map<String, dynamic>>> fetchMenu() async {
-    final res = await SupabaseService.client
-        .from('menu_items')
-        .select()
-        .eq('available', true);
+  Future<List<Map<String, dynamic>>> fetchMenu({
+    bool onlyAvailable = true,
+  }) async {
+    try {
+      final res = await SupabaseService.client
+          .from('menu_items')
+          .select()
+          .eq('available', onlyAvailable);
 
-    return List<Map<String, dynamic>>.from(res);
+      return List<Map<String, dynamic>>.from(res);
+    } catch (e) {
+      debugPrint('Error fetching menu: $e');
+      rethrow;
+    }
   }
 
   /// ➕ add item (Supabase generates id)
@@ -26,24 +29,29 @@ class MenuRemoteService {
     required String ingreidents,
     bool available = false,
   }) async {
-    final res = await SupabaseService.client
-        .from('menu_items')
-        .insert({
-          'name': name,
-          'description': description,
-          'price': price,
-          'category_id': categoryId,
-          'image_url': imageUrl,
-          'ingreident': ingreidents,
-          'available': available,
-        })
-        .select()
-        .single();
-    return res;
+    try {
+      final res = await SupabaseService.client
+          .from('menu_items')
+          .insert({
+            'name': name,
+            'description': description,
+            'price': price,
+            'category_id': categoryId,
+            'image_url': imageUrl,
+            'ingreident': ingreidents,
+            'available': available,
+          })
+          .select()
+          .single();
+      return res;
+    } catch (e) {
+      debugPrint('Error adding item: $e');
+      rethrow;
+    }
   }
 
   /// ✏️ update item
-  Future<void> updateItem({
+  Future<Map<String, dynamic>> updateItem({
     required int itemId,
     String? name,
     String? description,
@@ -53,37 +61,56 @@ class MenuRemoteService {
     String? ingreidents,
     bool? available,
   }) async {
-    final data = <String, dynamic>{};
+    try {
+      final data = <String, dynamic>{};
 
-    if (name != null) data['name'] = name;
-    if (description != null) data['description'] = description;
-    if (price != null) data['price'] = price;
-    if (categoryId != null) data['category_id'] = categoryId;
-    if (imageUrl != null) data['image_url'] = imageUrl;
-    if (ingreidents != null) data['ingreident'] = ingreidents;
-    if (available != null) data['available'] = available;
+      if (name != null) data['name'] = name;
+      if (description != null) data['description'] = description;
+      if (price != null) data['price'] = price;
+      if (categoryId != null) data['category_id'] = categoryId;
+      if (imageUrl != null) data['image_url'] = imageUrl;
+      if (ingreidents != null) data['ingreident'] = ingreidents;
+      if (available != null) data['available'] = available;
 
-    if (data.isEmpty) return;
+      if (data.isEmpty) return <String, dynamic>{};
 
-    await SupabaseService.client
-        .from('menu_items')
-        .update(data)
-        .eq('id', itemId);
+      final res = await SupabaseService.client
+          .from('menu_items')
+          .update(data)
+          .eq('id', itemId)
+          .select()
+          .single();
+
+      return res;
+    } catch (e) {
+      debugPrint('Error updating item: $e');
+      rethrow;
+    }
   }
 
   /// 🗑️ delete item
   Future<void> deleteItem(int itemId) async {
-    await SupabaseService.client.from('menu_items').delete().eq('id', itemId);
+    try {
+      await SupabaseService.client.from('menu_items').delete().eq('id', itemId);
+    } catch (e) {
+      debugPrint('Error deleting item: $e');
+      rethrow;
+    }
   }
 
   /// 📥 fetch categories
   Future<List<Map<String, dynamic>>> fetchCategories() async {
-    final res = await SupabaseService.client
-        .from('categories')
-        .select()
-        .order('created_at');
+    try {
+      final res = await SupabaseService.client
+          .from('categories')
+          .select()
+          .order('created_at');
 
-    return List<Map<String, dynamic>>.from(res);
+      return List<Map<String, dynamic>>.from(res);
+    } catch (e) {
+      debugPrint('Error fetching categories: $e');
+      rethrow;
+    }
   }
 
   /// ➕ add category
@@ -91,40 +118,58 @@ class MenuRemoteService {
     required String name,
     required String imageUrl,
   }) async {
-    final res = await SupabaseService.client
-        .from('categories')
-        .insert({'name': name, 'image_url': imageUrl})
-        .select()
-        .single();
+    try {
+      final res = await SupabaseService.client
+          .from('categories')
+          .insert({'name': name, 'image_url': imageUrl})
+          .select()
+          .single();
 
-    return res;
+      return res;
+    } catch (e) {
+      debugPrint('Error adding category: $e');
+      rethrow;
+    }
   }
 
   /// ✏️ update category
-  Future<void> updateCategory({
+  Future<Map<String, dynamic>> updateCategory({
     required int categoryId,
     String? name,
     String? imageUrl,
   }) async {
-    final data = <String, dynamic>{};
+    try {
+      final data = <String, dynamic>{};
 
-    if (name != null) data['name'] = name;
-    if (imageUrl != null) data['image_url'] = imageUrl;
+      if (name != null) data['name'] = name;
+      if (imageUrl != null) data['image_url'] = imageUrl;
 
-    if (data.isEmpty) return;
+      if (data.isEmpty) return <String, dynamic>{};
 
-    await SupabaseService.client
-        .from('categories')
-        .update(data)
-        .eq('id', categoryId);
+      final res = await SupabaseService.client
+          .from('categories')
+          .update(data)
+          .eq('id', categoryId)
+          .select()
+          .single();
+
+      return res;
+    } catch (e) {
+      debugPrint('Error updating category: $e');
+      rethrow;
+    }
   }
 
   /// 🗑️ delete category
   Future<void> deleteCategory(int categoryId) async {
-    await SupabaseService.client
-        .from('categories')
-        .delete()
-        .eq('id', categoryId)
-        .select();
+    try {
+      await SupabaseService.client
+          .from('categories')
+          .delete()
+          .eq('id', categoryId);
+    } catch (e) {
+      debugPrint('Error deleting category: $e');
+      rethrow;
+    }
   }
 }

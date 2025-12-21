@@ -94,7 +94,7 @@ OrderItemModel _orderItemModelDeserialize(
   final object = OrderItemModel();
   object.id = id;
   object.itemId = reader.readLong(offsets[0]);
-  object.localOrderId = reader.readLong(offsets[1]);
+  object.localOrderId = reader.readLongOrNull(offsets[1]);
   object.orderId = reader.readLongOrNull(offsets[2]);
   object.orderItemId = reader.readLong(offsets[3]);
   object.price = reader.readDouble(offsets[4]);
@@ -112,7 +112,7 @@ P _orderItemModelDeserializeProp<P>(
     case 0:
       return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 2:
       return (reader.readLongOrNull(offset)) as P;
     case 3:
@@ -334,7 +334,25 @@ extension OrderItemModelQueryFilter
   }
 
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
-      localOrderIdEqualTo(int value) {
+      localOrderIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'localOrderId',
+      ));
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      localOrderIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'localOrderId',
+      ));
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      localOrderIdEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'localOrderId',
@@ -345,7 +363,7 @@ extension OrderItemModelQueryFilter
 
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
       localOrderIdGreaterThan(
-    int value, {
+    int? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -359,7 +377,7 @@ extension OrderItemModelQueryFilter
 
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
       localOrderIdLessThan(
-    int value, {
+    int? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -373,8 +391,8 @@ extension OrderItemModelQueryFilter
 
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
       localOrderIdBetween(
-    int lower,
-    int upper, {
+    int? lower,
+    int? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -879,7 +897,7 @@ extension OrderItemModelQueryProperty
     });
   }
 
-  QueryBuilder<OrderItemModel, int, QQueryOperations> localOrderIdProperty() {
+  QueryBuilder<OrderItemModel, int?, QQueryOperations> localOrderIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'localOrderId');
     });

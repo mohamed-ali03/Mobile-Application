@@ -1,108 +1,145 @@
+import 'package:flutter/material.dart';
 import 'package:foodapp/models/category%20model/category_model.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/service/isar_local/isar_service.dart';
 import 'package:isar/isar.dart';
 
 class MenuLocalService {
-  Future<void> upsertFromRemote(List<Map<String, dynamic>> data) async {
-    await IsarService.isar.writeTxn(() async {
-      for (final row in data) {
-        final item = ItemModel()
-          ..itemId = row['id']
-          ..categoryId = row['category_id']
-          ..name = row['name']
-          ..description = row['description']
-          ..price = (row['price'] as num).toDouble()
-          ..imageUrl = row['image_url']
-          ..ingreidents = row['ingreident']
-          ..available = row['available']
-          ..createdAt = DateTime.parse(row['created_at']);
+  /// 📝 save/sync menu items (clears old data)
+  Future<void> saveItems(List<ItemModel> items) async {
+    try {
+      await IsarService.isar.writeTxn(() async {
+        await IsarService.isar.itemModels.clear();
+        await IsarService.isar.itemModels.putAll(items);
+      });
+    } catch (e) {
+      debugPrint('Error saving items: $e');
+      rethrow;
+    }
+  }
 
-        final existing = await IsarService.isar.itemModels
-            .filter()
-            .itemIdEqualTo(item.itemId)
-            .findFirst();
+  /// 👀 watch menu items
+  Stream<List<ItemModel>> watchMenu() {
+    try {
+      return IsarService.isar.itemModels.where().sortByCategoryId().watch(
+        fireImmediately: true,
+      );
+    } catch (e) {
+      debugPrint('Error watching menu: $e');
+      rethrow;
+    }
+  }
 
+  /// 🔍 get item by remote id
+  Future<ItemModel?> getItemByItemId(int itemId) async {
+    try {
+      return await IsarService.isar.itemModels
+          .filter()
+          .itemIdEqualTo(itemId)
+          .findFirst();
+    } catch (e) {
+      debugPrint('Error getting item by id: $e');
+      return null;
+    }
+  }
+
+  /// ➕ upsert item (insert or update)
+  Future<void> upsertItem(ItemModel item) async {
+    try {
+      await IsarService.isar.writeTxn(() async {
+        final existing = await getItemByItemId(item.itemId);
         if (existing != null) {
           item.id = existing.id;
         }
         await IsarService.isar.itemModels.put(item);
-      }
-    });
+      });
+    } catch (e) {
+      debugPrint('Error upserting item: $e');
+      rethrow;
+    }
   }
 
-  Future<void> saveMenu(List<ItemModel> items) async {
-    await IsarService.isar.writeTxn(() async {
-      await IsarService.isar.itemModels.clear();
-      await IsarService.isar.itemModels.putAll(items);
-    });
-  }
-
-  Stream<List<ItemModel>> watchMenu() {
-    return IsarService.isar.itemModels.where().sortByCategoryId().watch(
-      fireImmediately: true,
-    );
-  }
-
-  /// 🔍 get by remote id
-  Future<ItemModel?> getItemByItemId(int itemId) {
-    return IsarService.isar.itemModels
-        .filter()
-        .itemIdEqualTo(itemId)
-        .findFirst();
-  }
-
-  Future<void> upsertItem(ItemModel item) async {
-    await IsarService.isar.writeTxn(() async {
-      await IsarService.isar.itemModels.put(item);
-    });
-  }
-
-  /// 🗑️ delete by remote id
+  /// 🗑️ delete item by remote id
   Future<void> deleteItemByItemId(int itemId) async {
-    await IsarService.isar.writeTxn(() async {
-      final item = await getItemByItemId(itemId);
-      if (item != null) {
-        await IsarService.isar.itemModels.delete(item.id);
-      }
-    });
+    try {
+      await IsarService.isar.writeTxn(() async {
+        final item = await getItemByItemId(itemId);
+        if (item != null) {
+          await IsarService.isar.itemModels.delete(item.id);
+        }
+      });
+    } catch (e) {
+      debugPrint('Error deleting item: $e');
+      rethrow;
+    }
   }
 
-  /// 🔄 replace all (sync)
-  Future<void> replaceAll(List<CategoryModel> categories) async {
-    await IsarService.isar.writeTxn(() async {
-      await IsarService.isar.categoryModels.clear();
-      await IsarService.isar.categoryModels.putAll(categories);
-    });
+  /// 📝 save/sync categories (clears old data)
+  Future<void> saveCats(List<CategoryModel> categories) async {
+    try {
+      await IsarService.isar.writeTxn(() async {
+        await IsarService.isar.categoryModels.clear();
+        await IsarService.isar.categoryModels.putAll(categories);
+      });
+    } catch (e) {
+      debugPrint('Error saving categories: $e');
+      rethrow;
+    }
   }
 
   /// 👀 watch categories
   Stream<List<CategoryModel>> watchCategories() {
-    return IsarService.isar.categoryModels.where().watch(fireImmediately: true);
+    try {
+      return IsarService.isar.categoryModels.where().watch(
+        fireImmediately: true,
+      );
+    } catch (e) {
+      debugPrint('Error watching categories: $e');
+      rethrow;
+    }
   }
 
-  /// 🔍 get by remote id
-  Future<CategoryModel?> getCatByCategoryId(int categoryId) {
-    return IsarService.isar.categoryModels
-        .filter()
-        .categoryIdEqualTo(categoryId)
-        .findFirst();
+  /// 🔍 get category by remote id
+  Future<CategoryModel?> getCatByCategoryId(int categoryId) async {
+    try {
+      return await IsarService.isar.categoryModels
+          .filter()
+          .categoryIdEqualTo(categoryId)
+          .findFirst();
+    } catch (e) {
+      debugPrint('Error getting category by id: $e');
+      return null;
+    }
   }
 
-  /// ➕ add or update
+  /// ➕ upsert category (insert or update)
   Future<void> upsertCat(CategoryModel category) async {
-    await IsarService.isar.writeTxn(() async {
-      await IsarService.isar.categoryModels.put(category);
-    });
+    try {
+      await IsarService.isar.writeTxn(() async {
+        final existing = await getCatByCategoryId(category.categoryId);
+        if (existing != null) {
+          category.id = existing.id;
+        }
+        await IsarService.isar.categoryModels.put(category);
+      });
+    } catch (e) {
+      debugPrint('Error upserting category: $e');
+      rethrow;
+    }
   }
 
-  /// 🗑️ delete by remote id
+  /// 🗑️ delete category by remote id
   Future<void> deleteByCategoryId(int categoryId) async {
-    await IsarService.isar.writeTxn(() async {
-      final cat = await getCatByCategoryId(categoryId);
-      if (cat != null) {
-        await IsarService.isar.categoryModels.delete(cat.id);
-      }
-    });
+    try {
+      await IsarService.isar.writeTxn(() async {
+        final cat = await getCatByCategoryId(categoryId);
+        if (cat != null) {
+          await IsarService.isar.categoryModels.delete(cat.id);
+        }
+      });
+    } catch (e) {
+      debugPrint('Error deleting category: $e');
+      rethrow;
+    }
   }
 }

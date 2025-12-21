@@ -7,28 +7,27 @@ class AuthRepository {
   final _remote = AuthRemoteService();
   final _local = UserLocalService();
 
+  static const _timeout = Duration(seconds: 10);
+
   /// 🔑 login and sync profile to local DB (offline-safe)
   Future<void> login(String email, String password) async {
     try {
-      final user = await _remote
-          .login(email, password)
-          .timeout(const Duration(seconds: 5));
+      final user = await _remote.login(email, password).timeout(_timeout);
 
-      final profile = await _remote
-          .fetchProfile(user.id)
-          .timeout(const Duration(seconds: 5));
+      final profile = await _remote.fetchProfile(user.id).timeout(_timeout);
 
       final localUser = UserModel()
         ..authID = user.id
-        ..name = profile['name']
-        ..role = profile['role']
+        ..name = profile['name'] ?? ''
+        ..role = profile['role'] ?? 'user'
         ..phoneNumber = profile['phone_number']
         ..imageUrl = profile['image_url']
-        ..createdAt = DateTime.parse(profile['created_at']);
+        ..createdAt = _parseDate(profile['created_at']);
 
       await _local.saveUser(localUser);
     } catch (e) {
       debugPrint('Failed to login or fetch profile: $e');
+      rethrow;
     }
   }
 
@@ -49,9 +48,9 @@ class AuthRepository {
             password: password,
             role: role,
             phoneNumber: phoneNumber,
-            imagUrl: imageUrl,
+            imageUrl: imageUrl,
           )
-          .timeout(const Duration(seconds: 5));
+          .timeout(_timeout);
 
       final localUser = UserModel()
         ..authID = user.id
@@ -59,29 +58,137 @@ class AuthRepository {
         ..role = role
         ..phoneNumber = phoneNumber
         ..imageUrl = imageUrl
-        ..createdAt = DateTime.parse('created_at');
+        ..createdAt = DateTime.now();
 
       await _local.saveUser(localUser);
     } catch (e) {
-      debugPrint('Failed to register user remotely: $e');
+      debugPrint('Failed to register user: $e');
+      rethrow;
     }
   }
 
-  /// 🚪 logout
+  /// 🚪 logout and clear local data
   Future<void> logout() async {
     try {
-      await _remote.logout().timeout(const Duration(seconds: 5));
-      await _local.clear();
+      await _remote.logout().timeout(_timeout);
     } catch (e) {
       debugPrint('Failed to logout remotely: $e');
+      rethrow;
+    } finally {
+      // Always clear local data even if remote logout fails
+      try {
+        await _local.clear();
+      } catch (e) {
+        debugPrint('Failed to clear local data: $e');
+      }
+    }
+  }
+
+  /// ✏️ update user profile
+  Future<void> updateProfile(
+    String userId, {
+    String? name,
+    String? phoneNumber,
+    String? imageUrl,
+  }) async {
+    try {
+      await _remote
+          .updateProfile(
+            userId,
+            name: name,
+            phoneNumber: phoneNumber,
+            imageUrl: imageUrl,
+          )
+          .timeout(_timeout);
+
+      // Update local cache
+      try {
+        await _local.updateUser(
+          name: name,
+          phoneNumber: phoneNumber,
+          imageUrl: imageUrl,
+        );
+      } catch (e) {
+        debugPrint('Failed to update local cache: $e');
+        // Don't rethrow - remote update succeeded
+      }
+    } catch (e) {
+      debugPrint('Failed to update profile remotely: $e');
+      rethrow;
+    }
+  }
+
+  /// 👤 get current authenticated user
+  Future<UserModel?> getCurrentUser() async {
+    try {
+      return await _local.getUserOnce();
+    } catch (e) {
+      debugPrint('Failed to get current user: $e');
+      return null;
+    }
+  }
+
+  /// 🔐 check if user is authenticated
+  Future<bool> isAuthenticated() async {
+    try {
+      final user = await _local.getUserOnce();
+      return user != null;
+    } catch (e) {
+      debugPrint('Failed to check authentication: $e');
+      return false;
     }
   }
 
   /// 👀 watch local user for UI updates
-  Stream<UserModel?> watchUser() => _local.watchUser();
+  Stream<UserModel?> watchUser() {
+    try {
+      return _local.watchUser();
+    } catch (e) {
+      debugPrint('Failed to watch user: $e');
+      rethrow;
+    }
+  }
 
-  /// 🔎 get user once
-  Future<UserModel?> getUser() async {
-    return await _local.getUserOnce();
+  /// 🔄 sync all profiles with remote database
+  Future<void> syncProfiles() async {
+    try {
+      final profiles = await _remote.fetchAllProfiles().timeout(_timeout);
+
+      final users = profiles.map<UserModel>((profile) {
+        return UserModel()
+          ..authID = profile['id']
+          ..name = profile['name'] ?? ''
+          ..role = profile['role'] ?? 'user'
+          ..phoneNumber = profile['phone_number']
+          ..imageUrl = profile['image_url']
+          ..createdAt = _parseDate(profile['created_at']);
+      }).toList();
+
+      await _local.upsertUsers(users);
+    } catch (e) {
+      debugPrint('syncProfiles error: $e');
+      rethrow;
+    }
+  }
+
+  /// 📥 fetch all users from local database
+  Future<List<UserModel>> fetchAllUsers() async {
+    try {
+      return await _local.fetchUsersSkipFirst();
+    } catch (e) {
+      debugPrint('fetchAllUsers error: $e');
+      return [];
+    }
+  }
+
+  /// 🔧 helper to safely parse dates
+  DateTime? _parseDate(dynamic date) {
+    if (date == null) return null;
+    try {
+      return DateTime.parse(date.toString());
+    } catch (e) {
+      debugPrint('Date parse error: $e');
+      return null;
+    }
   }
 }

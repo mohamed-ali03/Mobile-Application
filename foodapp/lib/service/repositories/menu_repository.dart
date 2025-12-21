@@ -1,12 +1,130 @@
 import 'package:flutter/material.dart';
 import 'package:foodapp/models/category%20model/category_model.dart';
+import 'package:foodapp/models/category%20model/category_parse.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
+import 'package:foodapp/models/item%20model/item_parse.dart';
 import 'package:foodapp/service/isar_local/menu_local_service.dart';
 import 'package:foodapp/service/supabase_remote/menu_remote_service.dart';
+import 'package:foodapp/service/supabase_remote/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MenuRepository {
   final _remote = MenuRemoteService();
   final _local = MenuLocalService();
+
+  RealtimeChannel? _itemsChannel;
+  RealtimeChannel? _categoryChannel;
+
+  /// 🔔 listen to changes in items table [insert, update, delete]
+  void listenToChangesInItemsTable() {
+    try {
+      _itemsChannel = SupabaseService.client
+          .channel('public:menu_items')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.insert,
+            schema: 'public',
+            table: 'menu_items',
+            callback: (payload) {
+              _local
+                  .upsertItem(ItemModelJson.fromJson(payload.newRecord))
+                  .catchError((e) {
+                    debugPrint('Error syncing inserted item: $e');
+                  });
+            },
+          )
+          .onPostgresChanges(
+            event: PostgresChangeEvent.update,
+            schema: 'public',
+            table: 'menu_items',
+            callback: (payload) {
+              _local
+                  .upsertItem(ItemModelJson.fromJson(payload.newRecord))
+                  .catchError((e) {
+                    debugPrint('Error syncing updated item: $e');
+                  });
+            },
+          )
+          .onPostgresChanges(
+            event: PostgresChangeEvent.delete,
+            schema: 'public',
+            table: 'menu_items',
+            callback: (payload) {
+              _local.deleteItemByItemId(payload.oldRecord['id']).catchError((
+                e,
+              ) {
+                debugPrint('Error syncing deleted item: $e');
+              });
+            },
+          )
+          .subscribe();
+    } catch (e) {
+      debugPrint('Error setting up items listener: $e');
+      rethrow;
+    }
+  }
+
+  /// 🔔 listen to changes in category table [insert, update, delete]
+  void listenToChangesInCategoryTable() {
+    try {
+      _categoryChannel = SupabaseService.client
+          .channel('public:category')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.insert,
+            schema: 'public',
+            table: 'category',
+            callback: (payload) {
+              _local
+                  .upsertCat(CategoryModelJson.fromJson(payload.newRecord))
+                  .catchError((e) {
+                    debugPrint('Error syncing inserted category: $e');
+                  });
+            },
+          )
+          .onPostgresChanges(
+            event: PostgresChangeEvent.update,
+            schema: 'public',
+            table: 'category',
+            callback: (payload) {
+              _local
+                  .upsertCat(CategoryModelJson.fromJson(payload.newRecord))
+                  .catchError((e) {
+                    debugPrint('Error syncing updated category: $e');
+                  });
+            },
+          )
+          .onPostgresChanges(
+            event: PostgresChangeEvent.delete,
+            schema: 'public',
+            table: 'category',
+            callback: (payload) {
+              _local.deleteByCategoryId(payload.oldRecord['id']).catchError((
+                e,
+              ) {
+                debugPrint('Error syncing deleted category: $e');
+              });
+            },
+          )
+          .subscribe();
+    } catch (e) {
+      debugPrint('Error setting up category listener: $e');
+      rethrow;
+    }
+  }
+
+  /// 🧹 cleanup subscriptions
+  Future<void> dispose() async {
+    try {
+      if (_itemsChannel != null) {
+        await SupabaseService.client.removeChannel(_itemsChannel!);
+      }
+      if (_categoryChannel != null) {
+        await SupabaseService.client.removeChannel(_categoryChannel!);
+      }
+    } catch (e) {
+      debugPrint('Error disposing MenuRepository: $e');
+      rethrow;
+    }
+  }
 
   /// 🔄 sync menu from remote to local (offline-safe)
   Future<void> syncMenu() async {
@@ -28,33 +146,25 @@ class MenuRepository {
           ..createdAt = DateTime.parse(e['created_at']);
       }).toList();
 
-      await _local.saveMenu(localItems);
+      await _local.saveItems(localItems);
     } catch (e) {
-      debugPrint('Failed to fetch menu: $e');
+      debugPrint('Failed to sync menu: $e');
+      rethrow;
     }
   }
 
   /// 👀 UI reads Isar only
-  Stream<List<ItemModel>> watchLocalMenu() => _local.watchMenu();
-
-  /// 👀 Isar reads Supabase
-  void watchRemoteMenu() {
-    _remote.listenToMenuChanges().listen(
-      (rows) async {
-        try {
-          await _local.upsertFromRemote(rows);
-        } catch (e) {
-          debugPrint('Failed to update local menu : $e');
-        }
-      },
-      onError: (error) {
-        debugPrint('Menu stream error : $error');
-      },
-    );
+  Stream<List<ItemModel>> watchLocalMenu() {
+    try {
+      return _local.watchMenu();
+    } catch (e) {
+      debugPrint('Error watching local menu: $e');
+      rethrow;
+    }
   }
 
-  /// ➕ add menu item (offline-safe: local will update anyway)
-  Future<void> add(ItemModel item) async {
+  /// ➕ add menu item
+  Future<void> addItem(ItemModel item) async {
     try {
       final res = await _remote
           .addItem(
@@ -71,12 +181,13 @@ class MenuRepository {
       item.itemId = res['id'];
       await _local.upsertItem(item);
     } catch (e) {
-      debugPrint('Failed to add item remotely: $e');
+      debugPrint('Failed to add item: $e');
+      rethrow;
     }
   }
 
-  /// ✏️ update menu item
-  Future<void> update(ItemModel item) async {
+  /// ✏️ update menu item (listener will sync to local)
+  Future<void> updateItem(ItemModel item) async {
     try {
       await _remote
           .updateItem(
@@ -90,24 +201,31 @@ class MenuRepository {
             available: item.available,
           )
           .timeout(const Duration(seconds: 5));
-      await _local.upsertItem(item);
     } catch (e) {
-      debugPrint('Failed to update item remotely: $e');
+      debugPrint('Failed to update item (id: ${item.itemId}): $e');
+      rethrow;
     }
   }
 
-  /// 🗑️ delete menu item
-  Future<void> delete(ItemModel item) async {
+  /// 🗑️ delete menu item (listener will sync to local)
+  Future<void> deleteItem(ItemModel item) async {
     try {
       await _remote.deleteItem(item.itemId).timeout(const Duration(seconds: 5));
-      await _local.deleteItemByItemId(item.itemId);
     } catch (e) {
-      debugPrint('Failed to delete item remotely: $e');
+      debugPrint('Failed to delete item (id: ${item.itemId}): $e');
+      rethrow;
     }
   }
 
   /// 👀 UI reads Isar only
-  Stream<List<CategoryModel>> watchCategories() => _local.watchCategories();
+  Stream<List<CategoryModel>> watchCategories() {
+    try {
+      return _local.watchCategories();
+    } catch (e) {
+      debugPrint('Error watching categories: $e');
+      rethrow;
+    }
+  }
 
   /// 🔄 sync categories (offline-safe)
   Future<void> syncCat() async {
@@ -124,9 +242,10 @@ class MenuRepository {
           ..createdAt = DateTime.parse(e['created_at']);
       }).toList();
 
-      await _local.replaceAll(categories);
+      await _local.saveCats(categories);
     } catch (e) {
-      debugPrint('Failed to fetch categories: $e');
+      debugPrint('Failed to sync categories: $e');
+      rethrow;
     }
   }
 
@@ -141,11 +260,12 @@ class MenuRepository {
       category.createdAt = DateTime.parse(res['created_at']);
       await _local.upsertCat(category);
     } catch (e) {
-      debugPrint('Failed to add category remotely: $e');
+      debugPrint('Failed to add category: $e');
+      rethrow;
     }
   }
 
-  /// ✏️ update category
+  /// ✏️ update category (listener will sync to local)
   Future<void> updateCat(CategoryModel category) async {
     try {
       await _remote
@@ -155,21 +275,21 @@ class MenuRepository {
             imageUrl: category.imageUrl,
           )
           .timeout(const Duration(seconds: 5));
-      await _local.upsertCat(category);
     } catch (e) {
-      debugPrint('Failed to update category remotely: $e');
+      debugPrint('Failed to update category (id: ${category.categoryId}): $e');
+      rethrow;
     }
   }
 
-  /// 🗑️ delete category
+  /// 🗑️ delete category (listener will sync to local)
   Future<void> deleteCat(CategoryModel category) async {
     try {
       await _remote
           .deleteCategory(category.categoryId)
           .timeout(const Duration(seconds: 5));
-      await _local.deleteByCategoryId(category.categoryId);
     } catch (e) {
-      debugPrint('Failed to delete category remotely: $e');
+      debugPrint('Failed to delete category (id: ${category.categoryId}): $e');
+      rethrow;
     }
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:foodapp/models/category%20model/category_model.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
@@ -8,66 +6,152 @@ import 'package:foodapp/service/repositories/menu_repository.dart';
 class MenuProvider extends ChangeNotifier {
   final _repo = MenuRepository();
 
-  List<ItemModel> items = [];
-  bool syncing = false;
+  bool isLoading = false;
+  String? error;
+  bool _isDisposed = false;
 
-  late StreamSubscription _sub;
+  Stream<List<ItemModel>> get itemsStream => _repo.watchLocalMenu();
+  Stream<List<CategoryModel>> get categoriesStream => _repo.watchCategories();
 
   MenuProvider() {
-    // sync();
-    // watch remote menu and change the isar DB according to changes
-    _repo.watchRemoteMenu();
-    // watch isar and change the UI
-    _sub = _repo.watchLocalMenu().listen((data) {
-      items = data;
-      notifyListeners();
-    });
+    sync();
+    _repo.listenToChangesInItemsTable();
+    _repo.listenToChangesInCategoryTable();
   }
 
+  /// 🔄 sync categories and menu items
   Future<void> sync() async {
-    syncing = true;
-    notifyListeners();
+    try {
+      _setLoading(true);
+      _setError(null);
 
-    await _repo.syncMenu();
-    await _repo.syncCat();
+      await _repo.syncMenu();
+      await _repo.syncCat();
 
-    syncing = false;
-    notifyListeners();
-    print('fuck you ');
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to sync menu: $e');
+      debugPrint('Error syncing: $e');
+      _setLoading(false);
+    }
   }
 
+  /// ➕ Add item
   Future<void> addItem(ItemModel item) async {
-    await _repo.add(item);
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await _repo.addItem(item);
+
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to add item: $e');
+      debugPrint('Error adding item: $e');
+      _setLoading(false);
+    }
   }
 
-  // ✏️ Update item
+  /// ✏️ Update item
   Future<void> updateItem(ItemModel item) async {
-    await _repo.update(item);
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await _repo.updateItem(item);
+
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to update item: $e');
+      debugPrint('Error updating item: $e');
+      _setLoading(false);
+    }
   }
 
-  // 🗑️ Delete item
+  /// 🗑️ Delete item
   Future<void> deleteItem(ItemModel item) async {
-    await _repo.delete(item);
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await _repo.deleteItem(item);
+
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to delete item: $e');
+      debugPrint('Error deleting item: $e');
+      _setLoading(false);
+    }
   }
 
-  // add cat
+  /// ➕ Add category
   Future<void> addCat(CategoryModel category) async {
-    await _repo.addCat(category);
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await _repo.addCat(category);
+
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to add category: $e');
+      debugPrint('Error adding category: $e');
+      _setLoading(false);
+    }
   }
 
-  // update cat
+  /// ✏️ Update category
   Future<void> updateCat(CategoryModel category) async {
-    await _repo.updateCat(category);
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await _repo.updateCat(category);
+
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to update category: $e');
+      debugPrint('Error updating category: $e');
+      _setLoading(false);
+    }
   }
 
-  // delete cat
+  /// 🗑️ Delete category
   Future<void> deleteCat(CategoryModel category) async {
-    await _repo.deleteCat(category);
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await _repo.deleteCat(category);
+
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to delete category: $e');
+      debugPrint('Error deleting category: $e');
+      _setLoading(false);
+    }
+  }
+
+  /// 🔧 Helper to safely set loading state
+  void _setLoading(bool value) {
+    if (!_isDisposed) {
+      isLoading = value;
+      notifyListeners();
+    }
+  }
+
+  /// 🔧 Helper to safely set error state
+  void _setError(String? value) {
+    if (!_isDisposed) {
+      error = value;
+      notifyListeners();
+    }
   }
 
   @override
   void dispose() {
-    _sub.cancel();
+    _isDisposed = true;
+    _repo.dispose();
     super.dispose();
   }
 }

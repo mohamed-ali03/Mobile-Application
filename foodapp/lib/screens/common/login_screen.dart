@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodapp/providers/auth_provider.dart';
-import 'package:foodapp/screens/auth/register_screen.dart';
+import 'package:foodapp/screens/common/register_screen.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {

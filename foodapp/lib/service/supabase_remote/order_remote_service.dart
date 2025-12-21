@@ -1,42 +1,49 @@
-import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
+import 'package:foodapp/models/order%20item%20model/order_item_parse.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
+import 'package:foodapp/models/order%20model/order_model_parse.dart';
 import 'package:foodapp/service/supabase_remote/supabase_service.dart';
 
 class OrderRemoteService {
-  /// Creates an order with associated items via RPC
+  /// ➕ create order with associated items via RPC
   Future<Map<String, dynamic>> createOrderRPC(
     OrderModel order,
     List<OrderItemModel> items,
   ) async {
-    final itemsJson = items
-        .map(
-          (item) => {
-            'item_id': item.itemId,
-            'quantity': item.quantity,
-            'price': item.price,
-          },
-        )
-        .toList();
+    try {
+      final itemsJson = items
+          .map(
+            (item) => {
+              'item_id': item.itemId,
+              'quantity': item.quantity,
+              'price': item.price,
+            },
+          )
+          .toList();
 
-    final response = await SupabaseService.client
-        .rpc(
-          'insert_order_with_items',
-          params: {
-            'p_user_id': order.userId,
-            'p_total_price': order.totalPrice,
-            'p_address': order.address,
-            'p_status': 'pending',
-            'p_created_at': order.createdAt?.toIso8601String(),
-            'p_items': itemsJson,
-          },
-        )
-        .single();
+      final response = await SupabaseService.client
+          .rpc(
+            'insert_order_with_items',
+            params: {
+              'p_user_id': order.userId,
+              'p_total_price': order.totalPrice,
+              'p_address': order.address,
+              'p_status': 'pending',
+              'p_created_at': order.createdAt?.toIso8601String(),
+              'p_items': itemsJson,
+            },
+          )
+          .single();
 
-    return response;
+      return response;
+    } catch (e) {
+      debugPrint('Error creating order: $e');
+      rethrow;
+    }
   }
 
-  /// Fetches a specific order with its items via RPC
+  /// 👀 fetch specific order with items via RPC
   Future<Map<String, dynamic>> getOrderRPC(int orderId) async {
     try {
       final response = await SupabaseService.client
@@ -49,78 +56,130 @@ class OrderRemoteService {
         return {'order': null, 'items': []};
       }
 
-      OrderModel order = _parseOrderFromResponse(response);
-      List<OrderItemModel> items = _parseItemsFromResponse(response);
+      final order = OrderModelJson.fromJson(response);
+      final items =
+          (response['items'] as List<dynamic>?)
+              ?.map(
+                (item) =>
+                    OrderItemModelJson.fromJson(item as Map<String, dynamic>),
+              )
+              .toList() ??
+          [];
 
       return {'order': order, 'items': items};
     } catch (e) {
       debugPrint('Error fetching order: $e');
-      return {'order': null, 'items': []};
+      rethrow;
     }
   }
 
-  /// Fetches all orders with items via RPC
-  Future<List<Map<String, dynamic>>> getAllOrdersRPC() async {
+  /// ✏️ update order [status, total_price, address]
+  Future<void> updateOrder(
+    int orderId, {
+    String? status,
+    double? totalPrice,
+    String? address,
+  }) async {
+    try {
+      final data = <String, dynamic>{};
+
+      if (status != null) data['status'] = status;
+      if (totalPrice != null) data['total_price'] = totalPrice;
+      if (address != null) data['address'] = address;
+
+      if (data.isEmpty) return;
+
+      await SupabaseService.client
+          .from('orders')
+          .update(data)
+          .eq('id', orderId);
+    } catch (e) {
+      debugPrint('Error updating order: $e');
+      rethrow;
+    }
+  }
+
+  /// ✏️ update order item [quantity]
+  Future<void> updateOrderItem(int orderItemId, {int? quantity}) async {
+    try {
+      if (quantity != null) {
+        await SupabaseService.client
+            .from('orderItems')
+            .update({'quantity': quantity})
+            .eq('id', orderItemId);
+      }
+    } catch (e) {
+      debugPrint('Error updating order item: $e');
+      rethrow;
+    }
+  }
+
+  /// 🗑️ delete order (cascade deletes items via RPC)
+  Future<Map<String, dynamic>> deleteOrder(int orderId) async {
+    try {
+      final response = await SupabaseService.client
+          .rpc('delete_order', params: {'p_order_id': orderId})
+          .single();
+
+      return response;
+    } catch (e) {
+      debugPrint('Error deleting order: $e');
+      rethrow;
+    }
+  }
+
+  /// 🗑️ delete order item
+  Future<void> deleteOrderItem(int orderItemId) async {
+    try {
+      await SupabaseService.client
+          .from('orderItems')
+          .delete()
+          .eq('id', orderItemId);
+    } catch (e) {
+      debugPrint('Error deleting order item: $e');
+      rethrow;
+    }
+  }
+
+  /// 👀 fetch all orders with items via RPC
+  Future<Map<String, dynamic>> getAllOrdersRPC() async {
     try {
       final response = await SupabaseService.client.rpc('fetch_all_orders');
 
-      if (response is Map) {
-        final orders = response['orders'] as List<dynamic>?;
-
-        if (orders == null || orders.isEmpty) {
-          return [];
-        }
-
-        return orders.map((orderData) {
-          final orderMap = orderData as Map<String, dynamic>;
-          final order = _parseOrderFromResponse(orderMap);
-          final items = _parseItemsFromResponse(orderMap);
-
-          return {'order': order, 'items': items};
-        }).toList();
+      if (response['orders'] is! List<dynamic>) {
+        debugPrint('Invalid response type: ${response.runtimeType}');
+        return {'orders': [], 'items': []};
       }
 
-      return [];
+      final allOrders = <OrderModel>[];
+      final allItems = <OrderItemModel>[];
+
+      // Process each order
+      for (final orderData in response['orders']) {
+        try {
+          final orderMap = orderData as Map<String, dynamic>;
+          final order = OrderModelJson.fromJson(orderMap);
+
+          final itemsList = orderMap['items'] as List<dynamic>? ?? [];
+          final items = itemsList
+              .map(
+                (item) =>
+                    OrderItemModelJson.fromJson(item as Map<String, dynamic>),
+              )
+              .toList();
+
+          allOrders.add(order);
+          allItems.addAll(items);
+        } catch (e) {
+          debugPrint('Error parsing order: $e');
+          continue; // Skip this order and continue
+        }
+      }
+
+      return {'orders': allOrders, 'items': allItems};
     } catch (e) {
       debugPrint('Error fetching all orders: $e');
-      return [];
+      rethrow;
     }
-  }
-
-  /// Parse OrderModel from RPC response
-  OrderModel _parseOrderFromResponse(Map<String, dynamic> response) {
-    return OrderModel()
-      ..orderId = response['id'] as int?
-      ..userId = response['user_id'] as String
-      ..status = response['status'] as String
-      ..totalPrice = response['total_price'] as double
-      ..address = response['address'] as String
-      ..synced = true
-      ..createdAt = response['created_at'] != null
-          ? DateTime.parse(response['created_at'] as String)
-          : null;
-  }
-
-  /// Parse OrderItemModel list from RPC response
-  List<OrderItemModel> _parseItemsFromResponse(Map<String, dynamic> response) {
-    final itemsList = <OrderItemModel>[];
-    final items = response['items'];
-
-    if (items is List) {
-      for (final item in items) {
-        final orderItem = OrderItemModel()
-          ..orderId = response['id'] as int
-          ..localOrderId =
-              0 // Will be updated when synced locally
-          ..orderItemId = item['item_id'] as int
-          ..itemId = item['item_id'] as int
-          ..quantity = item['quantity'] as int
-          ..price = item['price'] as double;
-
-        itemsList.add(orderItem);
-      }
-    }
-
-    return itemsList;
   }
 }
