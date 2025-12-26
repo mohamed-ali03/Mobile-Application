@@ -21,9 +21,12 @@ class MenuLocalService {
   /// 👀 watch menu items
   Stream<List<ItemModel>> watchMenu() {
     try {
-      return IsarService.isar.itemModels.where().sortByCategoryId().watch(
-        fireImmediately: true,
-      );
+      final items = IsarService.isar.itemModels
+          .where()
+          .sortByCategoryId()
+          .watch(fireImmediately: true);
+
+      return items;
     } catch (e) {
       debugPrint('Error watching menu: $e');
       rethrow;
@@ -90,9 +93,11 @@ class MenuLocalService {
   /// 👀 watch categories
   Stream<List<CategoryModel>> watchCategories() {
     try {
-      return IsarService.isar.categoryModels.where().watch(
+      final cats = IsarService.isar.categoryModels.where().watch(
         fireImmediately: true,
       );
+
+      return cats;
     } catch (e) {
       debugPrint('Error watching categories: $e');
       rethrow;

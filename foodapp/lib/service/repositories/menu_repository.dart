@@ -129,9 +129,7 @@ class MenuRepository {
   /// 🔄 sync menu from remote to local (offline-safe)
   Future<void> syncMenu() async {
     try {
-      final remoteMenu = await _remote.fetchMenu().timeout(
-        const Duration(seconds: 5),
-      );
+      final remoteMenu = await _remote.fetchMenu();
 
       final localItems = remoteMenu.map((e) {
         return ItemModel()
@@ -163,6 +161,14 @@ class MenuRepository {
     }
   }
 
+  Future<ItemModel?> getItem(int itemId) async {
+    try {
+      return await _local.getItemByItemId(itemId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   /// ➕ add menu item
   Future<void> addItem(ItemModel item) async {
     try {
@@ -176,7 +182,7 @@ class MenuRepository {
             ingreidents: item.ingreidents,
             available: item.available,
           )
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 10));
 
       item.itemId = res['id'];
       await _local.upsertItem(item);
@@ -200,7 +206,7 @@ class MenuRepository {
             ingreidents: item.ingreidents,
             available: item.available,
           )
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 10));
     } catch (e) {
       debugPrint('Failed to update item (id: ${item.itemId}): $e');
       rethrow;
@@ -210,7 +216,9 @@ class MenuRepository {
   /// 🗑️ delete menu item (listener will sync to local)
   Future<void> deleteItem(ItemModel item) async {
     try {
-      await _remote.deleteItem(item.itemId).timeout(const Duration(seconds: 5));
+      await _remote
+          .deleteItem(item.itemId)
+          .timeout(const Duration(seconds: 10));
     } catch (e) {
       debugPrint('Failed to delete item (id: ${item.itemId}): $e');
       rethrow;
@@ -231,7 +239,7 @@ class MenuRepository {
   Future<void> syncCat() async {
     try {
       final remote = await _remote.fetchCategories().timeout(
-        const Duration(seconds: 5),
+        const Duration(seconds: 10),
       );
 
       final categories = remote.map((e) {
@@ -254,7 +262,7 @@ class MenuRepository {
     try {
       final res = await _remote
           .addCategory(name: category.name, imageUrl: category.imageUrl)
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 10));
 
       category.categoryId = res['id'];
       category.createdAt = DateTime.parse(res['created_at']);
@@ -274,7 +282,7 @@ class MenuRepository {
             name: category.name,
             imageUrl: category.imageUrl,
           )
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 10));
     } catch (e) {
       debugPrint('Failed to update category (id: ${category.categoryId}): $e');
       rethrow;
@@ -286,7 +294,7 @@ class MenuRepository {
     try {
       await _remote
           .deleteCategory(category.categoryId)
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 10));
     } catch (e) {
       debugPrint('Failed to delete category (id: ${category.categoryId}): $e');
       rethrow;

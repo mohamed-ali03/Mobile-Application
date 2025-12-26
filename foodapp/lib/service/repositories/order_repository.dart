@@ -8,66 +8,20 @@ import 'package:foodapp/models/order%20model/order_model_parse.dart';
 import 'package:foodapp/service/isar_local/order_local_service.dart';
 import 'package:foodapp/service/supabase_remote/order_remote_service.dart';
 import 'package:foodapp/service/supabase_remote/supabase_service.dart';
+import 'package:isar/isar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OrderRepository {
   final _local = OrderLocalService();
   final _remote = OrderRemoteService();
-  PostgresChangeFilter? filter;
 
   // Store subscriptions for cleanup
   RealtimeChannel? _ordersChannel;
   RealtimeChannel? _orderItemsChannel;
 
-  /// 🔔 listen to changes in order table [insert, update, delete]
-  void listenToOrderChanges() {
-    try {
-      _ordersChannel = SupabaseService.client
-          .channel('public:orders')
-          .onPostgresChanges(
-            event: PostgresChangeEvent.insert,
-            schema: 'public',
-            table: 'orders',
-            filter: filter,
-            callback: (payload) {
-              fetchOrderByIdFromOnlineDB(
-                payload.newRecord['id'] as int,
-                // ignore: body_might_complete_normally_catch_error
-              ).catchError((e) {
-                debugPrint('Error syncing inserted order: $e');
-              });
-            },
-          )
-          .onPostgresChanges(
-            event: PostgresChangeEvent.update,
-            schema: 'public',
-            table: 'orders',
-            filter: filter,
-            callback: (payload) {
-              _syncOrderFromPayload(payload.newRecord).catchError((e) {
-                debugPrint('Error syncing updated order: $e');
-              });
-            },
-          )
-          .onPostgresChanges(
-            event: PostgresChangeEvent.delete,
-            schema: 'public',
-            table: 'orders',
-            filter: filter,
-            callback: (payload) {
-              _local.deleteOrder(payload.oldRecord['id'] as int).catchError((
-                e,
-              ) {
-                debugPrint('Error syncing deleted order: $e');
-              });
-            },
-          )
-          .subscribe();
-    } catch (e) {
-      debugPrint('Error setting up orders listener: $e');
-      rethrow;
-    }
-  }
+  // ====================================================================================================
+  //                                        Order Item
+  // ====================================================================================================
 
   /// 🔔 listen to changes in orderItem table [update, delete]
   void listenToOrderItemsChanges() {
@@ -89,11 +43,11 @@ class OrderRepository {
             schema: 'public',
             table: 'orderItems',
             callback: (payload) {
-              _local.deleteOrderItem(payload.oldRecord['id'] as int).catchError(
-                (e) {
-                  debugPrint('Error syncing deleted order item: $e');
-                },
-              );
+              _local
+                  .deleteOrderItem(orderItemId: payload.oldRecord['id'] as int)
+                  .catchError((e) {
+                    debugPrint('Error syncing deleted order item: $e');
+                  });
             },
           )
           .subscribe();
@@ -103,18 +57,163 @@ class OrderRepository {
     }
   }
 
-  /// 🧹 cleanup subscriptions
-  Future<void> dispose() async {
+  /// 🔄 sync order item from Realtime payload
+  Future<void> _syncOrderItemFromPayload(Map<String, dynamic> payload) async {
     try {
-      if (_ordersChannel != null) {
-        await SupabaseService.client.removeChannel(_ordersChannel!);
-      }
-      if (_orderItemsChannel != null) {
-        await SupabaseService.client.removeChannel(_orderItemsChannel!);
-      }
+      final orderItem = OrderItemModelJson.fromJson(payload);
+      orderItem.synced = true;
+      await _local.upsertOrderItem(orderItem);
     } catch (e) {
-      debugPrint('Error disposing OrderRepository: $e');
+      debugPrint('Error syncing order item from payload: $e');
       rethrow;
+    }
+  }
+
+  /// 👀 watch order items for user
+  Stream<List<OrderItemModel>> watchOrderItems() {
+    try {
+      return _local.watchOrderItems();
+    } catch (e) {
+      debugPrint('Error watching orders: $e');
+      rethrow;
+    }
+  }
+
+  /// add/update item
+  Future<void> upsertOrderItem(OrderItemModel orderitem) async {
+    try {
+      orderitem.synced = false;
+      await _local.upsertOrderItem(orderitem);
+    } catch (e) {
+      debugPrint('Error placing order: $e');
+      rethrow;
+    }
+  }
+
+  /// delete orderitem
+  Future<void> deleteOrderItem(Id id) async {
+    try {
+      await _local.deleteOrderItem(id: id);
+    } catch (e) {
+      debugPrint('Error Deleting local orderItem: $e');
+      rethrow;
+    }
+  }
+
+  /// get unsynced orderitems
+  Future<List<OrderItemModel>> getUnsyncedOrderItems() async {
+    return await _local.getUnsyncedOrderItems();
+  }
+
+  // ====================================================================================================
+  //                                           Order
+  // ====================================================================================================
+
+  /// 🔔 listen to changes in order table [insert, update, delete]
+  void listenToOrderChanges(String role) {
+    try {
+      _ordersChannel = SupabaseService.client
+          .channel('public:orders')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.insert,
+            schema: 'public',
+            table: 'orders',
+            callback: (payload) {
+              if (role != 'user') {
+                _fetchOrderByIdFromOnlineDB(
+                  payload.newRecord['id'] as int,
+                  // ignore: body_might_complete_normally_catch_error
+                ).catchError((e) {
+                  debugPrint('Error syncing inserted order: $e');
+                });
+              }
+            },
+          )
+          .onPostgresChanges(
+            event: PostgresChangeEvent.update,
+            schema: 'public',
+            table: 'orders',
+            callback: (payload) {
+              _syncOrderFromPayload(payload.newRecord).catchError((e) {
+                debugPrint('Error syncing updated order: $e');
+              });
+            },
+          )
+          .onPostgresChanges(
+            event: PostgresChangeEvent.delete,
+            schema: 'public',
+            table: 'orders',
+            callback: (payload) {
+              _local.deleteOrder(payload.oldRecord['id'] as int).catchError((
+                e,
+              ) {
+                debugPrint('Error syncing deleted order: $e');
+              });
+            },
+          )
+          .subscribe();
+    } catch (e) {
+      debugPrint('Error setting up orders listener: $e');
+      rethrow;
+    }
+  }
+
+  /// 👀 fetch order by ID from online DB
+  Future<Map<String, dynamic>> _fetchOrderByIdFromOnlineDB(int orderId) async {
+    try {
+      final result = await _remote.getOrderRPC(orderId);
+
+      final order = result['order'] as OrderModel?;
+      final items = result['items'] as List<OrderItemModel>;
+
+      if (order != null) {
+        order.synced = true;
+        for (final item in items) {
+          item.synced = true;
+        }
+        await _local.upsertOrder(order, items);
+      }
+
+      return result;
+    } catch (e) {
+      debugPrint('Error fetching order from online DB: $e');
+      rethrow;
+    }
+  }
+
+  /// 🔄 sync order from Realtime payload
+  Future<void> _syncOrderFromPayload(Map<String, dynamic> payload) async {
+    try {
+      final order = OrderModelJson.fromJson(payload);
+      order.synced = true;
+      await _local.upsertOrder(order, []);
+    } catch (e) {
+      debugPrint('Error syncing order from payload: $e');
+      rethrow;
+    }
+  }
+
+  /// 👀 watch orders for user
+  Stream<List<OrderModel>> watchOrders() {
+    try {
+      return _local.watchOrders();
+    } catch (e) {
+      debugPrint('Error watching orders: $e');
+      rethrow;
+    }
+  }
+
+  /// 📥 fetch all orders and update local database
+  Future<void> fetchAllOrders() async {
+    try {
+      final ordersData = await _remote.getAllOrdersRPC();
+
+      await _local.upsertOrders(
+        ordersData['orders'] as List<OrderModel>,
+        ordersData['items'] as List<OrderItemModel>,
+      );
+    } catch (e) {
+      debugPrint('Error fetching all orders: $e');
     }
   }
 
@@ -122,13 +221,17 @@ class OrderRepository {
   Future<void> placeOrder(OrderModel order, List<OrderItemModel> items) async {
     try {
       order.synced = false;
-      await _local.insertOrderWithItems(order, items);
+      for (var item in items) {
+        item.synced = false;
+      }
+      await _local.upsertOrder(order, items);
 
       try {
-        await _remote.createOrderRPC(order, items);
+        final response = await _remote.createOrderRPC(order, items);
+
+        await _local.upsertOrder(response['order'], response['items']);
       } catch (e) {
         debugPrint('Error placing order remotely (will retry): $e');
-        // Order stays unsynced, will retry in syncOrders()
       }
     } catch (e) {
       debugPrint('Error placing order: $e');
@@ -148,7 +251,6 @@ class OrderRepository {
           await _remote.createOrderRPC(order, items);
         } catch (e) {
           debugPrint('Error syncing order: $e');
-          // Continue with next order
         }
       }
     } catch (e) {
@@ -157,119 +259,17 @@ class OrderRepository {
     }
   }
 
-  /// 📥 fetch all orders and update local database
-  Future<void> fetchAllOrders() async {
+  /// 🧹 cleanup subscriptions
+  Future<void> dispose() async {
     try {
-      final ordersData = await _remote.getAllOrdersRPC();
-
-      await _local.upsertOrdersFromRemote(
-        ordersData['orders'] as List<OrderModel>,
-        ordersData['items'] as List<OrderItemModel>,
-      );
-    } catch (e) {
-      debugPrint('Error fetching all orders: $e');
-    }
-  }
-
-  /// 👀 fetch order by ID from online DB
-  Future<Map<String, dynamic>> fetchOrderByIdFromOnlineDB(int orderId) async {
-    try {
-      final result = await _remote.getOrderRPC(orderId);
-
-      final order = result['order'] as OrderModel?;
-      final items = result['items'] as List<OrderItemModel>;
-
-      if (order != null) {
-        order.synced = true;
-        await _local.insertOrderWithItems(order, items);
+      if (_ordersChannel != null) {
+        await SupabaseService.client.removeChannel(_ordersChannel!);
       }
-
-      return result;
+      if (_orderItemsChannel != null) {
+        await SupabaseService.client.removeChannel(_orderItemsChannel!);
+      }
     } catch (e) {
-      debugPrint('Error fetching order from online DB: $e');
-      rethrow;
-    }
-  }
-
-  /// 🔄 sync order from Realtime payload
-  Future<void> _syncOrderFromPayload(Map<String, dynamic> payload) async {
-    try {
-      final order = OrderModelJson.fromJson(payload);
-      order.synced = true;
-      await _local.updateOrder(order);
-    } catch (e) {
-      debugPrint('Error syncing order from payload: $e');
-      rethrow;
-    }
-  }
-
-  /// 🔄 sync order item from Realtime payload
-  Future<void> _syncOrderItemFromPayload(Map<String, dynamic> payload) async {
-    try {
-      final orderItem = OrderItemModelJson.fromJson(payload);
-      await _local.updateOrderItem(orderItem);
-    } catch (e) {
-      debugPrint('Error syncing order item from payload: $e');
-      rethrow;
-    }
-  }
-
-  /// ✏️ update order [status, total_price, address]
-  Future<void> updateOrder(
-    int orderId, {
-    String? status,
-    double? totalPrice,
-    String? address,
-  }) async {
-    try {
-      await _remote.updateOrder(
-        orderId,
-        status: status,
-        totalPrice: totalPrice,
-        address: address,
-      );
-    } catch (e) {
-      debugPrint('Error updating order: $e');
-      rethrow;
-    }
-  }
-
-  /// ✏️ update order item [quantity]
-  Future<void> updateOrderItem(int orderItemId, {int? quantity}) async {
-    try {
-      await _remote.updateOrderItem(orderItemId, quantity: quantity);
-    } catch (e) {
-      debugPrint('Error updating order item: $e');
-      rethrow;
-    }
-  }
-
-  /// 🗑️ delete order
-  Future<void> deleteOrder(int orderId) async {
-    try {
-      await _remote.deleteOrder(orderId);
-    } catch (e) {
-      debugPrint('Error deleting order: $e');
-      rethrow;
-    }
-  }
-
-  /// 🗑️ delete order item
-  Future<void> deleteOrderItem(int orderItemId) async {
-    try {
-      await _remote.deleteOrderItem(orderItemId);
-    } catch (e) {
-      debugPrint('Error deleting order item: $e');
-      rethrow;
-    }
-  }
-
-  /// 👀 watch orders for user
-  Stream<List<Map<String, dynamic>>> watchOrders(String userId, String role) {
-    try {
-      return _local.watchOrders(userId, role);
-    } catch (e) {
-      debugPrint('Error watching orders: $e');
+      debugPrint('Error disposing OrderRepository: $e');
       rethrow;
     }
   }

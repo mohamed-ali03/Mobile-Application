@@ -6,11 +6,12 @@ part 'order_item_model.g.dart';
 class OrderItemModel {
   Id id = Isar.autoIncrement;
 
-  late int? orderId; // remote order id (after sync)
-  late int? localOrderId; // 🔑 Isar OrderModel.id
-  late int orderItemId;
+  int? orderId; // remote order id (after sync)
+  int? localOrderId; // 🔑 Isar OrderModel.id
+  int? orderItemId;
 
   late int itemId; // menu item remote id
   late int quantity;
   late double price;
+  late bool synced;
 }

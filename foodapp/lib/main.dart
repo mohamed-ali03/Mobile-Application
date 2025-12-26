@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
-import 'package:foodapp/screens/admin/menu_screen.dart';
-import 'package:foodapp/screens/admin/admin_home_screen.dart';
+import 'package:foodapp/screens/admin/admin_menu_screen.dart';
 import 'package:foodapp/screens/common/login_screen.dart';
 import 'package:foodapp/screens/staff/staff_home_screen.dart';
+import 'package:foodapp/screens/user/user_cart_screen.dart';
+import 'package:foodapp/screens/user/user_home_screen.dart';
 import 'package:foodapp/service/isar_local/isar_service.dart';
 import 'package:foodapp/service/supabase_remote/supabase_service.dart';
 import 'package:provider/provider.dart';
@@ -25,9 +26,9 @@ void main() async {
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => MenuProvider()),
         ChangeNotifierProxyProvider<AuthProvider, OrderProvider>(
-          create: (context) => OrderProvider(null),
+          create: (context) => OrderProvider('user'),
           update: (context, authProvider, orderProvider) {
-            return OrderProvider(authProvider.user);
+            return OrderProvider(authProvider.user!.role);
           },
         ),
       ],
@@ -45,6 +46,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Food App',
       theme: ThemeData(useMaterial3: true, primarySwatch: Colors.blue),
+      routes: {
+        '/userHomeScreen': (context) => UserHomeScreen(),
+        '/userCartScreen': (context) => UserCartScreen(),
+      },
       home: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
           // Loading state
@@ -70,12 +75,12 @@ class MyApp extends StatelessWidget {
   Widget _buildHomeScreen(String role) {
     switch (role.toLowerCase()) {
       case 'admin':
-        return const AdminHomeScreen();
+        return const AdminMenuScreen();
       case 'staff':
         return const StaffHomeScreen();
       case 'user':
       default:
-        return const MenuScreen();
+        return const UserHomeScreen();
     }
   }
 }

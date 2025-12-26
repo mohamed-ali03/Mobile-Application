@@ -36,7 +36,14 @@ class OrderRemoteService {
           )
           .single();
 
-      return response;
+      order.orderId = response['id'];
+      order.synced = true;
+      for (int i = 0; i < items.length; i++) {
+        items[i].orderItemId = response['items'][i]['id'];
+        items[i].orderId = response['id'];
+        items[i].synced = true;
+      }
+      return {'order': order, 'items': items};
     } catch (e) {
       debugPrint('Error creating order: $e');
       rethrow;

@@ -5,139 +5,53 @@ import 'package:foodapp/service/isar_local/isar_service.dart';
 import 'package:isar/isar.dart';
 
 class OrderLocalService {
-  /// 📝 upsert orders and items from remote
-  Future<void> upsertOrdersFromRemote(
-    List<OrderModel> orders,
-    List<OrderItemModel> items,
-  ) async {
+  // =================================================================================================
+  //                                         Order Item CRUD
+  // =================================================================================================
+
+  /// 🔍 watch all order items
+  Stream<List<OrderItemModel>> watchOrderItems() {
+    return IsarService.isar.orderItemModels.where().watch(
+      fireImmediately: true,
+    );
+  }
+
+  /// get unsynced order items
+  Future<List<OrderItemModel>> getUnsyncedOrderItems() async {
+    return await IsarService.isar.orderItemModels
+        .filter()
+        .syncedEqualTo(false)
+        .findAll();
+  }
+
+  /// create/Update order item
+  Future<void> upsertOrderItem(OrderItemModel orderItem) async {
     try {
       await IsarService.isar.writeTxn(() async {
-        for (final order in orders) {
-          order.synced = true;
-          final localOrderId = await _addOrUpdateOrderOnly(order);
-
-          final orderItems = items
-              .where((item) => item.orderId == order.orderId)
-              .toList();
-
-          for (final item in orderItems) {
-            item.localOrderId = localOrderId;
-            await _addOrUpdateOrderItemOnly(item);
-          }
+        if (orderItem.orderItemId == null) {
+          await IsarService.isar.orderItemModels.put(orderItem);
+        } else {
+          await _upsertOrderItem(orderItem);
         }
       });
     } catch (e) {
-      debugPrint('Error upserting orders from remote: $e');
+      debugPrint(e.toString());
       rethrow;
     }
   }
 
-  /// ➕ insert order + items atomically
-  Future<int> insertOrderWithItems(
-    OrderModel order,
-    List<OrderItemModel> items,
-  ) async {
-    try {
-      late int orderLocalId;
-
-      await IsarService.isar.writeTxn(() async {
-        orderLocalId = await _addOrUpdateOrderOnly(order);
-
-        for (final item in items) {
-          item.localOrderId = orderLocalId;
-          await _addOrUpdateOrderItemOnly(item);
-        }
-      });
-
-      return orderLocalId;
-    } catch (e) {
-      debugPrint('Error inserting order with items: $e');
-      rethrow;
-    }
-  }
-
-  /// ➕ insert or update order only (no items)
-  Future<int> _addOrUpdateOrderOnly(OrderModel order) async {
-    final existing = await IsarService.isar.orderModels
-        .filter()
-        .orderIdEqualTo(order.orderId)
-        .findFirst();
-
-    if (existing != null) {
-      order.id = existing.id;
-    }
-
-    return await IsarService.isar.orderModels.put(order);
-  }
-
-  /// ✏️ update order
-  Future<void> updateOrder(OrderModel order) async {
+  /// 🗑️ delete a single order item using remote id
+  Future<void> deleteOrderItem({Id? id, int? orderItemId}) async {
     try {
       await IsarService.isar.writeTxn(() async {
-        await _addOrUpdateOrderOnly(order);
-      });
-    } catch (e) {
-      debugPrint('Error updating order: $e');
-      rethrow;
-    }
-  }
-
-  /// ➕ insert or update order item only
-  Future<int> _addOrUpdateOrderItemOnly(OrderItemModel orderItem) async {
-    final existing = await IsarService.isar.orderItemModels
-        .filter()
-        .orderItemIdEqualTo(orderItem.orderItemId)
-        .findFirst();
-
-    if (existing != null) {
-      orderItem.id = existing.id;
-    }
-
-    return await IsarService.isar.orderItemModels.put(orderItem);
-  }
-
-  /// ✏️ update order item
-  Future<void> updateOrderItem(OrderItemModel orderItem) async {
-    try {
-      await IsarService.isar.writeTxn(() async {
-        await _addOrUpdateOrderItemOnly(orderItem);
-      });
-    } catch (e) {
-      debugPrint('Error updating order item: $e');
-      rethrow;
-    }
-  }
-
-  /// 🗑️ delete entire order + all its items
-  Future<void> deleteOrder(int remoteId) async {
-    try {
-      await IsarService.isar.writeTxn(() async {
-        final existing = await IsarService.isar.orderModels
-            .filter()
-            .orderIdEqualTo(remoteId)
-            .findFirst();
-
-        if (existing != null) {
-          // Delete items first
+        if (id != null) {
+          await IsarService.isar.orderItemModels.delete(id);
+        } else if (orderItemId != null) {
           await IsarService.isar.orderItemModels
               .filter()
-              .localOrderIdEqualTo(existing.id)
-              .deleteAll();
-          // Then delete the order
-          await IsarService.isar.orderModels.delete(existing.id);
+              .orderItemIdEqualTo(orderItemId)
+              .deleteFirst();
         }
-      });
-    } catch (e) {
-      debugPrint('Error deleting order: $e');
-      rethrow;
-    }
-  }
-
-  /// 🗑️ delete a single order item
-  Future<void> deleteOrderItem(int itemId) async {
-    try {
-      await IsarService.isar.writeTxn(() async {
-        await IsarService.isar.orderItemModels.delete(itemId);
       });
     } catch (e) {
       debugPrint('Error deleting order item: $e');
@@ -145,44 +59,33 @@ class OrderLocalService {
     }
   }
 
-  /// 👀 UI: order list with items
-  Stream<List<Map<String, dynamic>>> watchOrders(
-    String userId,
-    String role,
-  ) async* {
+  /// ➕ insert or update order item
+  Future<int> _upsertOrderItem(OrderItemModel orderItem) async {
     try {
-      late final Stream<List<OrderModel>> orderStream;
-      if (role == 'user') {
-        orderStream = IsarService.isar.orderModels
-            .filter()
-            .userIdEqualTo(userId)
-            .sortByCreatedAtDesc()
-            .watch(fireImmediately: true);
-      } else {
-        orderStream = IsarService.isar.orderModels
-            .where()
-            .sortByCreatedAtDesc()
-            .watch(fireImmediately: true);
+      final existing = await IsarService.isar.orderItemModels
+          .filter()
+          .orderItemIdEqualTo(orderItem.orderItemId)
+          .findFirst();
+
+      if (existing != null) {
+        orderItem.id = existing.id;
       }
+      return await IsarService.isar.orderItemModels.put(orderItem);
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-      await for (final orders in orderStream) {
-        if (orders.isEmpty) {
-          yield [];
-          continue;
-        }
-        final result = <Map<String, dynamic>>[];
+  // =================================================================================================
+  //                                          Order CRUD
+  // =================================================================================================
 
-        for (final order in orders) {
-          final items = await IsarService.isar.orderItemModels
-              .filter()
-              .localOrderIdEqualTo(order.id)
-              .findAll();
-
-          result.add({'order': order, 'items': items});
-        }
-
-        yield result;
-      }
+  /// 👀 UI: order list with items
+  Stream<List<OrderModel>> watchOrders() {
+    try {
+      return IsarService.isar.orderModels.where().sortByCreatedAtDesc().watch(
+        fireImmediately: true,
+      );
     } catch (e) {
       debugPrint('Error watching orders: $e');
       rethrow;
@@ -247,5 +150,95 @@ class OrderLocalService {
       debugPrint('Error marking order synced: $e');
       rethrow;
     }
+  }
+
+  /// ➕ upsert order
+  Future<int> upsertOrder(OrderModel order, List<OrderItemModel> items) async {
+    try {
+      late int orderLocalId;
+
+      await IsarService.isar.writeTxn(() async {
+        orderLocalId = order.orderId == null
+            ? await IsarService.isar.orderModels.put(order)
+            : await _upsertOrder(order);
+
+        for (final item in items) {
+          item.localOrderId = orderLocalId;
+          await _upsertOrderItem(item);
+        }
+      });
+
+      return orderLocalId;
+    } catch (e) {
+      debugPrint('Error inserting order with items: $e');
+      rethrow;
+    }
+  }
+
+  /// 📝 upsert orders and items from remote
+  Future<void> upsertOrders(
+    List<OrderModel> orders,
+    List<OrderItemModel> items,
+  ) async {
+    try {
+      await IsarService.isar.writeTxn(() async {
+        await IsarService.isar.orderItemModels.clear();
+        await IsarService.isar.orderModels.clear();
+        for (final order in orders) {
+          final localOrderId = await _upsertOrder(order);
+
+          final orderItems = items
+              .where((item) => item.orderId == order.orderId)
+              .toList();
+
+          for (final item in orderItems) {
+            item.localOrderId = localOrderId;
+            await _upsertOrderItem(item);
+          }
+        }
+      });
+    } catch (e) {
+      debugPrint('Error upserting orders from remote: $e');
+      rethrow;
+    }
+  }
+
+  /// 🗑️ delete entire order + all its items
+  Future<void> deleteOrder(int remoteId) async {
+    try {
+      await IsarService.isar.writeTxn(() async {
+        final existing = await IsarService.isar.orderModels
+            .filter()
+            .orderIdEqualTo(remoteId)
+            .findFirst();
+
+        if (existing != null) {
+          // Delete items first
+          await IsarService.isar.orderItemModels
+              .filter()
+              .localOrderIdEqualTo(existing.id)
+              .deleteAll();
+          // Then delete the order
+          await IsarService.isar.orderModels.delete(existing.id);
+        }
+      });
+    } catch (e) {
+      debugPrint('Error deleting order: $e');
+      rethrow;
+    }
+  }
+
+  /// ➕ insert or update order only (no items)
+  Future<int> _upsertOrder(OrderModel order) async {
+    final existing = await IsarService.isar.orderModels
+        .filter()
+        .createdAtEqualTo(order.createdAt)
+        .findFirst();
+
+    if (existing != null) {
+      order.id = existing.id;
+    }
+
+    return await IsarService.isar.orderModels.put(order);
   }
 }

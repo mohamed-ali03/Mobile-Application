@@ -46,6 +46,11 @@ const OrderItemModelSchema = CollectionSchema(
       id: 5,
       name: r'quantity',
       type: IsarType.long,
+    ),
+    r'synced': PropertySchema(
+      id: 6,
+      name: r'synced',
+      type: IsarType.bool,
     )
   },
   estimateSize: _orderItemModelEstimateSize,
@@ -83,6 +88,7 @@ void _orderItemModelSerialize(
   writer.writeLong(offsets[3], object.orderItemId);
   writer.writeDouble(offsets[4], object.price);
   writer.writeLong(offsets[5], object.quantity);
+  writer.writeBool(offsets[6], object.synced);
 }
 
 OrderItemModel _orderItemModelDeserialize(
@@ -96,9 +102,10 @@ OrderItemModel _orderItemModelDeserialize(
   object.itemId = reader.readLong(offsets[0]);
   object.localOrderId = reader.readLongOrNull(offsets[1]);
   object.orderId = reader.readLongOrNull(offsets[2]);
-  object.orderItemId = reader.readLong(offsets[3]);
+  object.orderItemId = reader.readLongOrNull(offsets[3]);
   object.price = reader.readDouble(offsets[4]);
   object.quantity = reader.readLong(offsets[5]);
+  object.synced = reader.readBool(offsets[6]);
   return object;
 }
 
@@ -116,11 +123,13 @@ P _orderItemModelDeserializeProp<P>(
     case 2:
       return (reader.readLongOrNull(offset)) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 4:
       return (reader.readDouble(offset)) as P;
     case 5:
       return (reader.readLong(offset)) as P;
+    case 6:
+      return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -482,7 +491,25 @@ extension OrderItemModelQueryFilter
   }
 
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
-      orderItemIdEqualTo(int value) {
+      orderItemIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'orderItemId',
+      ));
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      orderItemIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'orderItemId',
+      ));
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      orderItemIdEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'orderItemId',
@@ -493,7 +520,7 @@ extension OrderItemModelQueryFilter
 
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
       orderItemIdGreaterThan(
-    int value, {
+    int? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -507,7 +534,7 @@ extension OrderItemModelQueryFilter
 
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
       orderItemIdLessThan(
-    int value, {
+    int? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -521,8 +548,8 @@ extension OrderItemModelQueryFilter
 
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
       orderItemIdBetween(
-    int lower,
-    int upper, {
+    int? lower,
+    int? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -658,6 +685,16 @@ extension OrderItemModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      syncedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'synced',
+        value: value,
+      ));
+    });
+  }
 }
 
 extension OrderItemModelQueryObject
@@ -744,6 +781,19 @@ extension OrderItemModelQuerySortBy
       sortByQuantityDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'quantity', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterSortBy> sortBySynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'synced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterSortBy>
+      sortBySyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'synced', Sort.desc);
     });
   }
 }
@@ -840,6 +890,19 @@ extension OrderItemModelQuerySortThenBy
       return query.addSortBy(r'quantity', Sort.desc);
     });
   }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterSortBy> thenBySynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'synced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterSortBy>
+      thenBySyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'synced', Sort.desc);
+    });
+  }
 }
 
 extension OrderItemModelQueryWhereDistinct
@@ -881,6 +944,12 @@ extension OrderItemModelQueryWhereDistinct
       return query.addDistinctBy(r'quantity');
     });
   }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QDistinct> distinctBySynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'synced');
+    });
+  }
 }
 
 extension OrderItemModelQueryProperty
@@ -909,7 +978,7 @@ extension OrderItemModelQueryProperty
     });
   }
 
-  QueryBuilder<OrderItemModel, int, QQueryOperations> orderItemIdProperty() {
+  QueryBuilder<OrderItemModel, int?, QQueryOperations> orderItemIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'orderItemId');
     });
@@ -924,6 +993,12 @@ extension OrderItemModelQueryProperty
   QueryBuilder<OrderItemModel, int, QQueryOperations> quantityProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'quantity');
+    });
+  }
+
+  QueryBuilder<OrderItemModel, bool, QQueryOperations> syncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'synced');
     });
   }
 }

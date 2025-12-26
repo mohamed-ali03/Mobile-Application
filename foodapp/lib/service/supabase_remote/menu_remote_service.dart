@@ -4,14 +4,16 @@ import 'package:foodapp/service/supabase_remote/supabase_service.dart';
 class MenuRemoteService {
   /// 📥 fetch available items
   Future<List<Map<String, dynamic>>> fetchMenu({
-    bool onlyAvailable = true,
+    bool onlyAvailable = false,
   }) async {
     try {
-      final res = await SupabaseService.client
-          .from('menu_items')
-          .select()
-          .eq('available', onlyAvailable);
+      var query = SupabaseService.client.from('menu_items').select();
 
+      if (onlyAvailable) {
+        query = query.eq('available', true);
+      }
+
+      final res = await query;
       return List<Map<String, dynamic>>.from(res);
     } catch (e) {
       debugPrint('Error fetching menu: $e');

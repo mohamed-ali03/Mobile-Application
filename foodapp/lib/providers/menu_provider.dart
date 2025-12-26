@@ -14,9 +14,8 @@ class MenuProvider extends ChangeNotifier {
   Stream<List<CategoryModel>> get categoriesStream => _repo.watchCategories();
 
   MenuProvider() {
-    sync();
-    _repo.listenToChangesInItemsTable();
     _repo.listenToChangesInCategoryTable();
+    _repo.listenToChangesInItemsTable();
   }
 
   /// 🔄 sync categories and menu items
@@ -25,14 +24,22 @@ class MenuProvider extends ChangeNotifier {
       _setLoading(true);
       _setError(null);
 
-      await _repo.syncMenu();
       await _repo.syncCat();
+      await _repo.syncMenu();
 
       _setLoading(false);
     } catch (e) {
       _setError('Failed to sync menu: $e');
       debugPrint('Error syncing: $e');
       _setLoading(false);
+    }
+  }
+
+  Future<ItemModel?> getItem(int itemId) async {
+    try {
+      return await _repo.getItem(itemId);
+    } catch (e) {
+      return null;
     }
   }
 
