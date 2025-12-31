@@ -20,6 +20,7 @@ extension OrderModelJson on OrderModel {
       ..status = json['status'] as String
       ..totalPrice = (json['total_price'] as num).toDouble()
       ..address = json['address'] as String
+      ..synced = true
       ..createdAt = json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null;

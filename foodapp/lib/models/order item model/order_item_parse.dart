@@ -19,6 +19,7 @@ extension OrderItemModelJson on OrderItemModel {
       ..orderId = json['order_id']
       ..itemId = json['item_id']
       ..quantity = json['quantity']
-      ..price = json['price'];
+      ..price = json['price']
+      ..synced = true;
   }
 }

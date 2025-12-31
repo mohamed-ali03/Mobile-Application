@@ -90,10 +90,20 @@ class OrderRepository {
     }
   }
 
-  /// delete orderitem
-  Future<void> deleteOrderItem(Id id) async {
+  /// update list of order items
+  Future<void> updateOrdersItem(List<OrderItemModel> orderitems) async {
     try {
-      await _local.deleteOrderItem(id: id);
+      await _local.updateOrdersItem(orderitems);
+    } catch (e) {
+      debugPrint('Error placing order: $e');
+      rethrow;
+    }
+  }
+
+  /// delete orderitem
+  Future<void> deleteOrderItem({Id? id, int? itemId}) async {
+    try {
+      await _local.deleteOrderItem(id: id, itemId: itemId);
     } catch (e) {
       debugPrint('Error Deleting local orderItem: $e');
       rethrow;
@@ -239,6 +249,25 @@ class OrderRepository {
     }
   }
 
+  Future<void> updateOrder(int orderId, String status) async {
+    try {
+      await _remote.updateOrder(orderId, status: status);
+    } catch (e) {
+      debugPrint('Error Deleting order: $e');
+      rethrow;
+    }
+  }
+
+  /// delete Order
+  Future<void> deleteOrder(int orderId) async {
+    try {
+      await _remote.deleteOrder(orderId);
+    } catch (e) {
+      debugPrint('Error Deleting order: $e');
+      rethrow;
+    }
+  }
+
   /// 🔄 retry unsynced orders
   Future<void> syncOrders() async {
     try {
@@ -257,6 +286,12 @@ class OrderRepository {
       debugPrint('Error syncing orders: $e');
       rethrow;
     }
+  }
+
+  Future<void> clearLocalMenu() async {
+    try {
+      _local.clearMenu();
+    } catch (_) {}
   }
 
   /// 🧹 cleanup subscriptions

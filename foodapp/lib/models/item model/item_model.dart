@@ -14,5 +14,6 @@ class ItemModel {
   late String imageUrl;
   late String ingreidents;
   late bool available = false;
+  late bool selected = true;
   late DateTime? createdAt;
 }

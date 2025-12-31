@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
-import 'package:foodapp/providers/menu_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
-import 'package:foodapp/screens/user/widgets/quantity_control.dart';
+import 'package:foodapp/screens/user/widgets/order_item_card.dart';
 import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class UnsyncedItems extends StatefulWidget {
-  final OrderProvider orderProvider;
+  List<OrderItemModel> orderItems;
 
-  const UnsyncedItems({super.key, required this.orderProvider});
+  UnsyncedItems({super.key, required this.orderItems});
 
   @override
   State<UnsyncedItems> createState() => _UnsyncedItemsState();
@@ -20,235 +19,188 @@ class UnsyncedItems extends StatefulWidget {
 class _UnsyncedItemsState extends State<UnsyncedItems> {
   late ValueNotifier<double> totalPrice = ValueNotifier(0);
 
+  bool isChanged = false;
+
+  @override
+  void dispose() {
+    if (isChanged) {
+      context.read<OrderProvider>().updateOrderItemsLocally(widget.orderItems);
+    }
+    totalPrice.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: widget.orderProvider.orderItemsSub,
-      builder: (context, asyncSnapshot) {
-        if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        if (asyncSnapshot.hasError) {
-          return Center(
-            child: Text('Error Occured during fetching order items'),
-          );
-        }
-
-        final unsyncedItems = asyncSnapshot.data
-            ?.where((item) => item.synced == false)
-            .toList();
-
-        if (unsyncedItems!.isEmpty) {
-          return Center(
-            child: Text(
-              'All order syncronoused. Do you want to order something?',
+    _calculateTotal();
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            itemCount: widget.orderItems.length,
+            itemBuilder: (context, index) => OrderItemCard(
+              orderItem: widget.orderItems[index],
+              onChangeQty: (qty) {
+                widget.orderItems[index].quantity = qty;
+                _calculateTotal();
+                isChanged = true;
+              },
+              onDeleteOrderItem: () => _onDeleteItem(index, context),
             ),
-          );
-        }
-
-        double temp = 0;
-        for (final item in unsyncedItems) {
-          temp += item.price * item.quantity;
-        }
-        totalPrice.value = temp;
-
-        return Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: unsyncedItems.length,
-                itemBuilder: (context, index) => _OrderItemCard(
-                  orderItemModel: unsyncedItems[index],
-                  onChangeQty: (qty) {
-                    unsyncedItems[index].quantity = qty;
-                    double temp = 0;
-                    for (final item in unsyncedItems) {
-                      temp += item.price * item.quantity;
-                    }
-                    totalPrice.value = temp;
-                  },
-                  onDeleteOrderItem: () => widget.orderProvider
-                      .deleteOrderItemLocally(unsyncedItems[index].id),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsetsGeometry.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                child: Row(
-                  children: [
-                    ValueListenableBuilder(
-                      valueListenable: totalPrice,
-                      builder: (context, value, child) {
-                        return Expanded(
-                          child: Text('Total Price : $value EGP'),
-                        );
-                      },
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        OrderModel order = OrderModel()
-                          ..address = 'Alexandria'
-                          ..createdAt = DateTime.now()
-                          ..status = 'pending'
-                          ..totalPrice = totalPrice.value
-                          ..userId = context.read<AuthProvider>().user!.authID;
-                        await widget.orderProvider.placeOrder(
-                          order,
-                          unsyncedItems,
-                        );
-                      },
-                      child: Text('Checkout'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+        _buildCheckoutSection(),
+      ],
     );
   }
-}
 
-class _OrderItemCard extends StatefulWidget {
-  final OrderItemModel orderItemModel;
-  final Function(int) onChangeQty;
-  final Function() onDeleteOrderItem;
-  const _OrderItemCard({
-    required this.orderItemModel,
-    required this.onChangeQty,
-    required this.onDeleteOrderItem,
-  });
-
-  @override
-  State<_OrderItemCard> createState() => _OrderItemCardState();
-}
-
-class _OrderItemCardState extends State<_OrderItemCard> {
-  late Future<ItemModel?> item;
-
-  @override
-  void initState() {
-    getItem();
-    super.initState();
+  void _calculateTotal() {
+    double temp = 0;
+    for (final item in widget.orderItems) {
+      temp += item.price * item.quantity;
+    }
+    totalPrice.value = temp;
   }
 
-  void getItem() async {
-    item = context.read<MenuProvider>().getItem(widget.orderItemModel.itemId);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: item,
-      builder: (context, asyncSnapshot) {
-        if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        if (asyncSnapshot.hasError) {
-          return Center(child: Text('Error in Fetching item'));
-        }
-
-        final item = asyncSnapshot.data;
-
-        return Container(
-          margin: EdgeInsets.all(10),
-          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(8),
-            border: BoxBorder.all(color: Colors.white),
+  void _onDeleteItem(int index, BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Order'),
+        content: Text('Are you sure you want to delete this item?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
           ),
-          child: Row(
-            children: [
-              _CartItemImage(imageUrl: item!.imageUrl),
-              const SizedBox(width: 12),
-              _CartItemDetails(name: item.name, price: item.price),
-              QuantityControl(
-                quantity: widget.orderItemModel.quantity,
-                onChangeQuantity: widget.onChangeQty,
-              ),
-              const SizedBox(width: 8),
-              _DeleteButton(onPressed: widget.onDeleteOrderItem),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-// ============================================================================
-// Cart Item Image
-// ============================================================================
-class _CartItemImage extends StatelessWidget {
-  final String imageUrl;
-
-  const _CartItemImage({required this.imageUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover),
-    );
-  }
-}
-
-// ============================================================================
-// Cart Item Details
-// ============================================================================
-class _CartItemDetails extends StatelessWidget {
-  final String name;
-  final double price;
-
-  const _CartItemDetails({required this.name, required this.price});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            name,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '$price EGP',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.green,
-            ),
+          TextButton(
+            onPressed: () {
+              context.read<OrderProvider>().deleteOrderItemLocally(
+                id: widget.orderItems[index].id,
+              );
+              Navigator.pop(context);
+            },
+            child: Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
-}
 
-// ============================================================================
-// Delete Button
-// ============================================================================
-class _DeleteButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  void _handleCheckout() async {
+    final authProvider = context.read<AuthProvider>();
 
-  const _DeleteButton({required this.onPressed});
+    if (authProvider.user == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Please login to continue')));
+      return;
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.delete_outline, color: Colors.red),
-      onPressed: onPressed,
-      splashRadius: 24,
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Checkout'),
+        content: Text('Are you sure you want to checkout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              OrderModel order = OrderModel()
+                ..address = 'Alexandria'
+                ..createdAt = DateTime.now()
+                ..status = 'pending'
+                ..totalPrice = totalPrice.value
+                ..userId = authProvider.user!.authID;
+
+              await context.read<OrderProvider>().placeOrder(
+                order,
+                widget.orderItems,
+              );
+              if (!context.mounted) return;
+              Navigator.pop(context);
+            },
+            child: Text('Confirm', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCheckoutSection() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.grey[300]!, blurRadius: 4)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Order Summary',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Items: ${widget.orderItems.length}',
+                    style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                  ),
+                  SizedBox(height: 8),
+                  ValueListenableBuilder(
+                    valueListenable: totalPrice,
+                    builder: (context, value, child) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Total',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '${value.toStringAsFixed(2)} EGP',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+              ElevatedButton.icon(
+                onPressed: () => _handleCheckout(),
+                icon: Icon(Icons.shopping_bag_outlined),
+                label: Text('Checkout'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

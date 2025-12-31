@@ -28,10 +28,20 @@ class OrderLocalService {
   Future<void> upsertOrderItem(OrderItemModel orderItem) async {
     try {
       await IsarService.isar.writeTxn(() async {
-        if (orderItem.orderItemId == null) {
+        await _upsertOrderItem(orderItem);
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+      rethrow;
+    }
+  }
+
+  /// Update list of order item
+  Future<void> updateOrdersItem(List<OrderItemModel> orderItems) async {
+    try {
+      await IsarService.isar.writeTxn(() async {
+        for (final orderItem in orderItems) {
           await IsarService.isar.orderItemModels.put(orderItem);
-        } else {
-          await _upsertOrderItem(orderItem);
         }
       });
     } catch (e) {
@@ -41,7 +51,7 @@ class OrderLocalService {
   }
 
   /// 🗑️ delete a single order item using remote id
-  Future<void> deleteOrderItem({Id? id, int? orderItemId}) async {
+  Future<void> deleteOrderItem({Id? id, int? orderItemId, int? itemId}) async {
     try {
       await IsarService.isar.writeTxn(() async {
         if (id != null) {
@@ -50,6 +60,11 @@ class OrderLocalService {
           await IsarService.isar.orderItemModels
               .filter()
               .orderItemIdEqualTo(orderItemId)
+              .deleteFirst();
+        } else if (itemId != null) {
+          await IsarService.isar.orderItemModels
+              .filter()
+              .itemIdEqualTo(itemId)
               .deleteFirst();
         }
       });
@@ -62,15 +77,28 @@ class OrderLocalService {
   /// ➕ insert or update order item
   Future<int> _upsertOrderItem(OrderItemModel orderItem) async {
     try {
-      final existing = await IsarService.isar.orderItemModels
-          .filter()
-          .orderItemIdEqualTo(orderItem.orderItemId)
-          .findFirst();
+      if (orderItem.orderItemId == null) {
+        final existing = await IsarService.isar.orderItemModels
+            .filter()
+            .itemIdEqualTo(orderItem.itemId)
+            .findFirst();
+        if (existing != null) {
+          orderItem.id = existing.id;
+        }
+        return await IsarService.isar.orderItemModels.put(orderItem);
+      } else {
+        final existing = await IsarService.isar.orderItemModels
+            .filter()
+            .orderItemIdEqualTo(orderItem.orderItemId)
+            .findFirst();
 
-      if (existing != null) {
-        orderItem.id = existing.id;
+        if (existing != null) {
+          orderItem.id = existing.id;
+          return await IsarService.isar.orderItemModels.put(orderItem);
+        } else {
+          return await IsarService.isar.orderItemModels.put(orderItem);
+        }
       }
-      return await IsarService.isar.orderItemModels.put(orderItem);
     } catch (e) {
       rethrow;
     }
@@ -158,9 +186,7 @@ class OrderLocalService {
       late int orderLocalId;
 
       await IsarService.isar.writeTxn(() async {
-        orderLocalId = order.orderId == null
-            ? await IsarService.isar.orderModels.put(order)
-            : await _upsertOrder(order);
+        orderLocalId = await _upsertOrder(order);
 
         for (final item in items) {
           item.localOrderId = orderLocalId;
@@ -182,8 +208,6 @@ class OrderLocalService {
   ) async {
     try {
       await IsarService.isar.writeTxn(() async {
-        await IsarService.isar.orderItemModels.clear();
-        await IsarService.isar.orderModels.clear();
         for (final order in orders) {
           final localOrderId = await _upsertOrder(order);
 
@@ -228,17 +252,31 @@ class OrderLocalService {
     }
   }
 
+  Future<void> clearMenu() async {
+    try {
+      await IsarService.isar.writeTxn(() async {
+        await IsarService.isar.orderItemModels.clear();
+        await IsarService.isar.orderModels.clear();
+      });
+    } catch (_) {}
+  }
+
   /// ➕ insert or update order only (no items)
   Future<int> _upsertOrder(OrderModel order) async {
-    final existing = await IsarService.isar.orderModels
-        .filter()
-        .createdAtEqualTo(order.createdAt)
-        .findFirst();
+    if (order.orderId == null) {
+      return await IsarService.isar.orderModels.put(order);
+    } else {
+      final existing = await IsarService.isar.orderModels
+          .filter()
+          .orderIdEqualTo(order.orderId)
+          .findFirst();
 
-    if (existing != null) {
-      order.id = existing.id;
+      if (existing != null) {
+        order.id = existing.id;
+        return await IsarService.isar.orderModels.put(order);
+      } else {
+        return await IsarService.isar.orderModels.put(order);
+      }
     }
-
-    return await IsarService.isar.orderModels.put(order);
   }
 }

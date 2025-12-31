@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
+import 'package:foodapp/screens/admin/admin_home_screen.dart';
 import 'package:foodapp/screens/admin/admin_menu_screen.dart';
+import 'package:foodapp/screens/admin/admin_order_screen.dart';
 import 'package:foodapp/screens/common/login_screen.dart';
 import 'package:foodapp/screens/staff/staff_home_screen.dart';
+import 'package:foodapp/screens/common/account_screen.dart';
 import 'package:foodapp/screens/user/user_cart_screen.dart';
 import 'package:foodapp/screens/user/user_home_screen.dart';
 import 'package:foodapp/service/isar_local/isar_service.dart';
@@ -28,7 +31,7 @@ void main() async {
         ChangeNotifierProxyProvider<AuthProvider, OrderProvider>(
           create: (context) => OrderProvider('user'),
           update: (context, authProvider, orderProvider) {
-            return OrderProvider(authProvider.user!.role);
+            return OrderProvider(authProvider.user?.role);
           },
         ),
       ],
@@ -45,10 +48,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Food App',
-      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.blue),
       routes: {
         '/userHomeScreen': (context) => UserHomeScreen(),
         '/userCartScreen': (context) => UserCartScreen(),
+        '/accountScreen': (context) => AccountScreen(),
+        '/adminMenuScreen': (context) => AdminMenuScreen(),
+        '/adminOrdersScreen': (context) => AdminOrderScreen(),
       },
       home: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
@@ -75,7 +80,7 @@ class MyApp extends StatelessWidget {
   Widget _buildHomeScreen(String role) {
     switch (role.toLowerCase()) {
       case 'admin':
-        return const AdminMenuScreen();
+        return const AdminHomeScreen();
       case 'staff':
         return const StaffHomeScreen();
       case 'user':

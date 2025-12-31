@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
-import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/providers/order_provider.dart';
-import 'package:foodapp/screens/user/widgets/order_card.dart';
-import 'package:foodapp/screens/user/widgets/unsynced_items.dart';
+import 'package:foodapp/screens/admin/widgets/show_orders.dart';
 import 'package:provider/provider.dart';
 
-class UserCartScreen extends StatefulWidget {
-  const UserCartScreen({super.key});
+class AdminOrderScreen extends StatefulWidget {
+  const AdminOrderScreen({super.key});
 
   @override
-  State<UserCartScreen> createState() => _UserCartScreenState();
+  State<AdminOrderScreen> createState() => _AdminOrderScreenState();
 }
 
-class _UserCartScreenState extends State<UserCartScreen>
+class _AdminOrderScreenState extends State<AdminOrderScreen>
     with TickerProviderStateMixin {
+  late OrderProvider orderProvider;
   late TabController tabController;
+  Map<String, dynamic> order = {};
 
   @override
   void initState() {
+    orderProvider = context.read<OrderProvider>();
     tabController = TabController(length: 3, vsync: this);
     super.initState();
   }
@@ -40,7 +40,7 @@ class _UserCartScreenState extends State<UserCartScreen>
       bottom: TabBar(
         controller: tabController,
         tabs: [
-          Tab(text: 'Unordered'),
+          Tab(text: 'Pending'),
           Tab(text: 'Processing'),
           Tab(text: 'Delivered'),
         ],
@@ -56,51 +56,38 @@ class _UserCartScreenState extends State<UserCartScreen>
         }
 
         if (value.error != null) {
-          return Center(child: Text('error in geting orders'));
+          return Center(child: Text('Error'));
         }
 
+        value.orders.sort((a, b) => (b.orderId ?? 0).compareTo(a.orderId ?? 0));
         return TabBarView(
           controller: tabController,
           children: [
-            UnsyncedItems(
-              orderItems: value.orderItems
-                  .where((item) => item.synced == false)
-                  .toList(),
-            ),
-            _ShowOrders(
-              orderItems: value.orderItems,
+            ShowOrders(
               orders: value.orders
-                  .where((order) => order.status.toLowerCase() != 'delivered')
+                  .where((order) => order.status.toLowerCase() == 'pending')
                   .toList(),
+              items: value.orderItems,
             ),
-            _ShowOrders(
-              orderItems: value.orderItems,
+            ShowOrders(
+              orders: value.orders
+                  .where(
+                    (order) =>
+                        order.status.toLowerCase() != 'pending' &&
+                        order.status.toLowerCase() != 'delivered',
+                  )
+                  .toList(),
+              items: value.orderItems,
+            ),
+            ShowOrders(
               orders: value.orders
                   .where((order) => order.status.toLowerCase() == 'delivered')
                   .toList(),
+              items: value.orderItems,
             ),
           ],
         );
       },
-    );
-  }
-}
-
-class _ShowOrders extends StatelessWidget {
-  final List<OrderItemModel> orderItems;
-  final List<OrderModel> orders;
-  const _ShowOrders({required this.orderItems, required this.orders});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: orders.length,
-      itemBuilder: (context, index) => OrderCard(
-        order: orders[index],
-        orderItems: orderItems
-            .where((orderItem) => orderItem.orderId == orders[index].orderId)
-            .toList(),
-      ),
     );
   }
 }

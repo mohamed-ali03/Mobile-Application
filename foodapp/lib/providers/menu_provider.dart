@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:foodapp/models/category%20model/category_model.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
@@ -10,12 +12,26 @@ class MenuProvider extends ChangeNotifier {
   String? error;
   bool _isDisposed = false;
 
-  Stream<List<ItemModel>> get itemsStream => _repo.watchLocalMenu();
-  Stream<List<CategoryModel>> get categoriesStream => _repo.watchCategories();
+  List<ItemModel> items = [];
+  List<CategoryModel> categories = [];
+
+  StreamSubscription? _itemsSub;
+  StreamSubscription? _categoriesSub;
 
   MenuProvider() {
+    sync();
     _repo.listenToChangesInCategoryTable();
     _repo.listenToChangesInItemsTable();
+
+    _itemsSub = _repo.watchLocalMenu().listen((items) {
+      this.items = items;
+      notifyListeners();
+    });
+
+    _categoriesSub = _repo.watchCategories().listen((cats) {
+      categories = cats;
+      notifyListeners();
+    });
   }
 
   /// 🔄 sync categories and menu items
@@ -159,6 +175,8 @@ class MenuProvider extends ChangeNotifier {
   void dispose() {
     _isDisposed = true;
     _repo.dispose();
+    _itemsSub?.cancel();
+    _categoriesSub?.cancel();
     super.dispose();
   }
 }
