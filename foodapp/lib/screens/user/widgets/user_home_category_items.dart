@@ -3,15 +3,15 @@ import 'package:foodapp/models/category%20model/category_model.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/providers/order_provider.dart';
-import 'package:foodapp/screens/user/widgets/item_card.dart';
+import 'package:foodapp/screens/widgets/item_card.dart';
 import 'package:provider/provider.dart';
 
-class MenuItemsByCategory extends StatelessWidget {
+class UserCategoryItems extends StatelessWidget {
   final ValueNotifier<int> selCategory;
   final ValueNotifier<String> searchTxt;
   final List<ItemModel> allItems;
   final List<CategoryModel> categories;
-  const MenuItemsByCategory({
+  const UserCategoryItems({
     super.key,
     required this.selCategory,
     required this.searchTxt,
@@ -55,7 +55,7 @@ class MenuItemsByCategory extends StatelessWidget {
                 final item = items[index];
                 return ItemCard(
                   item: item,
-                  catName: categories
+                  categoryName: categories
                       .firstWhere((cat) => cat.categoryId == item.categoryId)
                       .name,
                   onSelectItem: (x) {

@@ -57,8 +57,7 @@ class AuthRepository {
         ..name = name
         ..role = role
         ..phoneNumber = phoneNumber
-        ..imageUrl = imageUrl
-        ..createdAt = DateTime.now();
+        ..imageUrl = imageUrl;
 
       await _local.saveUser(localUser);
     } catch (e) {
@@ -171,9 +170,56 @@ class AuthRepository {
     }
   }
 
+  /// Update a user's role remotely and update local cache
+  Future<void> updateUserRole(String userId, String role) async {
+    try {
+      await _remote.updateUserRole(userId, role).timeout(_timeout);
+
+      // Update local cache by fetching profiles again or updating single user
+      try {
+        final profiles = await _remote.fetchAllProfiles().timeout(_timeout);
+        final users = profiles.map((profile) {
+          return UserModel()
+            ..authID = profile['id']
+            ..name = profile['name'] ?? ''
+            ..role = profile['role'] ?? 'user'
+            ..phoneNumber = profile['phone_number']
+            ..imageUrl = profile['image_url']
+            ..createdAt = _parseDate(profile['created_at']);
+        }).toList();
+
+        await _local.upsertUsers(users);
+      } catch (e) {
+        debugPrint('Failed to update local cache after role change: $e');
+      }
+    } catch (e) {
+      debugPrint('Failed to update user role: $e');
+      rethrow;
+    }
+  }
+
   /// 📥 fetch all users from local database
   Future<List<UserModel>> fetchAllUsers() async {
     try {
+      // Try to fetch from remote first and update local cache
+      try {
+        final profiles = await _remote.fetchAllProfiles().timeout(_timeout);
+        final users = profiles.map<UserModel>((profile) {
+          return UserModel()
+            ..authID = profile['id']
+            ..name = profile['name'] ?? ''
+            ..role = profile['role'] ?? 'user'
+            ..phoneNumber = profile['phone_number']
+            ..imageUrl = profile['image_url']
+            ..createdAt = _parseDate(profile['created_at']);
+        }).toList();
+
+        await _local.upsertUsers(users);
+      } catch (e) {
+        // If remote fetch fails, fall back to local cache
+        debugPrint('Failed to fetch remote profiles: $e');
+      }
+
       return await _local.fetchUsersSkipFirst();
     } catch (e) {
       debugPrint('fetchAllUsers error: $e');

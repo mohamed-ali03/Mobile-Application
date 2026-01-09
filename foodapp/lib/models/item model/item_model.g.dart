@@ -61,6 +61,11 @@ const ItemModelSchema = CollectionSchema(
       id: 8,
       name: r'price',
       type: IsarType.double,
+    ),
+    r'selected': PropertySchema(
+      id: 9,
+      name: r'selected',
+      type: IsarType.bool,
     )
   },
   estimateSize: _itemModelEstimateSize,
@@ -105,6 +110,7 @@ void _itemModelSerialize(
   writer.writeLong(offsets[6], object.itemId);
   writer.writeString(offsets[7], object.name);
   writer.writeDouble(offsets[8], object.price);
+  writer.writeBool(offsets[9], object.selected);
 }
 
 ItemModel _itemModelDeserialize(
@@ -124,6 +130,7 @@ ItemModel _itemModelDeserialize(
   object.itemId = reader.readLong(offsets[6]);
   object.name = reader.readString(offsets[7]);
   object.price = reader.readDouble(offsets[8]);
+  object.selected = reader.readBool(offsets[9]);
   return object;
 }
 
@@ -152,6 +159,8 @@ P _itemModelDeserializeProp<P>(
       return (reader.readString(offset)) as P;
     case 8:
       return (reader.readDouble(offset)) as P;
+    case 9:
+      return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1079,6 +1088,16 @@ extension ItemModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> selectedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'selected',
+        value: value,
+      ));
+    });
+  }
 }
 
 extension ItemModelQueryObject
@@ -1193,6 +1212,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByPriceDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'price', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortBySelected() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selected', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortBySelectedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selected', Sort.desc);
     });
   }
 }
@@ -1318,6 +1349,18 @@ extension ItemModelQuerySortThenBy
       return query.addSortBy(r'price', Sort.desc);
     });
   }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenBySelected() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selected', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenBySelectedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selected', Sort.desc);
+    });
+  }
 }
 
 extension ItemModelQueryWhereDistinct
@@ -1377,6 +1420,12 @@ extension ItemModelQueryWhereDistinct
   QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByPrice() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'price');
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctBySelected() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'selected');
     });
   }
 }
@@ -1440,6 +1489,12 @@ extension ItemModelQueryProperty
   QueryBuilder<ItemModel, double, QQueryOperations> priceProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'price');
+    });
+  }
+
+  QueryBuilder<ItemModel, bool, QQueryOperations> selectedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'selected');
     });
   }
 }

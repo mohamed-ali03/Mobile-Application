@@ -50,6 +50,20 @@ class OrderProvider extends ChangeNotifier {
     }
   }
 
+  // clear all orders and order items (for logout)
+  Future<void> clearAllData() async {
+    try {
+      _setError(null);
+      _setLoading(true);
+      await _repo.clearAllOrdersAndItems();
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to clear orders data: $e');
+      debugPrint('Error clearing orders data: $e');
+      _setLoading(false);
+    }
+  }
+
   //  =========================================================================================
   //                                           Order Item
   //  =========================================================================================

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/providers/menu_provider.dart';
-import 'package:foodapp/screens/user/widgets/quantity_control.dart';
+import 'package:foodapp/screens/user/widgets/user_cart_quantity_control.dart';
 import 'package:provider/provider.dart';
 
 class OrderItemCard extends StatelessWidget {

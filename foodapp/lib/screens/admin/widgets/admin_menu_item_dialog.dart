@@ -1,157 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:foodapp/core/functions.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
-import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:provider/provider.dart';
-
-class ItemCard extends StatefulWidget {
-  final ItemModel item;
-  final String catName;
-  final Function(bool) onSelectItem;
-
-  const ItemCard({
-    super.key,
-    required this.item,
-    required this.catName,
-    required this.onSelectItem,
-  });
-
-  @override
-  State<ItemCard> createState() => _ItemCardState();
-}
-
-class _ItemCardState extends State<ItemCard> {
-  bool selected = false;
-
-  void _showEditItemDialog(BuildContext context, ItemModel item) {
-    showDialog(
-      context: context,
-      builder: (context) => MenuItemFormDialog(
-        isEdit: true,
-        initialItem: item,
-        onSave: (name, price, description, categoryId, available, imageUrl) {
-          final updatedItem = ItemModel()
-            ..itemId = item.itemId
-            ..name = name
-            ..description = description
-            ..price = price
-            ..categoryId = categoryId
-            ..imageUrl = imageUrl.isNotEmpty ? imageUrl : item.imageUrl
-            ..ingreidents = item.ingreidents
-            ..available = available;
-
-          context.read<MenuProvider>().updateItem(updatedItem);
-          Navigator.pop(context);
-        },
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Item page will be handled later'),
-            backgroundColor: Colors.blue,
-          ),
-        );
-      },
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 10),
-        child: Column(
-          children: [
-            ListTile(
-              leading: ClipRRect(
-                borderRadius: BorderRadiusGeometry.circular(12),
-                child: Image.network(
-                  widget.item.imageUrl,
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 60,
-                    height: 60,
-                    color: Colors.grey[300],
-                    child: Icon(
-                      Icons.image_not_supported,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ),
-              ),
-              title: Text(widget.item.name),
-              subtitle: Text(widget.catName),
-              trailing: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: widget.item.available ? Colors.green : Colors.grey,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  widget.item.available ? 'Available' : 'Out of Stock',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            Divider(color: Colors.black54),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Price: \$${widget.item.price}'),
-                  context.read<AuthProvider>().user?.role == 'user'
-                      ? widget.item.available
-                            ? selected
-                                  ? IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          selected = false;
-                                          widget.onSelectItem(selected);
-                                        });
-                                      },
-                                      icon: const Icon(
-                                        Icons.check_circle,
-                                        color: Colors.green,
-                                      ),
-                                    )
-                                  : IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          selected = true;
-                                          widget.onSelectItem(selected);
-                                        });
-                                      },
-                                      icon: Icon(Icons.shopping_cart),
-                                    )
-                            : IconButton(
-                                onPressed: () {},
-                                icon: Icon(Icons.block, color: Colors.red),
-                              )
-                      : IconButton(
-                          onPressed: () =>
-                              _showEditItemDialog(context, widget.item),
-                          icon: Icon(Icons.edit),
-                        ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class MenuItemFormDialog extends StatefulWidget {
   final bool isEdit;
@@ -163,6 +14,7 @@ class MenuItemFormDialog extends StatefulWidget {
     int categoryId,
     bool available,
     String imageUrl,
+    String ingreidents,
   )
   onSave;
 
@@ -181,6 +33,7 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
   late TextEditingController nameController;
   late TextEditingController priceController;
   late TextEditingController descriptionController;
+  late TextEditingController ingreidentsController;
   late bool isAvailable;
   late int selectedCategoryId;
   String? imageUrl;
@@ -201,6 +54,9 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
     descriptionController = TextEditingController(
       text: widget.initialItem?.description ?? '',
     );
+    ingreidentsController = TextEditingController(
+      text: widget.initialItem?.ingreidents ?? '',
+    );
     isAvailable = widget.initialItem?.available ?? true;
     selectedCategoryId = widget.initialItem?.categoryId ?? 1;
     imageUrl = widget.initialItem?.imageUrl;
@@ -211,6 +67,7 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
     nameController.dispose();
     priceController.dispose();
     descriptionController.dispose();
+    ingreidentsController.dispose();
     super.dispose();
   }
 
@@ -329,7 +186,7 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
                 decoration: const InputDecoration(
                   labelText: 'Price',
                   hintText: 'e.g., 12.99',
-                  prefixText: '\$',
+                  suffixText: 'EGP',
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
@@ -352,6 +209,39 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a description';
+                  }
+                  if (value.trim().length < 10) {
+                    return 'Description is too short';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: ingreidentsController,
+                decoration: const InputDecoration(
+                  labelText: 'Ingredients',
+                  hintText: 'Item ingredients (comma separated)',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter ingredients';
+                  }
+                  final parts = value
+                      .split(',')
+                      .map((s) => s.trim())
+                      .where((s) => s.isNotEmpty)
+                      .toList();
+                  if (parts.isEmpty) {
+                    return 'Please list at least one ingredient';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               // Category selector
@@ -398,7 +288,7 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
           onPressed: isUploadingImage
               ? null
               : () {
-                  if (_formKey.currentState!.validate()) {
+                  if ((_formKey.currentState?.validate() ?? false)) {
                     widget.onSave(
                       nameController.text,
                       double.parse(priceController.text),
@@ -406,6 +296,7 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
                       selectedCategoryId,
                       isAvailable,
                       imageUrl ?? '',
+                      ingreidentsController.text,
                     );
                   }
                 },

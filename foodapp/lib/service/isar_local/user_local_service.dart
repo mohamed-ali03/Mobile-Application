@@ -70,6 +70,26 @@ class UserLocalService {
     }
   }
 
+  /// Update role for a specific user identified by authID
+  Future<void> updateUserRole(String authId, String role) async {
+    try {
+      final user = await IsarService.isar.userModels
+          .filter()
+          .authIDEqualTo(authId)
+          .findFirst();
+      if (user == null) return;
+
+      user.role = role;
+
+      await IsarService.isar.writeTxn(() async {
+        await IsarService.isar.userModels.put(user);
+      });
+    } catch (e) {
+      debugPrint('Error updating user role locally: $e');
+      rethrow;
+    }
+  }
+
   /// 📥 upsert multiple users (for syncing)
   Future<void> upsertUsers(List<UserModel> users) async {
     try {
@@ -106,6 +126,20 @@ class UserLocalService {
       return users.sublist(1);
     } catch (e) {
       debugPrint('Error fetching users: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch all users from local DB (including current). Use caller to filter if needed.
+  Future<List<UserModel>> fetchAllUsers() async {
+    try {
+      final users = await IsarService.isar.userModels
+          .where()
+          .sortByCreatedAt()
+          .findAll();
+      return users;
+    } catch (e) {
+      debugPrint('Error fetching all users: $e');
       rethrow;
     }
   }

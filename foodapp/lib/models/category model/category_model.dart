@@ -9,5 +9,5 @@ class CategoryModel {
   late int categoryId;
   late String name;
   late String imageUrl;
-  late DateTime? createdAt;
+  DateTime? createdAt;
 }

@@ -138,12 +138,31 @@ class AuthProvider extends ChangeNotifier {
     try {
       _setError(null);
       _setLoading(true);
-      users = await _repo.fetchAllUsers();
+      final fetched = await _repo.fetchAllUsers();
+      // Exclude current user from the list
+      users = fetched.where((u) => u.authID != user?.authID).toList();
       _setLoading(false);
     } catch (e) {
       _setError('Failed to fetch users: $e');
       debugPrint('Fetch all users error: $e');
       _setLoading(false);
+    }
+  }
+
+  /// Change another user's role (admin only)
+  Future<void> changeUserRole(String userAuthId, String newRole) async {
+    try {
+      _setError(null);
+      _setLoading(true);
+      await _repo.updateUserRole(userAuthId, newRole);
+      // Refresh the local users list
+      users = await _repo.fetchAllUsers();
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to change user role: $e');
+      debugPrint('Change user role error: $e');
+      _setLoading(false);
+      rethrow;
     }
   }
 

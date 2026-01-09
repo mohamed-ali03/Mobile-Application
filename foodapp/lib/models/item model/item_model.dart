@@ -15,5 +15,5 @@ class ItemModel {
   late String ingreidents;
   late bool available = false;
   late bool selected = true;
-  late DateTime? createdAt;
+  DateTime? createdAt;
 }

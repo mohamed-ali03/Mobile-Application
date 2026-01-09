@@ -24,13 +24,12 @@ class OrderRemoteService {
 
       final response = await SupabaseService.client
           .rpc(
-            'insert_order_with_items',
+            'place_order',
             params: {
               'p_user_id': order.userId,
               'p_total_price': order.totalPrice,
               'p_address': order.address,
               'p_status': 'pending',
-              'p_created_at': order.createdAt?.toIso8601String(),
               'p_items': itemsJson,
             },
           )
@@ -38,6 +37,7 @@ class OrderRemoteService {
 
       order.orderId = response['id'];
       order.synced = true;
+      order.createdAt = _parseDate(response['created_at']);
       for (int i = 0; i < items.length; i++) {
         items[i].orderItemId = response['items'][i]['id'];
         items[i].orderId = response['id'];
@@ -188,5 +188,16 @@ class OrderRemoteService {
       debugPrint('Error fetching all orders: $e');
       rethrow;
     }
+  }
+}
+
+/// 🔧 helper to safely parse dates
+DateTime? _parseDate(dynamic date) {
+  if (date == null) return null;
+  try {
+    return DateTime.parse(date.toString());
+  } catch (e) {
+    debugPrint('Date parse error: $e');
+    return null;
   }
 }

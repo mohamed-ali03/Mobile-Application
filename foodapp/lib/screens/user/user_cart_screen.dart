@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/providers/order_provider.dart';
-import 'package:foodapp/screens/user/widgets/order_card.dart';
-import 'package:foodapp/screens/user/widgets/unsynced_items.dart';
+import 'package:foodapp/screens/user/widgets/user_cart_order.dart';
+import 'package:foodapp/screens/user/widgets/user_home_unsynced_items.dart';
+import 'package:foodapp/screens/user/widgets/user_cart_states.dart';
 import 'package:provider/provider.dart';
 
 class UserCartScreen extends StatefulWidget {
@@ -19,65 +20,104 @@ class _UserCartScreenState extends State<UserCartScreen>
 
   @override
   void initState() {
-    tabController = TabController(length: 3, vsync: this);
     super.initState();
+    tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: _buildAppBar(), body: _buildBody());
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: const Text('Cart'),
-      leading: IconButton(
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        icon: const Icon(Icons.arrow_back),
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text('My Orders'),
+        elevation: 0,
+        bottom: TabBar(
+          controller: tabController,
+          indicatorColor: Colors.white,
+          tabs: const [
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.shopping_cart, size: 18),
+                  SizedBox(width: 8),
+                  Text('Cart'),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.restaurant, size: 18),
+                  SizedBox(width: 8),
+                  Text('Processing'),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.check_circle, size: 18),
+                  SizedBox(width: 8),
+                  Text('Delivered'),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      bottom: TabBar(
-        controller: tabController,
-        tabs: [
-          Tab(text: 'Unordered'),
-          Tab(text: 'Processing'),
-          Tab(text: 'Delivered'),
-        ],
-      ),
+      body: _buildBody(),
     );
   }
 
   Widget _buildBody() {
     return Consumer<OrderProvider>(
-      builder: (context, value, child) {
-        if (value.isLoading) {
-          return Center(child: CircularProgressIndicator());
+      builder: (context, orderProvider, child) {
+        if (orderProvider.isLoading && orderProvider.orders.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
         }
 
-        if (value.error != null) {
-          return Center(child: Text('error in geting orders'));
+        if (orderProvider.error != null) {
+          return ErrorState(
+            error: orderProvider.error!,
+            onRetry: () => orderProvider.fetchAllOrders(),
+          );
         }
+
+        final unorderedItems = orderProvider.orderItems
+            .where((item) => item.synced == false)
+            .toList();
+        final processingOrders = orderProvider.orders
+            .where((order) => order.status.toLowerCase() != 'delivered')
+            .toList();
+        final deliveredOrders = orderProvider.orders
+            .where((order) => order.status.toLowerCase() == 'delivered')
+            .toList();
 
         return TabBarView(
           controller: tabController,
           children: [
-            UnsyncedItems(
-              orderItems: value.orderItems
-                  .where((item) => item.synced == false)
-                  .toList(),
+            _CartTabView(
+              orderItems: unorderedItems,
+              onRefresh: () => orderProvider.fetchAllOrders(),
             ),
-            _ShowOrders(
-              orderItems: value.orderItems,
-              orders: value.orders
-                  .where((order) => order.status.toLowerCase() != 'delivered')
-                  .toList(),
+            _OrdersTabView(
+              orders: processingOrders,
+              orderItems: orderProvider.orderItems,
+              onRefresh: () => orderProvider.fetchAllOrders(),
             ),
-            _ShowOrders(
-              orderItems: value.orderItems,
-              orders: value.orders
-                  .where((order) => order.status.toLowerCase() == 'delivered')
-                  .toList(),
+            _OrdersTabView(
+              orders: deliveredOrders,
+              orderItems: orderProvider.orderItems,
+              onRefresh: () => orderProvider.fetchAllOrders(),
             ),
           ],
         );
@@ -86,20 +126,60 @@ class _UserCartScreenState extends State<UserCartScreen>
   }
 }
 
-class _ShowOrders extends StatelessWidget {
+class _CartTabView extends StatelessWidget {
   final List<OrderItemModel> orderItems;
-  final List<OrderModel> orders;
-  const _ShowOrders({required this.orderItems, required this.orders});
+  final VoidCallback onRefresh;
+
+  const _CartTabView({required this.orderItems, required this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: orders.length,
-      itemBuilder: (context, index) => OrderCard(
-        order: orders[index],
-        orderItems: orderItems
-            .where((orderItem) => orderItem.orderId == orders[index].orderId)
-            .toList(),
+    return RefreshIndicator(
+      onRefresh: () async => onRefresh(),
+      child: orderItems.isEmpty
+          ? EmptyCartState()
+          : UnsyncedItems(orderItems: orderItems),
+    );
+  }
+}
+
+class _OrdersTabView extends StatelessWidget {
+  final List<OrderModel> orders;
+  final List<OrderItemModel> orderItems;
+  final VoidCallback onRefresh;
+
+  const _OrdersTabView({
+    required this.orders,
+    required this.orderItems,
+    required this.onRefresh,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (orders.isEmpty) {
+      return EmptyOrdersState();
+    }
+
+    final sortedOrders = List<OrderModel>.from(orders)
+      ..sort((a, b) {
+        final aTime = a.createdAt ?? DateTime(1970);
+        final bTime = b.createdAt ?? DateTime(1970);
+        return bTime.compareTo(aTime);
+      });
+
+    return RefreshIndicator(
+      onRefresh: () async => onRefresh(),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: sortedOrders.length,
+        itemBuilder: (context, index) => OrderCard(
+          order: sortedOrders[index],
+          orderItems: orderItems
+              .where(
+                (orderItem) => orderItem.orderId == sortedOrders[index].orderId,
+              )
+              .toList(),
+        ),
       ),
     );
   }

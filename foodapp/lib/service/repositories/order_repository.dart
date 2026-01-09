@@ -19,6 +19,16 @@ class OrderRepository {
   RealtimeChannel? _ordersChannel;
   RealtimeChannel? _orderItemsChannel;
 
+  // clear all local orders and items (for logout)
+  Future<void> clearAllOrdersAndItems() async {
+    try {
+      await _local.clearAllOrdersAndItems();
+    } catch (e) {
+      debugPrint('Error clearing local orders and items: $e');
+      rethrow;
+    }
+  }
+
   // ====================================================================================================
   //                                        Order Item
   // ====================================================================================================
@@ -232,7 +242,7 @@ class OrderRepository {
     try {
       order.synced = false;
       for (var item in items) {
-        item.synced = false;
+        item.synced = true;
       }
       await _local.upsertOrder(order, items);
 
@@ -277,7 +287,8 @@ class OrderRepository {
         try {
           final order = data['order'] as OrderModel;
           final items = data['items'] as List<OrderItemModel>;
-          await _remote.createOrderRPC(order, items);
+          final response = await _remote.createOrderRPC(order, items);
+          await _local.upsertOrder(response['order'], response['items']);
         } catch (e) {
           debugPrint('Error syncing order: $e');
         }
@@ -286,12 +297,6 @@ class OrderRepository {
       debugPrint('Error syncing orders: $e');
       rethrow;
     }
-  }
-
-  Future<void> clearLocalMenu() async {
-    try {
-      _local.clearMenu();
-    } catch (_) {}
   }
 
   /// 🧹 cleanup subscriptions

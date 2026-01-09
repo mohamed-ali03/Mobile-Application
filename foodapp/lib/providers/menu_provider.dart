@@ -34,6 +34,20 @@ class MenuProvider extends ChangeNotifier {
     });
   }
 
+  // clear all local menu data (for logout)
+  Future<void> clearAllData() async {
+    try {
+      _setError(null);
+      _setLoading(true);
+      await _repo.clearAllMenuData();
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to clear menu data: $e');
+      debugPrint('Error clearing menu data: $e');
+      _setLoading(false);
+    }
+  }
+
   /// 🔄 sync categories and menu items
   Future<void> sync() async {
     try {

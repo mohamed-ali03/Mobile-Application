@@ -28,7 +28,6 @@ extension ItemModelJson on ItemModel {
       'image_url': imageUrl,
       'ingredients': ingreidents,
       'available': available,
-      'created_at': createdAt?.toIso8601String(),
     };
   }
 }

@@ -96,6 +96,19 @@ class AuthRemoteService {
     }
   }
 
+  /// Update user's role (admin only)
+  Future<void> updateUserRole(String userId, String role) async {
+    try {
+      await SupabaseService.client
+          .from('profiles')
+          .update({'role': role})
+          .eq('id', userId);
+    } catch (e) {
+      debugPrint('Update user role error: $e');
+      rethrow;
+    }
+  }
+
   /// Log out current user
   Future<void> logout() async {
     try {

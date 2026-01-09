@@ -15,6 +15,16 @@ class MenuRepository {
   RealtimeChannel? _itemsChannel;
   RealtimeChannel? _categoryChannel;
 
+  /// clear all local menu data (for logout)
+  Future<void> clearAllMenuData() async {
+    try {
+      await _local.clearAllMenuData();
+    } catch (e) {
+      debugPrint('Error clearing local menu data: $e');
+      rethrow;
+    }
+  }
+
   /// 🔔 listen to changes in items table [insert, update, delete]
   void listenToChangesInItemsTable() {
     try {

@@ -5,6 +5,19 @@ import 'package:foodapp/service/isar_local/isar_service.dart';
 import 'package:isar/isar.dart';
 
 class OrderLocalService {
+  /// clear all local orders and items (for logout)
+  Future<void> clearAllOrdersAndItems() async {
+    try {
+      await IsarService.isar.writeTxn(() async {
+        await IsarService.isar.orderItemModels.clear();
+        await IsarService.isar.orderModels.clear();
+      });
+    } catch (e) {
+      debugPrint('Error clearing local orders and items: $e');
+      rethrow;
+    }
+  }
+
   // =================================================================================================
   //                                         Order Item CRUD
   // =================================================================================================
@@ -252,7 +265,7 @@ class OrderLocalService {
     }
   }
 
-  Future<void> clearMenu() async {
+  Future<void> clearOrders() async {
     try {
       await IsarService.isar.writeTxn(() async {
         await IsarService.isar.orderItemModels.clear();

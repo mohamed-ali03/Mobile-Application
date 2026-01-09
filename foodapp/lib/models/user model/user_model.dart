@@ -9,7 +9,7 @@ class UserModel {
   late String authID;
   late String name;
   late String role;
-  late String? phoneNumber;
-  late String? imageUrl;
-  late DateTime? createdAt;
+  String? phoneNumber;
+  String? imageUrl;
+  DateTime? createdAt;
 }

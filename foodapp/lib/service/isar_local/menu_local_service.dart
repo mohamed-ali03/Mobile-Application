@@ -5,6 +5,19 @@ import 'package:foodapp/service/isar_local/isar_service.dart';
 import 'package:isar/isar.dart';
 
 class MenuLocalService {
+  /// clear all local menu data (for logout)
+  Future<void> clearAllMenuData() async {
+    try {
+      await IsarService.isar.writeTxn(() async {
+        await IsarService.isar.itemModels.clear();
+        await IsarService.isar.categoryModels.clear();
+      });
+    } catch (e) {
+      debugPrint('Error clearing local menu data: $e');
+      rethrow;
+    }
+  }
+
   /// 📝 save/sync menu items (clears old data)
   Future<void> saveItems(List<ItemModel> items) async {
     try {

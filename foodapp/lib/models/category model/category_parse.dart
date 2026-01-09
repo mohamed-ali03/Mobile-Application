@@ -14,11 +14,6 @@ extension CategoryModelJson on CategoryModel {
 
   /// TO JSON
   Map<String, dynamic> toJson() {
-    return {
-      'id': categoryId,
-      'name': name,
-      'image_url': imageUrl,
-      'created_at': createdAt?.toIso8601String(),
-    };
+    return {'id': categoryId, 'name': name, 'image_url': imageUrl};
   }
 }
