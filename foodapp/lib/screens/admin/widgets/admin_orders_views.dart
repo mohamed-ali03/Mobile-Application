@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/providers/order_provider.dart';
@@ -20,8 +21,11 @@ class AdminOrderTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (orders.isEmpty) {
-      return const Center(
-        child: Padding(padding: EdgeInsets.all(32.0), child: Text('No Orders')),
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Text(AppLocalizations.of(context).t('noOrdersYet')),
+        ),
       );
     }
 
@@ -88,7 +92,7 @@ class _OrderHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Order #$orderId',
+          '${AppLocalizations.of(context).t('order')} #$orderId',
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
@@ -98,7 +102,17 @@ class _OrderHeader extends StatelessWidget {
             const SizedBox(width: 4),
             Expanded(
               child: Text(
-                'User: ${userId.substring(0, userId.length > 20 ? 20 : userId.length)}${userId.length > 20 ? '...' : ''}',
+                AppLocalizations.of(context).t(
+                  'user:Id',
+                  data: {
+                    'id':
+                        userId.substring(
+                          0,
+                          userId.length > 20 ? 20 : userId.length,
+                        ) +
+                        (userId.length > 20 ? '...' : ''),
+                  },
+                ),
                 style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -157,15 +171,16 @@ class _OrderInfo extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoItem(
-                label: 'Order Date',
+                label: AppLocalizations.of(context).t('orderDate'),
                 value: _formatDate(order.createdAt),
                 icon: Icons.calendar_today,
               ),
             ),
             const SizedBox(width: 16),
             _InfoItem(
-              label: 'Items',
-              value: '$itemCount ${itemCount == 1 ? 'item' : 'items'}',
+              label: AppLocalizations.of(context).t('items'),
+              value:
+                  '$itemCount ${itemCount == 1 ? AppLocalizations.of(context).t('item') : AppLocalizations.of(context).t('items')}',
               icon: Icons.shopping_bag,
             ),
           ],
@@ -180,7 +195,7 @@ class _OrderInfo extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Delivery Address',
+                    AppLocalizations.of(context).t('deliveryAddressLabel'),
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.grey[600],
@@ -217,7 +232,7 @@ class _OrderInfo extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                order.status.toUpperCase(),
+                AppLocalizations.of(context).t(order.status).toUpperCase(),
                 style: TextStyle(
                   fontSize: 12,
                   color: _getStatusColor(order.status),
@@ -322,7 +337,7 @@ class _OrderFooter extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Order Total',
+              AppLocalizations.of(context).t('orderTotal'),
               style: TextStyle(
                 fontSize: 11,
                 color: Colors.grey[600],
@@ -331,7 +346,7 @@ class _OrderFooter extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'EGP ${order.totalPrice.toStringAsFixed(2)}',
+              '${AppLocalizations.of(context).t('egp')} ${order.totalPrice.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -350,14 +365,18 @@ class _OrderFooter extends StatelessWidget {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Order status updated to $nextStatus'),
+                    content: Text(
+                      '${AppLocalizations.of(context).t('orderStatusUpdatedTo')} ${AppLocalizations.of(context).t(nextStatus.toLowerCase())}',
+                    ),
                     backgroundColor: Colors.green,
                   ),
                 );
               }
             },
             icon: const Icon(Icons.arrow_forward, size: 18),
-            label: Text('Mark as ${nextStatus.capitalize()}'),
+            label: Text(
+              '${AppLocalizations.of(context).t('markAs')}${AppLocalizations.of(context).t(nextStatus.toLowerCase())}',
+            ),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),

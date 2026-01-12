@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/screens/widgets/logout_button.dart';
 import 'package:provider/provider.dart';
@@ -90,14 +91,14 @@ class MyDrawer extends StatelessWidget {
 
                 ListTile(
                   leading: const Icon(Icons.home),
-                  title: const Text('Home'),
+                  title: Text(AppLocalizations.of(context).t('home')),
                   onTap: () => Navigator.pop(context),
                 ),
 
                 if (user.role != 'user')
                   ListTile(
                     leading: const Icon(Icons.menu_book),
-                    title: const Text('Manage Menu'),
+                    title: Text(AppLocalizations.of(context).t('manageMenu')),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/adminMenuScreen');
@@ -106,7 +107,7 @@ class MyDrawer extends StatelessWidget {
 
                 ListTile(
                   leading: const Icon(Icons.shopping_cart),
-                  title: const Text('Orders'),
+                  title: Text(AppLocalizations.of(context).t('orders')),
                   onTap: () {
                     Navigator.pop(context);
                     user.role == 'user'
@@ -117,7 +118,7 @@ class MyDrawer extends StatelessWidget {
 
                 ListTile(
                   leading: const Icon(Icons.person),
-                  title: const Text('Profile'),
+                  title: Text(AppLocalizations.of(context).t('profile')),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, '/accountScreen');
@@ -128,20 +129,12 @@ class MyDrawer extends StatelessWidget {
                 if (user.role == 'admin')
                   Column(
                     children: [
-                      const Divider(),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          'Administration',
-                          style: TextStyle(
-                            color: Colors.grey[700],
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+                      Divider(),
                       ListTile(
                         leading: const Icon(Icons.group),
-                        title: const Text('Manage Users'),
+                        title: Text(
+                          AppLocalizations.of(context).t('manageUsers'),
+                        ),
                         onTap: () {
                           Navigator.pop(context);
                           Navigator.pushNamed(context, '/adminUsersScreen');
@@ -149,7 +142,7 @@ class MyDrawer extends StatelessWidget {
                       ),
                       ListTile(
                         leading: const Icon(Icons.settings),
-                        title: const Text('Settings'),
+                        title: Text(AppLocalizations.of(context).t('settings')),
                         onTap: () {
                           Navigator.pop(context);
                           Navigator.pushNamed(context, '/adminSettingsScreen');

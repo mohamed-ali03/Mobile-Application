@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +12,10 @@ class StaffHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(title: const Text('Staff Dashboard'), elevation: 0),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).t('staffDashboard')),
+        elevation: 0,
+      ),
       body: SafeArea(
         child: Consumer2<OrderProvider, MenuProvider>(
           builder: (context, orderProv, menuProv, child) {
@@ -41,7 +45,7 @@ class StaffHomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome back',
+                      AppLocalizations.of(context).t('welcomeBack'),
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 16),
@@ -51,7 +55,7 @@ class StaffHomeScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: StaffStatCard(
-                            label: 'Pending',
+                            label: AppLocalizations.of(context).t('pending'),
                             value: pending.toString(),
                             color: Colors.orange,
                             icon: Icons.pending,
@@ -60,7 +64,7 @@ class StaffHomeScreen extends StatelessWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: StaffStatCard(
-                            label: 'Processing',
+                            label: AppLocalizations.of(context).t('processing'),
                             value: processing.toString(),
                             color: Colors.blue,
                             icon: Icons.restaurant,
@@ -73,7 +77,7 @@ class StaffHomeScreen extends StatelessWidget {
 
                     // Quick actions
                     Text(
-                      'Quick Actions',
+                      AppLocalizations.of(context).t('quickActions'),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
@@ -86,7 +90,9 @@ class StaffHomeScreen extends StatelessWidget {
                               '/staffOrdersScreen',
                             ),
                             icon: const Icon(Icons.list_alt),
-                            label: const Text('View Orders'),
+                            label: Text(
+                              AppLocalizations.of(context).t('viewOrders'),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -95,7 +101,9 @@ class StaffHomeScreen extends StatelessWidget {
                             onPressed: () =>
                                 Navigator.pushNamed(context, '/accountScreen'),
                             icon: const Icon(Icons.person),
-                            label: const Text('Profile'),
+                            label: Text(
+                              AppLocalizations.of(context).t('profile'),
+                            ),
                           ),
                         ),
                       ],
@@ -105,7 +113,7 @@ class StaffHomeScreen extends StatelessWidget {
 
                     // Menu summary
                     Text(
-                      'Menu items',
+                      AppLocalizations.of(context).t('menuItems'),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
@@ -136,7 +144,7 @@ class StaffHomeScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Total items',
+                                AppLocalizations.of(context).t('totalItems'),
                                 style: TextStyle(color: Colors.grey[700]),
                               ),
                             ],
@@ -146,7 +154,9 @@ class StaffHomeScreen extends StatelessWidget {
                               context,
                               '/adminMenuScreen',
                             ),
-                            child: const Text('Manage Menu'),
+                            child: Text(
+                              AppLocalizations.of(context).t('manageMenu'),
+                            ),
                           ),
                         ],
                       ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:foodapp/providers/app_settings_provider.dart';
 
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({super.key});
@@ -8,7 +10,7 @@ class AdminSettingsScreen extends StatefulWidget {
 }
 
 class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
-  String _selectedLanguage = 'English';
+  String _selectedLanguageCode = 'en';
   TimeOfDay _workStart = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _workEnd = const TimeOfDay(hour: 17, minute: 0);
   bool _isDarkMode = false;
@@ -17,14 +19,21 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   String _currency = 'USD';
   double _taxRate = 10.0;
 
-  final List<String> _languages = [
-    'English',
-    'Spanish',
-    'French',
-    'German',
-    'Arabic',
-  ];
+  final Map<String, String> _languages = {
+    'en': 'English',
+    'es': 'Spanish',
+    'fr': 'French',
+    'de': 'German',
+    'ar': 'Arabic',
+  };
   final List<String> _currencies = ['USD', 'EUR', 'GBP', 'JPY', 'AED'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Load current language from provider
+    _selectedLanguageCode = context.read<AppSettingsProvider>().lang;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +97,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: _selectedLanguage,
+              value: _selectedLanguageCode,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(
@@ -96,16 +105,20 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                   vertical: 8,
                 ),
               ),
-              items: _languages.map((String language) {
+              items: _languages.entries.map((entry) {
                 return DropdownMenuItem<String>(
-                  value: language,
-                  child: Text(language),
+                  value: entry.key,
+                  child: Text(entry.value),
                 );
               }).toList(),
               onChanged: (String? newValue) {
-                setState(() {
-                  _selectedLanguage = newValue!;
-                });
+                if (newValue != null) {
+                  setState(() {
+                    _selectedLanguageCode = newValue;
+                  });
+                  // Update the app language using the provider
+                  context.read<AppSettingsProvider>().setLanguage(newValue);
+                }
               },
             ),
           ],
@@ -408,7 +421,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
   void _resetToDefaults() {
     setState(() {
-      _selectedLanguage = 'English';
+      _selectedLanguageCode = 'en';
       _workStart = const TimeOfDay(hour: 9, minute: 0);
       _workEnd = const TimeOfDay(hour: 17, minute: 0);
       _isDarkMode = false;

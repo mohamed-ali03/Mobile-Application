@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 
 class EmptyCartState extends StatelessWidget {
   const EmptyCartState({super.key});
@@ -18,7 +19,7 @@ class EmptyCartState extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Your Cart is Empty',
+              AppLocalizations.of(context).t('yourCartIsEmpty'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Colors.grey[700],
                 fontWeight: FontWeight.bold,
@@ -26,7 +27,7 @@ class EmptyCartState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Add some delicious items to your cart!',
+              AppLocalizations.of(context).t('addSomeDeliciousItemsToYourCart'),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
@@ -65,7 +66,7 @@ class EmptyOrdersState extends StatelessWidget {
             Icon(Icons.receipt_long, size: 100, color: Colors.grey[400]),
             const SizedBox(height: 24),
             Text(
-              'No Orders Yet',
+              AppLocalizations.of(context).t('noOrdersYet'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Colors.grey[700],
                 fontWeight: FontWeight.bold,
@@ -73,7 +74,7 @@ class EmptyOrdersState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Your orders will appear here',
+              AppLocalizations.of(context).t('yourOrdersWillAppearHere'),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
@@ -103,7 +104,7 @@ class ErrorState extends StatelessWidget {
             Icon(Icons.error_outline, size: 100, color: Colors.red[300]),
             const SizedBox(height: 24),
             Text(
-              'Error',
+              AppLocalizations.of(context).t('error'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Colors.grey[700],
                 fontWeight: FontWeight.bold,
@@ -121,7 +122,7 @@ class ErrorState extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context).t('retry')),
             ),
           ],
         ),

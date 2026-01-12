@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 
 class AdminStatsGrid extends StatelessWidget {
@@ -40,26 +41,27 @@ class AdminStatsGrid extends StatelessWidget {
       childAspectRatio: 1.5,
       children: [
         _StatCard(
-          title: 'Total Orders',
+          title: AppLocalizations.of(context).t('totalOrders'),
           value: stats['totalOrders'].toString(),
           icon: Icons.shopping_bag,
           color: Colors.green,
         ),
         _StatCard(
-          title: 'Pending Orders',
+          title: AppLocalizations.of(context).t('pendingOrders'),
           value: stats['pendingOrders'].toString(),
           icon: Icons.pending_actions,
           color: Colors.orange,
         ),
         _StatCard(
-          title: 'Menu Items',
+          title: AppLocalizations.of(context).t('menuItems'),
           value: stats['menuItems'].toString(),
           icon: Icons.restaurant_menu,
           color: Colors.blue,
         ),
         _StatCard(
-          title: 'Revenue',
-          value: '${stats['revenue'].toStringAsFixed(0)} EGP',
+          title: AppLocalizations.of(context).t('revenue'),
+          value:
+              '${stats['revenue'].toStringAsFixed(0)} ${AppLocalizations.of(context).t('egp')}',
           icon: Icons.attach_money,
           color: Colors.purple,
         ),

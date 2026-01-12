@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:foodapp/core/functions.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
+import 'package:foodapp/models/user%20model/user_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/screens/widgets/logout_button.dart';
 import 'package:provider/provider.dart';
-import 'package:foodapp/screens/widgets/account_profile_header.dart';
-import 'package:foodapp/screens/widgets/account_info_card.dart';
+import 'package:foodapp/screens/common/widgets/account_profile_header.dart';
+import 'package:foodapp/screens/common/widgets/account_info_card.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -18,9 +20,15 @@ class AccountScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(AppLocalizations.of(context).t('profile')),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.pushNamed(context, '/settings'),
+            icon: Icon(Icons.settings),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -40,7 +48,7 @@ class AccountScreen extends StatelessWidget {
                 children: [
                   AccountInfoCard(
                     icon: Icons.person,
-                    label: 'Full Name',
+                    label: AppLocalizations.of(context).t('fullName'),
                     value: user.name,
                     onEdit: () =>
                         _showEditProfileDialog(context, user, field: 'name'),
@@ -48,7 +56,7 @@ class AccountScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   AccountInfoCard(
                     icon: Icons.phone,
-                    label: 'Phone Number',
+                    label: AppLocalizations.of(context).t('phoneNumber'),
                     value: user.phoneNumber ?? 'Not provided',
                     onEdit: () =>
                         _showEditProfileDialog(context, user, field: 'phone'),
@@ -56,7 +64,7 @@ class AccountScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   AccountInfoCard(
                     icon: Icons.badge,
-                    label: 'Role',
+                    label: AppLocalizations.of(context).t('role'),
                     value: user.role.toUpperCase(),
                     showEdit: false,
                     valueWidget: _RoleBadge(role: user.role),
@@ -64,14 +72,14 @@ class AccountScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   AccountInfoCard(
                     icon: Icons.calendar_today,
-                    label: 'Member Since',
+                    label: AppLocalizations.of(context).t('memberSince'),
                     value: _formatDate(user.createdAt),
                     showEdit: false,
                   ),
                   const SizedBox(height: 12),
                   AccountInfoCard(
                     icon: Icons.fingerprint,
-                    label: 'User ID',
+                    label: AppLocalizations.of(context).t('userID'),
                     value: '${user.authID.substring(0, 20)}...',
                     showEdit: false,
                   ),
@@ -127,10 +135,9 @@ class AccountScreen extends StatelessWidget {
 
 class _RoleBadge extends StatelessWidget {
   final String role;
-  final bool isLight;
 
   // ignore: unused_element_parameter
-  const _RoleBadge({required this.role, this.isLight = false});
+  const _RoleBadge({required this.role});
 
   Color _getRoleColor() {
     switch (role.toLowerCase()) {
@@ -149,19 +156,14 @@ class _RoleBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isLight
-            ? Colors.white.withOpacity(0.2)
-            : _getRoleColor().withOpacity(0.1),
+        color: _getRoleColor().withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isLight ? Colors.white : _getRoleColor(),
-          width: 1,
-        ),
+        border: Border.all(color: _getRoleColor(), width: 1),
       ),
       child: Text(
-        role.toUpperCase(),
+        AppLocalizations.of(context).t(role).toUpperCase(),
         style: TextStyle(
-          color: isLight ? Colors.white : _getRoleColor(),
+          color: _getRoleColor(),
           fontSize: 12,
           fontWeight: FontWeight.bold,
         ),
@@ -182,7 +184,7 @@ class _EmptyState extends StatelessWidget {
             Icon(Icons.person_off, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 24),
             Text(
-              'No User Data',
+              AppLocalizations.of(context).t('noUserData'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Colors.grey[700],
                 fontWeight: FontWeight.bold,
@@ -190,7 +192,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Unable to load user information',
+              AppLocalizations.of(context).t('unableToLoadUserInfo'),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
@@ -204,7 +206,7 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _EditProfileDialog extends StatefulWidget {
-  final user;
+  final UserModel? user;
   final String field;
 
   const _EditProfileDialog({required this.user, required this.field});
@@ -224,12 +226,12 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
   void initState() {
     super.initState();
     if (widget.field == 'name') {
-      _controller = TextEditingController(text: widget.user.name);
+      _controller = TextEditingController(text: widget.user?.name);
     } else if (widget.field == 'phone') {
-      _controller = TextEditingController(text: widget.user.phoneNumber ?? '');
+      _controller = TextEditingController(text: widget.user?.phoneNumber ?? '');
     } else {
       _controller = TextEditingController();
-      _imageUrl = widget.user.imageUrl;
+      _imageUrl = widget.user?.imageUrl;
     }
   }
 
@@ -253,9 +255,13 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
 
     if (mounted) {
       if (_imageUrl!.isEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to upload image')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).t('failedToUploadImage'),
+            ),
+          ),
+        );
       }
       setState(() => _isUploadingImage = false);
     }
@@ -268,8 +274,10 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
         if (mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile picture updated'),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context).t('profilePictureUpdated'),
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -291,8 +299,10 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile updated successfully'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).t('profileUpdatedSuccessfully'),
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -303,23 +313,38 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
   Widget build(BuildContext context) {
     if (widget.field == 'image') {
       return AlertDialog(
-        title: const Text('Update Profile Picture'),
+        title: Text(AppLocalizations.of(context).t('updateProfilePicture')),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 200,
-                height: 200,
+                height: _imageUrl != null && _imageUrl!.isNotEmpty ? null : 200,
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(12),
                   color: Colors.grey[100],
                 ),
                 child: _imageUrl != null && _imageUrl!.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(_imageUrl!, fit: BoxFit.cover),
+                    ? Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(_imageUrl!, fit: BoxFit.cover),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _imageUrl = null;
+                              });
+                            },
+                            icon: Icon(
+                              Icons.highlight_remove_sharp,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
                       )
                     : GestureDetector(
                         onTap: _isUploadingImage ? null : _handleImageUpload,
@@ -336,7 +361,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Tap to upload',
+                                AppLocalizations.of(context).t('tapToUpload'),
                                 style: TextStyle(color: Colors.grey[600]),
                               ),
                             ],
@@ -349,7 +374,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                 TextButton.icon(
                   onPressed: _handleImageUpload,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Change Image'),
+                  label: Text(AppLocalizations.of(context).t('changeImage')),
                 ),
               ],
             ],
@@ -358,32 +383,36 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).t('cancel')),
           ),
           ElevatedButton(
             onPressed: _isUploadingImage ? null : _save,
-            child: const Text('Save'),
+            child: Text(AppLocalizations.of(context).t('save')),
           ),
         ],
       );
     }
 
     return AlertDialog(
-      title: Text('Edit ${widget.field == 'name' ? 'Name' : 'Phone Number'}'),
+      title: Text(
+        '${AppLocalizations.of(context).t('edit')} ${widget.field == 'name' ? AppLocalizations.of(context).t('name') : AppLocalizations.of(context).t('phoneNumber')}',
+      ),
       content: Form(
         key: _formKey,
         child: TextFormField(
           controller: _controller,
           decoration: InputDecoration(
-            labelText: widget.field == 'name' ? 'Full Name' : 'Phone Number',
+            labelText: widget.field == 'name'
+                ? AppLocalizations.of(context).t('fullName')
+                : AppLocalizations.of(context).t('phoneNumber'),
             hintText: widget.field == 'name'
-                ? 'Enter your name'
-                : 'Enter phone number',
+                ? AppLocalizations.of(context).t('enterYourName')
+                : AppLocalizations.of(context).t('enterPhoneNumber'),
             border: const OutlineInputBorder(),
           ),
           validator: (value) {
             if (widget.field == 'name' && (value == null || value.isEmpty)) {
-              return 'Please enter your name';
+              return AppLocalizations.of(context).t('enterYourName');
             }
             return null;
           },
@@ -392,9 +421,12 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context).t('cancel')),
         ),
-        ElevatedButton(onPressed: _save, child: const Text('Save')),
+        ElevatedButton(
+          onPressed: _save,
+          child: Text(AppLocalizations.of(context).t('save')),
+        ),
       ],
     );
   }

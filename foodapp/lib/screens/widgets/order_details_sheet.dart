@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
@@ -72,7 +73,7 @@ class OrderDetailsSheet extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Order #${order.orderId}',
+                    '${AppLocalizations.of(context).t('order')} #${order.orderId}',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -93,15 +94,22 @@ class OrderDetailsSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _DetailSection(
-                    title: 'Order Information',
+                    title: AppLocalizations.of(context).t('orderInformation'),
                     children: [
-                      _DetailRow(label: 'Order ID', value: '#${order.orderId}'),
+                      _DetailRow(
+                        label: AppLocalizations.of(context).t('orderId'),
+                        value: '#${order.orderId}',
+                      ),
                       Consumer<AuthProvider>(
                         builder: (context, authProv, _) {
                           if (authProv.isLoading) {
-                            return const _DetailRow(
-                              label: 'Customer Name',
-                              value: 'Loading...',
+                            return _DetailRow(
+                              label: AppLocalizations.of(
+                                context,
+                              ).t('customerName'),
+                              value: AppLocalizations.of(
+                                context,
+                              ).t('loading...'),
                             );
                           }
 
@@ -123,7 +131,9 @@ class OrderDetailsSheet extends StatelessWidget {
                               }
                             },
                             child: _DetailRow(
-                              label: 'Customer Name',
+                              label: AppLocalizations.of(
+                                context,
+                              ).t('customerName'),
                               value:
                                   context
                                       .read<AuthProvider>()
@@ -139,15 +149,15 @@ class OrderDetailsSheet extends StatelessWidget {
                         },
                       ),
                       _DetailRow(
-                        label: 'Date',
+                        label: AppLocalizations.of(context).t('date'),
                         value: _formatDate(order.createdAt),
                       ),
                       _DetailRow(
-                        label: 'Status',
+                        label: AppLocalizations.of(context).t('status'),
                         value: order.status.toUpperCase(),
                       ),
                       _DetailRow(
-                        label: 'Total',
+                        label: AppLocalizations.of(context).t('total'),
                         value: 'EGP${order.totalPrice.toStringAsFixed(2)}',
                         isHighlighted: true,
                       ),
@@ -155,14 +165,15 @@ class OrderDetailsSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   _DetailSection(
-                    title: 'Delivery Address',
+                    title: AppLocalizations.of(context).t('deliveryAddress'),
                     children: [
                       Text(order.address, style: const TextStyle(fontSize: 14)),
                     ],
                   ),
                   const SizedBox(height: 24),
                   _DetailSection(
-                    title: 'Order Items (${orderItems.length})',
+                    title:
+                        '${AppLocalizations.of(context).t('orderItems')} (${orderItems.length})',
                     children: [
                       const SizedBox(height: 8),
                       ...orderItems.map(
@@ -180,7 +191,7 @@ class OrderDetailsSheet extends StatelessWidget {
                                       )
                                       .first
                                       .name
-                                : 'Unknown';
+                                : AppLocalizations.of(context).t('error');
                             return _OrderItemRow(
                               item: item,
                               menuItem: menuItem!,
@@ -293,7 +304,7 @@ class _OrderItemRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Qty: ${item.quantity} × EGP${item.price.toStringAsFixed(2)}',
+                    '${AppLocalizations.of(context).t('quantity')}: ${item.quantity} × EGP${item.price.toStringAsFixed(2)}',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],

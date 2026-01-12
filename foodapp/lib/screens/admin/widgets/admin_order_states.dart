@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 
 class AdminOrdersErrorState extends StatelessWidget {
   final String error;
@@ -21,7 +22,7 @@ class AdminOrdersErrorState extends StatelessWidget {
             Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
             const SizedBox(height: 24),
             Text(
-              'Error',
+              AppLocalizations.of(context).t('error'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Colors.grey[700],
                 fontWeight: FontWeight.bold,
@@ -39,7 +40,7 @@ class AdminOrdersErrorState extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context).t('retry')),
             ),
           ],
         ),

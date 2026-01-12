@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -33,12 +34,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text('Create Account'),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black87,
-      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -67,8 +62,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Welcome! Create your account',
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).t('wlecomeCreateYourAccount'),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -78,14 +75,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Full name',
-                          prefixIcon: Icon(Icons.person),
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).t('fullName'),
+                          prefixIcon: const Icon(Icons.person),
+                          border: const OutlineInputBorder(),
                         ),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
-                            return 'Name is required';
+                            return AppLocalizations.of(
+                              context,
+                            ).t('nameIsRequired');
                           }
                           return null;
                         },
@@ -95,19 +94,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       TextFormField(
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.email),
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).t('email'),
+                          prefixIcon: const Icon(Icons.email),
+                          border: const OutlineInputBorder(),
                         ),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
-                            return 'Email is required';
+                            return AppLocalizations.of(
+                              context,
+                            ).t('emailRequired');
                           }
                           final email = v.trim();
                           final regex = RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$");
                           if (!regex.hasMatch(email)) {
-                            return 'Enter a valid email';
+                            return AppLocalizations.of(context).t('validEmail');
                           }
                           return null;
                         },
@@ -118,7 +119,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         controller: passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
-                          labelText: 'Password',
+                          labelText: AppLocalizations.of(context).t('password'),
                           prefixIcon: const Icon(Icons.lock),
                           border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
@@ -134,10 +135,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
-                            return 'Password is required';
+                            return AppLocalizations.of(
+                              context,
+                            ).t('passwordRequired');
                           }
                           if (v.trim().length < 6) {
-                            return 'Password must be at least 6 characters';
+                            return AppLocalizations.of(
+                              context,
+                            ).t('passwordMinLengthRegister');
                           }
                           return null;
                         },
@@ -147,10 +152,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       TextFormField(
                         controller: phoneController,
                         keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(
-                          labelText: 'Phone (optional)',
-                          prefixIcon: Icon(Icons.phone),
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(
+                            context,
+                          ).t('phoneOptional'),
+                          prefixIcon: const Icon(Icons.phone),
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -202,17 +209,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     );
                                   }
                                 },
-                                child: const Text('Create account'),
+                                child: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).t('createAccount'),
+                                ),
                               ),
                       ),
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Already have an account?'),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).t('alreadyHaveAccount'),
+                          ),
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('Sign in'),
+                            child: Text(
+                              AppLocalizations.of(context).t('signIn'),
+                            ),
                           ),
                         ],
                       ),

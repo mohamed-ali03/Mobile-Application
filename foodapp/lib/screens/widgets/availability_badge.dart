@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 
 class AvailabilityBadge extends StatelessWidget {
   final bool available;
@@ -14,7 +15,9 @@ class AvailabilityBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
       ),
       child: Text(
-        available ? 'Available' : 'Out of Stock',
+        available
+            ? AppLocalizations.of(context).t('available')
+            : AppLocalizations.of(context).t('outOfStock'),
         style: const TextStyle(
           fontSize: 12,
           color: Colors.white,

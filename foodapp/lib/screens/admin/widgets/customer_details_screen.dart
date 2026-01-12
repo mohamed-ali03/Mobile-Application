@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/user model/user_model.dart';
 
 class CustomerDetailsScreen extends StatelessWidget {
@@ -14,7 +15,9 @@ class CustomerDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Customer Details')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).t('customerDetails')),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -37,15 +40,18 @@ class CustomerDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              user.role.toUpperCase(),
+              AppLocalizations.of(context).t(user.role).toUpperCase(),
               style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
             Card(
               child: ListTile(
                 leading: const Icon(Icons.phone),
-                title: Text(user.phoneNumber ?? 'Not provided'),
-                subtitle: const Text('Phone'),
+                title: Text(
+                  user.phoneNumber ??
+                      AppLocalizations.of(context).t('notProvided'),
+                ),
+                subtitle: Text(AppLocalizations.of(context).t('phone')),
               ),
             ),
             const SizedBox(height: 8),
@@ -53,7 +59,7 @@ class CustomerDetailsScreen extends StatelessWidget {
               child: ListTile(
                 leading: const Icon(Icons.calendar_today),
                 title: Text(_formatDate(user.createdAt)),
-                subtitle: const Text('Member since'),
+                subtitle: Text(AppLocalizations.of(context).t('memberSince')),
               ),
             ),
             const SizedBox(height: 16),
@@ -62,7 +68,7 @@ class CustomerDetailsScreen extends StatelessWidget {
                 // future: call / message
               },
               icon: const Icon(Icons.message),
-              label: const Text('Message'),
+              label: Text(AppLocalizations.of(context).t('message')),
             ),
           ],
         ),

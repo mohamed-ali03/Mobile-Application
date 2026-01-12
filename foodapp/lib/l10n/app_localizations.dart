@@ -26,9 +26,19 @@ class AppLocalizations {
     );
   }
 
-  /// Simple text
-  String t(String key) {
-    return _localizedStrings[key] ?? key;
+  /// Simple text with optional placeholder replacement
+  String t(String key, {Map<String, String>? data}) {
+    // Get the localized string
+    String text = _localizedStrings[key] ?? key;
+
+    // If data is provided, replace placeholders {placeholder} with actual values
+    if (data != null) {
+      data.forEach((placeholder, value) {
+        text = text.replaceAll('{$placeholder}', value);
+      });
+    }
+
+    return text;
   }
 
   /// Text with parameters: {name}, {count}, etc.

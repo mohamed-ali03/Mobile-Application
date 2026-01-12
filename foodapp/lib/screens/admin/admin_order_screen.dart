@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
@@ -70,19 +71,19 @@ class _AdminOrderScreenState extends State<AdminOrderScreen>
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Order Management'),
+        title: Text(AppLocalizations.of(context).t('orderManagement')),
         elevation: 0,
         bottom: TabBar(
           controller: tabController,
           indicatorColor: Colors.white,
-          tabs: const [
+          tabs: [
             Tab(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.pending, size: 18),
                   SizedBox(width: 8),
-                  Text('Pending'),
+                  Text(AppLocalizations.of(context).t('pending')),
                 ],
               ),
             ),
@@ -92,7 +93,7 @@ class _AdminOrderScreenState extends State<AdminOrderScreen>
                 children: [
                   Icon(Icons.restaurant, size: 18),
                   SizedBox(width: 8),
-                  Text('Processing'),
+                  Text(AppLocalizations.of(context).t('processing')),
                 ],
               ),
             ),
@@ -102,7 +103,7 @@ class _AdminOrderScreenState extends State<AdminOrderScreen>
                 children: [
                   Icon(Icons.check_circle, size: 18),
                   SizedBox(width: 8),
-                  Text('Delivered'),
+                  Text(AppLocalizations.of(context).t('delivered')),
                 ],
               ),
             ),
@@ -138,7 +139,9 @@ class _AdminOrderScreenState extends State<AdminOrderScreen>
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search by order ID or address ...',
+                    hintText: AppLocalizations.of(
+                      context,
+                    ).t('searchByOrderIdOrAddress'),
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(

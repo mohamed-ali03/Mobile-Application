@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/category model/category_model.dart';
 
 class MenuSearchFilters extends StatelessWidget {
@@ -41,7 +42,7 @@ class MenuSearchFilters extends StatelessWidget {
           TextField(
             controller: searchController,
             decoration: InputDecoration(
-              hintText: 'Search items',
+              hintText: AppLocalizations.of(context).t('searchItems'),
               prefixIcon: const Icon(Icons.search),
               suffixIcon: searchQuery.isNotEmpty
                   ? IconButton(
@@ -77,12 +78,16 @@ class MenuSearchFilters extends StatelessWidget {
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<int?>(
                       value: selectedCategoryId,
-                      hint: const Text('All Categories'),
+                      hint: Text(
+                        AppLocalizations.of(context).t('allCategories'),
+                      ),
                       isExpanded: true,
                       items: [
                         DropdownMenuItem<int?>(
                           value: null,
-                          child: const Text('All Categories'),
+                          child: Text(
+                            AppLocalizations.of(context).t('allCategories'),
+                          ),
                         ),
                         ...categories.map(
                           (cat) => DropdownMenuItem<int?>(
@@ -100,7 +105,7 @@ class MenuSearchFilters extends StatelessWidget {
 
               // Available Filter
               FilterChip(
-                label: const Text('Available Only'),
+                label: Text(AppLocalizations.of(context).t('availableOnly')),
                 selected: showAvailableOnly,
                 onSelected: onAvailableToggle,
               ),
@@ -114,7 +119,7 @@ class MenuSearchFilters extends StatelessWidget {
               child: TextButton.icon(
                 onPressed: onClearFilters,
                 icon: const Icon(Icons.clear_all, size: 16),
-                label: const Text("Clear Filters"),
+                label: Text(AppLocalizations.of(context).t('clearFilters')),
                 style: TextButton.styleFrom(foregroundColor: Colors.blue),
               ),
             ),

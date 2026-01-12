@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodapp/core/functions.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:provider/provider.dart';
@@ -76,9 +77,11 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
 
     final file = await uploadImage.pickImage();
     if (mounted && file == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to pick the image')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).t('failedToPickImage')),
+        ),
+      );
       return;
     }
 
@@ -87,9 +90,11 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
     imageUrl = await uploadImage.uploadImage('item_pic', fileName, file!);
 
     if (mounted && imageUrl!.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to upload image')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).t('failedToUploadImage')),
+        ),
+      );
     }
     setState(() => isUploadingImage = false);
   }
@@ -97,7 +102,11 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.isEdit ? 'Edit Menu Item' : 'Add Menu Item'),
+      title: Text(
+        widget.isEdit
+            ? AppLocalizations.of(context).t('editMenuItem')
+            : AppLocalizations.of(context).t('addMenuItem'),
+      ),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -154,7 +163,9 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Tap to upload image',
+                                AppLocalizations.of(
+                                  context,
+                                ).t('tapToUploadImage'),
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -168,14 +179,18 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Item Name',
-                  hintText: 'e.g., Margherita Pizza',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).t('itemName'),
+                  hintText: AppLocalizations.of(
+                    context,
+                  ).t('e.g., Margherita Pizza'),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter item name';
+                    return AppLocalizations.of(
+                      context,
+                    ).t('pleaseEnterItemName');
                   }
                   return null;
                 },
@@ -183,19 +198,21 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: priceController,
-                decoration: const InputDecoration(
-                  labelText: 'Price',
-                  hintText: 'e.g., 12.99',
-                  suffixText: 'EGP',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).t('price'),
+                  hintText: AppLocalizations.of(context).t('e.g., 12.99'),
+                  suffixText: AppLocalizations.of(context).t('egp'),
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter price';
+                    return AppLocalizations.of(context).t('pleaseEnterPrice');
                   }
                   if (double.tryParse(value) == null) {
-                    return 'Please enter a valid price';
+                    return AppLocalizations.of(
+                      context,
+                    ).t('pleaseEnterValidPrice');
                   }
                   return null;
                 },
@@ -203,18 +220,22 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'Item description...',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).t('description'),
+                  hintText: AppLocalizations.of(context).t('itemDescription'),
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 3,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a description';
+                    return AppLocalizations.of(
+                      context,
+                    ).t('pleaseEnterDescription');
                   }
                   if (value.trim().length < 10) {
-                    return 'Description is too short';
+                    return AppLocalizations.of(
+                      context,
+                    ).t('descriptionTooShort');
                   }
                   return null;
                 },
@@ -222,15 +243,17 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: ingreidentsController,
-                decoration: const InputDecoration(
-                  labelText: 'Ingredients',
-                  hintText: 'Item ingredients (comma separated)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).t('ingredients'),
+                  hintText: AppLocalizations.of(context).t('itemIngredients'),
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 2,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter ingredients';
+                    return AppLocalizations.of(
+                      context,
+                    ).t('pleaseEnterIngredients');
                   }
                   final parts = value
                       .split(',')
@@ -238,7 +261,9 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
                       .where((s) => s.isNotEmpty)
                       .toList();
                   if (parts.isEmpty) {
-                    return 'Please list at least one ingredient';
+                    return AppLocalizations.of(
+                      context,
+                    ).t('pleaseListAtLeastOneIngredient');
                   }
                   return null;
                 },
@@ -249,9 +274,9 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
                 builder: (context, menuProvider, _) {
                   return DropdownButtonFormField<int>(
                     initialValue: selectedCategoryId,
-                    decoration: const InputDecoration(
-                      labelText: 'Category',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context).t('category'),
+                      border: const OutlineInputBorder(),
                     ),
                     items: menuProvider.categories
                         .map(
@@ -269,7 +294,7 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
               ),
               const SizedBox(height: 16),
               CheckboxListTile(
-                title: const Text('Available'),
+                title: Text(AppLocalizations.of(context).t('available')),
                 value: isAvailable,
                 onChanged: (value) {
                   setState(() => isAvailable = value ?? true);
@@ -282,7 +307,7 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context).t('cancel')),
         ),
         ElevatedButton(
           onPressed: isUploadingImage
@@ -300,7 +325,11 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
                     );
                   }
                 },
-          child: Text(widget.isEdit ? 'Update' : 'Add'),
+          child: Text(
+            widget.isEdit
+                ? AppLocalizations.of(context).t('update')
+                : AppLocalizations.of(context).t('add'),
+          ),
         ),
       ],
     );

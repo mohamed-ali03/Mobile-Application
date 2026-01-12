@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 
 class AdminQuickActionsGrid extends StatelessWidget {
   final BuildContext parentContext;
@@ -16,13 +17,13 @@ class AdminQuickActionsGrid extends StatelessWidget {
       childAspectRatio: 2,
       children: [
         _QuickActionCard(
-          title: 'Manage Menu',
+          title: AppLocalizations.of(context).t('manageMenu'),
           icon: Icons.restaurant_menu,
           color: Colors.blue,
           onTap: () => Navigator.pushNamed(parentContext, '/adminMenuScreen'),
         ),
         _QuickActionCard(
-          title: 'View Orders',
+          title: AppLocalizations.of(context).t('viewOrders'),
           icon: Icons.list_alt,
           color: Colors.green,
           onTap: () => Navigator.pushNamed(parentContext, '/adminOrdersScreen'),

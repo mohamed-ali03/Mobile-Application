@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
 import 'package:foodapp/screens/admin/widgets/admin_home_recent_activity.dart';
@@ -15,7 +16,10 @@ class AdminHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(title: const Text('Admin Dashboard'), elevation: 0),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).t('adminDashboard')),
+        elevation: 0,
+      ),
       drawer: const MyDrawer(),
       body: SafeArea(
         child: Consumer2<OrderProvider, MenuProvider>(
@@ -46,7 +50,7 @@ class AdminHomeScreen extends StatelessWidget {
 
                     // Quick Actions
                     Text(
-                      'Quick Actions',
+                      AppLocalizations.of(context).t('quickActions'),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -57,7 +61,7 @@ class AdminHomeScreen extends StatelessWidget {
 
                     // Recent Activity
                     Text(
-                      'Recent Activity',
+                      AppLocalizations.of(context).t('recentActivity'),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

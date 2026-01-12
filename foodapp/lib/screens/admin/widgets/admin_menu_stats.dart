@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 
 class AdminMenuStats extends StatelessWidget {
   final Map<String, int> stats;
@@ -25,19 +26,19 @@ class AdminMenuStats extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _StatItem(
-            label: 'Total Items',
+            label: AppLocalizations.of(context).t('totalItems'),
             value: stats['total']!.toString(),
             icon: Icons.restaurant_menu,
             color: Colors.blue,
           ),
           _StatItem(
-            label: 'Available',
+            label: AppLocalizations.of(context).t('available'),
             value: stats['available']!.toString(),
             icon: Icons.check_circle,
             color: Colors.green,
           ),
           _StatItem(
-            label: 'Out of Stock',
+            label: AppLocalizations.of(context).t('outOfStock'),
             value: stats['outOfStock']!.toString(),
             icon: Icons.cancel,
             color: Colors.red,

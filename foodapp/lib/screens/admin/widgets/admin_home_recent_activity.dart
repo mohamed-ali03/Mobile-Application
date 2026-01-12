@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 
 class RecentActivityCard extends StatelessWidget {
@@ -16,19 +17,19 @@ class RecentActivityCard extends StatelessWidget {
     return sorted.take(5).toList();
   }
 
-  String _formatTimeAgo(DateTime? date) {
-    if (date == null) return 'Unknown';
+  String _formatTimeAgo(BuildContext context, DateTime? date) {
+    if (date == null) return AppLocalizations.of(context).t('unknown');
     final now = DateTime.now();
     final difference = now.difference(date);
 
     if (difference.inDays > 0) {
-      return '${difference.inDays} ${difference.inDays == 1 ? 'day' : 'days'} ago';
+      return '${difference.inDays} ${difference.inDays == 1 ? AppLocalizations.of(context).t('day') : AppLocalizations.of(context).t('days')}';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} ${difference.inHours == 1 ? 'hour' : 'hours'} ago';
+      return '${difference.inHours} ${difference.inHours == 1 ? AppLocalizations.of(context).t('hour') : AppLocalizations.of(context).t('hours')}';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} ${difference.inMinutes == 1 ? 'minute' : 'minutes'} ago';
+      return '${difference.inMinutes} ${difference.inMinutes == 1 ? AppLocalizations.of(context).t('minute') : AppLocalizations.of(context).t('minutes')}';
     } else {
-      return 'Just now';
+      return AppLocalizations.of(context).t('just_now');
     }
   }
 
@@ -86,7 +87,7 @@ class RecentActivityCard extends StatelessWidget {
                 Icon(Icons.inbox, size: 48, color: Colors.grey[400]),
                 const SizedBox(height: 12),
                 Text(
-                  'No Recent Activity',
+                  AppLocalizations.of(context).t('no_recent_activity'),
                   style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 ),
               ],
@@ -119,8 +120,8 @@ class RecentActivityCard extends StatelessWidget {
                 _ActivityItem(
                   icon: _getStatusIcon(order.status),
                   title:
-                      'Order #${order.orderId ?? 'N/A'} - ${order.status.toUpperCase()}',
-                  time: _formatTimeAgo(order.createdAt),
+                      '${AppLocalizations.of(context).t('order')} #${order.orderId ?? 'N/A'} - ${AppLocalizations.of(context).t(order.status).toUpperCase()}',
+                  time: _formatTimeAgo(context, order.createdAt),
                   color: _getStatusColor(order.status),
                 ),
                 if (index < recentOrders.length - 1) const Divider(),

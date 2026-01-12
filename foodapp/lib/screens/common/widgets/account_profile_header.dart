@@ -67,7 +67,6 @@ class AccountProfileHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          // RoleBadge kept in-screen
         ],
       ),
     );

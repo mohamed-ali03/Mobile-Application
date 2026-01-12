@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/order_provider.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/screens/admin/widgets/admin_orders_views.dart';
@@ -43,11 +44,11 @@ class _StaffOrdersScreenState extends State<StaffOrdersScreen> {
                   children: [
                     Icon(Icons.receipt_long, size: 80, color: Colors.grey[400]),
                     const SizedBox(height: 24),
-                    const Text('No active orders'),
+                    Text(AppLocalizations.of(context).t('noActiveOrders')),
                     const SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: () => orderProv.fetchAllOrders(),
-                      child: const Text('Refresh'),
+                      child: Text(AppLocalizations.of(context).t('refresh')),
                     ),
                   ],
                 ),

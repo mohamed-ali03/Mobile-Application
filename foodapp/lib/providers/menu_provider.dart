@@ -19,7 +19,7 @@ class MenuProvider extends ChangeNotifier {
   StreamSubscription? _categoriesSub;
 
   MenuProvider() {
-    sync();
+    // sync();
     _repo.listenToChangesInCategoryTable();
     _repo.listenToChangesInItemsTable();
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/screens/widgets/availability_badge.dart';
@@ -96,7 +97,7 @@ class _ItemCardState extends State<ItemCard> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'EGP${widget.item.price.toStringAsFixed(2)}',
+                                  '${AppLocalizations.of(context).t("egp")} ${widget.item.price.toStringAsFixed(2)}',
                                   style: TextStyle(
                                     color: Colors.green[700],
                                     fontWeight: FontWeight.bold,
@@ -123,7 +124,7 @@ class _ItemCardState extends State<ItemCard> {
                 children: role == 'user'
                     ? [
                         Text(
-                          'Price: EGP${widget.item.price.toStringAsFixed(2)}',
+                          '${AppLocalizations.of(context).t('price')}: ${AppLocalizations.of(context).t("egp")}${widget.item.price.toStringAsFixed(2)}',
                         ),
                         const SizedBox(width: 12),
                         widget.item.available
@@ -132,7 +133,7 @@ class _ItemCardState extends State<ItemCard> {
                                       onPressed: () {
                                         setState(() {
                                           selected = false;
-                                          widget.onSelectItem?.call(selected);
+                                          widget.onSelectItem!(selected);
                                         });
                                       },
                                       icon: const Icon(
@@ -144,7 +145,7 @@ class _ItemCardState extends State<ItemCard> {
                                       onPressed: () {
                                         setState(() {
                                           selected = true;
-                                          widget.onSelectItem?.call(selected);
+                                          widget.onSelectItem!(selected);
                                         });
                                       },
                                       icon: const Icon(Icons.add_shopping_cart),
@@ -162,14 +163,16 @@ class _ItemCardState extends State<ItemCard> {
                           TextButton.icon(
                             onPressed: widget.onEdit,
                             icon: const Icon(Icons.edit, size: 18),
-                            label: const Text('Edit'),
+                            label: Text(AppLocalizations.of(context).t('edit')),
                           ),
                         if (widget.onDelete != null) const SizedBox(width: 8),
                         if (widget.onDelete != null)
                           TextButton.icon(
                             onPressed: widget.onDelete,
                             icon: const Icon(Icons.delete, size: 18),
-                            label: const Text('Delete'),
+                            label: Text(
+                              AppLocalizations.of(context).t('delete'),
+                            ),
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.red,
                             ),

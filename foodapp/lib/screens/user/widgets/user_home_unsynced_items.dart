@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
@@ -51,16 +52,21 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Delete item'),
-        content: const Text('Are you sure you want to delete this item?'),
+        title: Text(AppLocalizations.of(context).t('deleteItem')),
+        content: Text(
+          AppLocalizations.of(context).t('areYouSureYouWantToDeleteThisItem'),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).t('cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(c, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(
+              AppLocalizations.of(context).t('delete'),
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -81,16 +87,22 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
     final authProvider = context.read<AuthProvider>();
 
     if (authProvider.user == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please login to continue')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).t('pleaseLoginToContinue'),
+          ),
+        ),
+      );
       return;
     }
 
     if (widget.orderItems.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('No items to checkout')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).t('noItemsToCheckout')),
+        ),
+      );
       return;
     }
 
@@ -100,17 +112,19 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
       context: context,
       builder: (c) {
         return AlertDialog(
-          title: const Text('Checkout'),
+          title: Text(AppLocalizations.of(context).t('checkout')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Confirm checkout for ${widget.orderItems.length} item(s)?'),
+              Text(AppLocalizations.of(context).t('confirmCheckout')),
               const SizedBox(height: 12),
               TextField(
                 controller: addressController,
-                decoration: const InputDecoration(
-                  labelText: 'Delivery address',
-                  hintText: 'Enter delivery address',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).t('deliveryAddress'),
+                  hintText: AppLocalizations.of(
+                    context,
+                  ).t('enterDeliveryAddress'),
                   border: OutlineInputBorder(),
                   isDense: true,
                 ),
@@ -121,7 +135,7 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(c, null),
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context).t('cancel')),
             ),
             TextButton(
               onPressed: () {
@@ -129,8 +143,8 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
                 addressController.clear();
                 Navigator.pop(c, value.isEmpty ? null : value);
               },
-              child: const Text(
-                'Confirm',
+              child: Text(
+                AppLocalizations.of(context).t('confirm'),
                 style: TextStyle(color: Colors.green),
               ),
             ),
@@ -145,7 +159,11 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
         // cancelled - do nothing
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please provide a delivery address')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).t('pleaseProvideADeliveryAddress'),
+            ),
+          ),
         );
       }
       return;
@@ -162,9 +180,11 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
       await context.read<OrderProvider>().placeOrder(order, widget.orderItems);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to place order: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).t('failedToPlaceOrder')),
+          ),
+        );
       }
       return;
     }
@@ -176,9 +196,13 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
     isChanged = true;
     _calculateTotal();
     setState(() {});
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Order placed successfully')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(context).t('orderPlacedSuccessfully'),
+        ),
+      ),
+    );
   }
 
   @override
@@ -229,8 +253,8 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Order Summary',
+          Text(
+            AppLocalizations.of(context).t('orderSummary'),
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey,
@@ -249,20 +273,20 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Items: ${widget.orderItems.length}',
+                          '${AppLocalizations.of(context).t('countOfItems')} ${widget.orderItems.length.toString()} ',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey[700],
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Total',
+                        Text(
+                          AppLocalizations.of(context).t('total'),
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${value.toStringAsFixed(2)} EGP',
+                          '${value.toStringAsFixed(2)} ${AppLocalizations.of(context).t('egp')}',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -278,7 +302,7 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
               ElevatedButton.icon(
                 onPressed: widget.orderItems.isEmpty ? null : _handleCheckout,
                 icon: const Icon(Icons.shopping_bag_outlined),
-                label: const Text('Checkout'),
+                label: Text(AppLocalizations.of(context).t('checkout')),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

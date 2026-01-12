@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
+import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
 import 'package:foodapp/screens/widgets/menu_search_filters.dart';
@@ -59,14 +61,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text('Welcome'),
-        leading: CartButton(),
-        actions: [
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/accountScreen'),
-            icon: const Icon(Icons.person),
-          ),
-        ],
+        title: Text(AppLocalizations.of(context).t('welcomeTitle')),
+        leading: IconButton(
+          onPressed: () => Navigator.pushNamed(context, '/accountScreen'),
+          icon: const Icon(Icons.person),
+        ),
+        actions: [CartButton()],
       ),
       backgroundColor: Colors.grey[100],
       body: SafeArea(
@@ -140,13 +140,30 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         final category = menuProvider.categories.firstWhere(
                           (cat) => cat.categoryId == item.categoryId,
                           orElse: () => CategoryModel()
-                            ..name = 'Unknown Category'
+                            ..name = AppLocalizations.of(
+                              context,
+                            ).t('unknownCategory')
                             ..categoryId = 0,
                         );
 
                         return ItemCard(
                           item: item,
                           categoryName: category.name,
+                          onSelectItem: (selected) async {
+                            if (selected) {
+                              final orderItem = OrderItemModel()
+                                ..itemId = item.itemId
+                                ..price = item.price
+                                ..quantity = 1;
+                              await context
+                                  .read<OrderProvider>()
+                                  .upsertOrderItemLocally(orderItem);
+                            } else {
+                              await context
+                                  .read<OrderProvider>()
+                                  .deleteOrderItemLocally(id: item.itemId);
+                            }
+                          },
                         );
                       }, childCount: filteredItems.length),
                     ),

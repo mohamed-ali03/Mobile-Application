@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/providers/order_provider.dart';
@@ -35,19 +36,19 @@ class _UserCartScreenState extends State<UserCartScreen>
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('My Orders'),
+        title: Text(AppLocalizations.of(context).t('myOrders')),
         elevation: 0,
         bottom: TabBar(
           controller: tabController,
           indicatorColor: Colors.white,
-          tabs: const [
+          tabs: [
             Tab(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.shopping_cart, size: 18),
                   SizedBox(width: 8),
-                  Text('Cart'),
+                  Text(AppLocalizations.of(context).t('cart')),
                 ],
               ),
             ),
@@ -57,7 +58,7 @@ class _UserCartScreenState extends State<UserCartScreen>
                 children: [
                   Icon(Icons.restaurant, size: 18),
                   SizedBox(width: 8),
-                  Text('Processing'),
+                  Text(AppLocalizations.of(context).t('processing')),
                 ],
               ),
             ),
@@ -67,7 +68,7 @@ class _UserCartScreenState extends State<UserCartScreen>
                 children: [
                   Icon(Icons.check_circle, size: 18),
                   SizedBox(width: 8),
-                  Text('Delivered'),
+                  Text(AppLocalizations.of(context).t('delivered')),
                 ],
               ),
             ),

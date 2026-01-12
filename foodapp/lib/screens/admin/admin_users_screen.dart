@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/user model/user_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     final selected = await showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: Text('Change role for ${user.name}'),
+        title: Text(
+          '${AppLocalizations.of(context).t('changeRoleTo')} ${user.name}',
+        ),
         children: roles
             .map(
               (r) => SimpleDialogOption(
@@ -41,7 +44,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                       size: 18,
                     ),
                     const SizedBox(width: 8),
-                    Text(r[0].toUpperCase() + r.substring(1)),
+                    Text(AppLocalizations.of(context).t(r).toUpperCase()),
                   ],
                 ),
               ),
@@ -56,13 +59,21 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       await auth.changeUserRole(user.authID, selected);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Role updated to $selected for ${user.name}')),
+        SnackBar(
+          content: Text(
+            '${AppLocalizations.of(context).t('roleUpdatedTo')} $selected ${AppLocalizations.of(context).t('for')}${user.name}',
+          ),
+        ),
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to update role: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${AppLocalizations.of(context).t('failedToUpdateRole')} $e',
+          ),
+        ),
+      );
     }
   }
 
@@ -70,7 +81,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(title: const Text('Manage Users'), elevation: 0),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).t('manageUsers')),
+        elevation: 0,
+      ),
       body: Consumer<AuthProvider>(
         builder: (context, auth, _) {
           if (auth.isLoading && auth.users.isEmpty) {
@@ -88,14 +102,14 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   children: [
                     const Icon(Icons.group_off, size: 56, color: Colors.grey),
                     const SizedBox(height: 12),
-                    const Text(
-                      'No users found',
-                      style: TextStyle(fontSize: 16),
+                    Text(
+                      AppLocalizations.of(context).t('noUsersFound'),
+                      style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton(
                       onPressed: () => auth.fetchAllUsers(),
-                      child: const Text('Retry'),
+                      child: Text(AppLocalizations.of(context).t('retry')),
                     ),
                   ],
                 ),
@@ -146,7 +160,9 @@ class _UserTile extends StatelessWidget {
               : null,
         ),
         title: Text(user.name),
-        subtitle: Text('Role: ${user.role}'),
+        subtitle: Text(
+          '${AppLocalizations.of(context).t('role')}: ${user.role}',
+        ),
         trailing: IconButton(
           icon: const Icon(Icons.edit),
           onPressed: onChangeRole,

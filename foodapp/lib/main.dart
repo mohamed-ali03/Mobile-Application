@@ -11,6 +11,7 @@ import 'package:foodapp/screens/admin/admin_order_screen.dart';
 import 'package:foodapp/screens/admin/admin_settings_screen.dart';
 import 'package:foodapp/screens/admin/admin_users_screen.dart';
 import 'package:foodapp/screens/common/login_screen.dart';
+import 'package:foodapp/screens/common/settings_screen.dart';
 import 'package:foodapp/screens/staff/staff_home_screen.dart';
 import 'package:foodapp/screens/common/account_screen.dart';
 import 'package:foodapp/screens/staff/staff_orders_screen.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
             '/adminSettingsScreen': (context) => const AdminSettingsScreen(),
             '/staffHomeScreen': (context) => const StaffHomeScreen(),
             '/staffOrdersScreen': (context) => const StaffOrdersScreen(),
+            '/settings': (context) => const SettingsScreen(),
           },
           locale: Locale(appSettingsProvider.lang),
           supportedLocales: const [Locale('en'), Locale('ar')],

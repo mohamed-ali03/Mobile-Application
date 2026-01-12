@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -12,16 +13,13 @@ class WelcomeBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final role = auth.user?.role ?? 'user';
-    final name = auth.user?.name ?? (role == 'admin' ? "admin" : "user");
 
-    final title =
-        titleOverride ??
-        (role == 'admin' ? "Welcome, $name!" : "Welcome, $name!");
+    final title = AppLocalizations.of(context).t('welcome');
     final subtitle =
         subtitleOverride ??
         (role == 'admin'
-            ? "Manage your restaurant"
-            : "Explore delicious meals");
+            ? AppLocalizations.of(context).t('subtitleAdmin')
+            : AppLocalizations.of(context).t('subtitleUser'));
 
     return Container(
       padding: const EdgeInsets.all(20),

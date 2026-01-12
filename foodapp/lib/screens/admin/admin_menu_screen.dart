@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/category%20model/category_model.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/providers/menu_provider.dart';
@@ -130,12 +131,16 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Item'),
-        content: Text('Are you sure you want to delete "${item.name}"?'),
+        title: Text(AppLocalizations.of(context).t('deleteItem')),
+        content: Text(
+          AppLocalizations.of(
+            context,
+          ).t('areYouSureYouWantToDeleteItem', data: {'item': item.name}),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).t('cancel')),
           ),
           TextButton(
             onPressed: () {
@@ -143,13 +148,15 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('${item.name} deleted'),
+                  content: Text(
+                    '${item.name} ${AppLocalizations.of(context).t('deleted')}',
+                  ),
                   backgroundColor: Colors.red,
                 ),
               );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context).t('delete')),
           ),
         ],
       ),
@@ -160,11 +167,14 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(title: const Text('Menu Management'), elevation: 0),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).t('menuManagement')),
+        elevation: 0,
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddItemDialog(context),
         icon: const Icon(Icons.add),
-        label: const Text('Add Item'),
+        label: Text(AppLocalizations.of(context).t('addItem')),
       ),
       body: Consumer<MenuProvider>(
         builder: (context, menuProvider, child) {
@@ -239,7 +249,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                         final category = menuProvider.categories.firstWhere(
                           (cat) => cat.categoryId == item.categoryId,
                           orElse: () => CategoryModel()
-                            ..name = 'Unknown'
+                            ..name = AppLocalizations.of(context).t('unknown')
                             ..categoryId = 0,
                         );
 
