@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
-import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
 import 'package:foodapp/screens/admin/widgets/admin_order_states.dart';
 import 'package:foodapp/screens/admin/widgets/admin_orders_stats.dart';
@@ -18,33 +17,17 @@ class AdminOrderScreen extends StatefulWidget {
 class _AdminOrderScreenState extends State<AdminOrderScreen>
     with TickerProviderStateMixin {
   late TabController tabController;
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     tabController = TabController(length: 3, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthProvider>().fetchAllUsers();
-    });
   }
 
   @override
   void dispose() {
     tabController.dispose();
-    _searchController.dispose();
     super.dispose();
-  }
-
-  List<OrderModel> _getFilteredOrders(List<OrderModel> orders) {
-    if (_searchQuery.isEmpty) return orders;
-
-    final query = _searchQuery.toLowerCase();
-    return orders.where((order) {
-      return order.orderId.toString().contains(query) ||
-          order.address.toLowerCase().contains(query);
-    }).toList();
   }
 
   Map<String, int> _calculateStats(List<OrderModel> orders) {
@@ -133,78 +116,39 @@ class _AdminOrderScreenState extends State<AdminOrderScreen>
               // Stats Section
               AdminOrdersStats(stats: stats),
 
-              // Search Bar
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(
-                      context,
-                    ).t('searchByOrderIdOrAddress'),
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value);
-                  },
-                ),
-              ),
-
               // Orders List
               Expanded(
                 child: TabBarView(
                   controller: tabController,
                   children: [
                     AdminOrderTabView(
-                      orders: _getFilteredOrders(
-                        sortedOrders
-                            .where(
-                              (order) =>
-                                  order.status.toLowerCase() == 'pending',
-                            )
-                            .toList(),
-                      ),
+                      orders: sortedOrders
+                          .where(
+                            (order) => order.status.toLowerCase() == 'pending',
+                          )
+                          .toList(),
                       orderItems: orderProvider.orderItems,
-                      onRefresh: () => orderProvider.fetchAllOrders(),
                     ),
                     AdminOrderTabView(
-                      orders: _getFilteredOrders(
-                        sortedOrders
-                            .where(
-                              (order) =>
-                                  order.status.toLowerCase() != 'pending' &&
-                                  order.status.toLowerCase() != 'delivered',
-                            )
-                            .toList(),
-                      ),
+                      orders: sortedOrders
+                          .where(
+                            (order) =>
+                                order.status.toLowerCase() != 'pending' &&
+                                order.status.toLowerCase() != 'delivered' &&
+                                order.status.toLowerCase() != 'canceled',
+                          )
+                          .toList(),
                       orderItems: orderProvider.orderItems,
-                      onRefresh: () => orderProvider.fetchAllOrders(),
                     ),
                     AdminOrderTabView(
-                      orders: _getFilteredOrders(
-                        sortedOrders
-                            .where(
-                              (order) =>
-                                  order.status.toLowerCase() == 'delivered',
-                            )
-                            .toList(),
-                      ),
+                      orders: sortedOrders
+                          .where(
+                            (order) =>
+                                order.status.toLowerCase() == 'delivered' ||
+                                order.status.toLowerCase() == 'canceled',
+                          )
+                          .toList(),
                       orderItems: orderProvider.orderItems,
-                      onRefresh: () => orderProvider.fetchAllOrders(),
                     ),
                   ],
                 ),

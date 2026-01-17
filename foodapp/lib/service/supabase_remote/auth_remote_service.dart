@@ -41,6 +41,7 @@ class AuthRemoteService {
         'role': role,
         'phone_number': phoneNumber,
         'image_url': imageUrl,
+        'buying_points': 0,
       });
 
       return user;
@@ -79,6 +80,7 @@ class AuthRemoteService {
     String userId, {
     String? name,
     String? phoneNumber,
+    int? buyingPoints,
     String? imageUrl,
   }) async {
     try {
@@ -88,6 +90,7 @@ class AuthRemoteService {
             if (name != null) 'name': name,
             if (phoneNumber != null) 'phone_number': phoneNumber,
             if (imageUrl != null) 'image_url': imageUrl,
+            if (buyingPoints != null) 'buying_points': buyingPoints,
           })
           .eq('id', userId);
     } catch (e) {

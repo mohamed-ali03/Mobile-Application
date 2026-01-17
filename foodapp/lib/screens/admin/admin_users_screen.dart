@@ -2,24 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/user model/user_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
+import 'package:foodapp/screens/admin/widgets/customer_details_screen.dart';
 import 'package:provider/provider.dart';
 
-class AdminUsersScreen extends StatefulWidget {
+class AdminUsersScreen extends StatelessWidget {
   const AdminUsersScreen({super.key});
-
-  @override
-  State<AdminUsersScreen> createState() => _AdminUsersScreenState();
-}
-
-class _AdminUsersScreenState extends State<AdminUsersScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Load users when screen opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthProvider>().fetchAllUsers();
-    });
-  }
 
   Future<void> _changeRole(BuildContext context, UserModel user) async {
     final auth = context.read<AuthProvider>();
@@ -125,9 +112,17 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final user = users[index];
-                return _UserTile(
-                  user: user,
-                  onChangeRole: () => _changeRole(context, user),
+                return InkWell(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CustomerDetailsScreen(user: user),
+                    ),
+                  ),
+                  child: _UserTile(
+                    user: user,
+                    onChangeRole: () => _changeRole(context, user),
+                  ),
                 );
               },
             ),

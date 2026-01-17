@@ -17,38 +17,43 @@ const OrderItemModelSchema = CollectionSchema(
   name: r'OrderItemModel',
   id: 3320497907544385651,
   properties: {
-    r'itemId': PropertySchema(
+    r'createdAt': PropertySchema(
       id: 0,
+      name: r'createdAt',
+      type: IsarType.dateTime,
+    ),
+    r'itemId': PropertySchema(
+      id: 1,
       name: r'itemId',
       type: IsarType.long,
     ),
     r'localOrderId': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'localOrderId',
       type: IsarType.long,
     ),
     r'orderId': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'orderId',
       type: IsarType.long,
     ),
     r'orderItemId': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'orderItemId',
       type: IsarType.long,
     ),
     r'price': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'price',
       type: IsarType.double,
     ),
     r'quantity': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'quantity',
       type: IsarType.long,
     ),
     r'synced': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'synced',
       type: IsarType.bool,
     )
@@ -82,13 +87,14 @@ void _orderItemModelSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.itemId);
-  writer.writeLong(offsets[1], object.localOrderId);
-  writer.writeLong(offsets[2], object.orderId);
-  writer.writeLong(offsets[3], object.orderItemId);
-  writer.writeDouble(offsets[4], object.price);
-  writer.writeLong(offsets[5], object.quantity);
-  writer.writeBool(offsets[6], object.synced);
+  writer.writeDateTime(offsets[0], object.createdAt);
+  writer.writeLong(offsets[1], object.itemId);
+  writer.writeLong(offsets[2], object.localOrderId);
+  writer.writeLong(offsets[3], object.orderId);
+  writer.writeLong(offsets[4], object.orderItemId);
+  writer.writeDouble(offsets[5], object.price);
+  writer.writeLong(offsets[6], object.quantity);
+  writer.writeBool(offsets[7], object.synced);
 }
 
 OrderItemModel _orderItemModelDeserialize(
@@ -98,14 +104,15 @@ OrderItemModel _orderItemModelDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = OrderItemModel();
+  object.createdAt = reader.readDateTimeOrNull(offsets[0]);
   object.id = id;
-  object.itemId = reader.readLong(offsets[0]);
-  object.localOrderId = reader.readLongOrNull(offsets[1]);
-  object.orderId = reader.readLongOrNull(offsets[2]);
-  object.orderItemId = reader.readLongOrNull(offsets[3]);
-  object.price = reader.readDouble(offsets[4]);
-  object.quantity = reader.readLong(offsets[5]);
-  object.synced = reader.readBool(offsets[6]);
+  object.itemId = reader.readLong(offsets[1]);
+  object.localOrderId = reader.readLongOrNull(offsets[2]);
+  object.orderId = reader.readLongOrNull(offsets[3]);
+  object.orderItemId = reader.readLongOrNull(offsets[4]);
+  object.price = reader.readDouble(offsets[5]);
+  object.quantity = reader.readLong(offsets[6]);
+  object.synced = reader.readBool(offsets[7]);
   return object;
 }
 
@@ -117,18 +124,20 @@ P _orderItemModelDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 1:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
       return (reader.readLongOrNull(offset)) as P;
     case 3:
       return (reader.readLongOrNull(offset)) as P;
     case 4:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 5:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 6:
+      return (reader.readLong(offset)) as P;
+    case 7:
       return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -231,6 +240,80 @@ extension OrderItemModelQueryWhere
 
 extension OrderItemModelQueryFilter
     on QueryBuilder<OrderItemModel, OrderItemModel, QFilterCondition> {
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      createdAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'createdAt',
+      ));
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      createdAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'createdAt',
+      ));
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      createdAtEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'createdAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      createdAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'createdAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      createdAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'createdAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition>
+      createdAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'createdAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -705,6 +788,19 @@ extension OrderItemModelQueryLinks
 
 extension OrderItemModelQuerySortBy
     on QueryBuilder<OrderItemModel, OrderItemModel, QSortBy> {
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterSortBy> sortByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterSortBy>
+      sortByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterSortBy> sortByItemId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'itemId', Sort.asc);
@@ -800,6 +896,19 @@ extension OrderItemModelQuerySortBy
 
 extension OrderItemModelQuerySortThenBy
     on QueryBuilder<OrderItemModel, OrderItemModel, QSortThenBy> {
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterSortBy> thenByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OrderItemModel, OrderItemModel, QAfterSortBy>
+      thenByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<OrderItemModel, OrderItemModel, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -907,6 +1016,13 @@ extension OrderItemModelQuerySortThenBy
 
 extension OrderItemModelQueryWhereDistinct
     on QueryBuilder<OrderItemModel, OrderItemModel, QDistinct> {
+  QueryBuilder<OrderItemModel, OrderItemModel, QDistinct>
+      distinctByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'createdAt');
+    });
+  }
+
   QueryBuilder<OrderItemModel, OrderItemModel, QDistinct> distinctByItemId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'itemId');
@@ -957,6 +1073,13 @@ extension OrderItemModelQueryProperty
   QueryBuilder<OrderItemModel, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<OrderItemModel, DateTime?, QQueryOperations>
+      createdAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'createdAt');
     });
   }
 

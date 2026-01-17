@@ -62,13 +62,13 @@ class CustomerDetailsScreen extends StatelessWidget {
                 subtitle: Text(AppLocalizations.of(context).t('memberSince')),
               ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                // future: call / message
-              },
-              icon: const Icon(Icons.message),
-              label: Text(AppLocalizations.of(context).t('message')),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.calendar_today),
+                title: Text(user.buyingPoints.toString()),
+                subtitle: Text(AppLocalizations.of(context).t('points')),
+              ),
             ),
           ],
         ),

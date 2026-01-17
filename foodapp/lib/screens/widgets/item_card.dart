@@ -11,7 +11,6 @@ class ItemCard extends StatefulWidget {
   final String categoryName;
   final ValueChanged<bool>? onSelectItem; // for user mode
   final VoidCallback? onEdit; // for admin/staff
-  final VoidCallback? onDelete; // for admin/staff
 
   const ItemCard({
     super.key,
@@ -19,7 +18,6 @@ class ItemCard extends StatefulWidget {
     required this.categoryName,
     this.onSelectItem,
     this.onEdit,
-    this.onDelete,
   });
 
   @override
@@ -43,7 +41,6 @@ class _ItemCardState extends State<ItemCard> {
           item: widget.item,
           categoryName: widget.categoryName,
           onSelectItem: widget.onSelectItem,
-          onDelete: widget.onDelete,
           onEdit: widget.onEdit,
           selected: selected,
         ),
@@ -164,18 +161,6 @@ class _ItemCardState extends State<ItemCard> {
                             onPressed: widget.onEdit,
                             icon: const Icon(Icons.edit, size: 18),
                             label: Text(AppLocalizations.of(context).t('edit')),
-                          ),
-                        if (widget.onDelete != null) const SizedBox(width: 8),
-                        if (widget.onDelete != null)
-                          TextButton.icon(
-                            onPressed: widget.onDelete,
-                            icon: const Icon(Icons.delete, size: 18),
-                            label: Text(
-                              AppLocalizations.of(context).t('delete'),
-                            ),
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.red,
-                            ),
                           ),
                       ],
               ),

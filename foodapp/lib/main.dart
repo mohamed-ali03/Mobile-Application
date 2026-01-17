@@ -9,6 +9,7 @@ import 'package:foodapp/screens/admin/admin_home_screen.dart';
 import 'package:foodapp/screens/admin/admin_menu_screen.dart';
 import 'package:foodapp/screens/admin/admin_order_screen.dart';
 import 'package:foodapp/screens/admin/admin_settings_screen.dart';
+import 'package:foodapp/screens/admin/admin_statistics_screen.dart';
 import 'package:foodapp/screens/admin/admin_users_screen.dart';
 import 'package:foodapp/screens/common/login_screen.dart';
 import 'package:foodapp/screens/common/settings_screen.dart';
@@ -59,13 +60,15 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Food App',
           routes: {
-            '/userHomeScreen': (context) => UserHomeScreen(),
-            '/userCartScreen': (context) => UserCartScreen(),
-            '/accountScreen': (context) => AccountScreen(),
-            '/adminMenuScreen': (context) => AdminMenuScreen(),
-            '/adminOrdersScreen': (context) => AdminOrderScreen(),
+            '/userHomeScreen': (context) => const UserHomeScreen(),
+            '/userCartScreen': (context) => const UserCartScreen(),
+            '/accountScreen': (context) => const AccountScreen(),
+            '/adminMenuScreen': (context) => const AdminMenuScreen(),
+            '/adminOrdersScreen': (context) => const AdminOrderScreen(),
             '/adminUsersScreen': (context) => const AdminUsersScreen(),
             '/adminSettingsScreen': (context) => const AdminSettingsScreen(),
+            '/adminStatisticsScreen': (context) =>
+                const AdminStatisticsScreen(),
             '/staffHomeScreen': (context) => const StaffHomeScreen(),
             '/staffOrdersScreen': (context) => const StaffOrdersScreen(),
             '/settings': (context) => const SettingsScreen(),
@@ -81,7 +84,7 @@ class MyApp extends StatelessWidget {
           home: Consumer<AuthProvider>(
             builder: (context, authProvider, _) {
               // Loading state
-              if (authProvider.isLoading) {
+              if (authProvider.isLoading || appSettingsProvider.isLoading) {
                 return const Scaffold(
                   body: Center(child: CircularProgressIndicator()),
                 );
@@ -93,7 +96,7 @@ class MyApp extends StatelessWidget {
               }
 
               // Role-based routing
-              return _buildHomeScreen(authProvider.user!.role);
+              return _buildHomeScreen(context, authProvider.user!.role);
             },
           ),
         );
@@ -102,7 +105,7 @@ class MyApp extends StatelessWidget {
   }
 
   /// Build home screen based on user role
-  Widget _buildHomeScreen(String role) {
+  Widget _buildHomeScreen(BuildContext context, String role) {
     switch (role.toLowerCase()) {
       case 'admin':
         return const AdminHomeScreen();

@@ -1,18 +1,33 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppSettingsProvider extends ChangeNotifier {
-  bool _isDarkMode = false;
+  static const _langKey = 'app_lang';
+  bool isLoading = false;
+
   String lang = 'ar';
 
-  bool get isDarkMode => _isDarkMode;
+  AppSettingsProvider() {
+    _loadLanguage();
+  }
 
-  void toggleDarkMode() {
-    _isDarkMode = !_isDarkMode;
+  Future<void> _loadLanguage() async {
+    isLoading = true;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    lang = prefs.getString(_langKey) ?? 'ar';
+
+    isLoading = false;
     notifyListeners();
   }
 
-  void setLanguage(String language) {
+  Future<void> setLanguage(String language) async {
     lang = language;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_langKey, language);
+
     notifyListeners();
   }
 }

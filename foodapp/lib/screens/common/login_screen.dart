@@ -100,8 +100,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             ? const Center(child: CircularProgressIndicator())
                             : ElevatedButton(
                                 onPressed: () async {
-                                  if (!_formKey.currentState!.validate())
+                                  if (!_formKey.currentState!.validate()) {
                                     return;
+                                  }
 
                                   try {
                                     await authProvider.login(

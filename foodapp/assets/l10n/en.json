@@ -8,7 +8,7 @@
   "languageChangeInfo": "Changing the language will update the app interface. Restart the app to see all changes take effect.",
   "languageChangedTo": "Language changed to English",
   
-  "welcomeTitle": "Welcome to FoodApp",
+  "welcomeTitle": "Welcome to FFood",
   "welcome": "Welcome 👋",
   "welcomeBack": "Welcome Back",
   "wlecomeCreateYourAccount": "Welcome! Create your account",
@@ -52,6 +52,9 @@
   "settings": "Settings",
   "manageMenu": "Manage Menu",
   "manageUsers": "Manage Users",
+  "workingHours": "Working Hours",
+  "startTime": "Start Time",
+  "endTime": "End Time",
   
   "admin": "Admin",
   "staff": "Staff",
@@ -130,7 +133,7 @@
   "total": "Total",
   "orderTotal": "Order Total",
   
-  "order": "Order",
+  "order": "Order # {orderId}",
   "orderId": "Order ID",
   "orderDate": "Order Date",
   "orderSummary": "Order Summary",
@@ -151,6 +154,7 @@
   "pending": "Pending",
   "completed": "Completed",
   "delivered": "Delivered",
+  "cancelOrder": "Cancel Order",
   "status": "Status",
   "orderStatusUpdated": "Order status updated to {status}",
   "orderStatusUpdatedTo": "Order status updated to ",
@@ -198,9 +202,11 @@
   "deleteItem": "Delete item",
   "deleteItemConfirm": "Are you sure you want to delete this item?",
   "deleteItemWithName": "Are you sure you want to delete \"{name}\"?",
-  "areYouSureYouWantToDeleteItem": "Are you sure you want to delete {item}?",
+  "areYouSureYouWantToDeleteItem": "Are you sure you want to delete item {item}?",
+  "areYouSureYouWantToDeleteOrder": "Are you sure you want to delete order {order}?",
   "close": "Close",
   "cancel": "Cancel",
+  "canceled": "Canceled",
   "confirm": "Confirm",
   "save": "Save",
   "update": "Update",
@@ -222,5 +228,19 @@
   "hour": "hour",
   "hours": "hours",
   "minute": "minute",
-  "minutes": "minutes"
+  "minutes": "minutes",
+
+  "statistics": "Statistics",
+  "allTime": "All Time",
+  "today": "Today",
+  "thisWeek": "This Week",
+  "thisMonth": "This Month",
+  "thisYear": "This Year",
+  "specificDay": "Specific Day",
+  "bestItems": "Best Items",
+  "bestCustomers": "Best Customers",
+  "viewAll": "View All",
+  "unknownUser": "Unknown User",
+
+  "points" : "Points"
 }

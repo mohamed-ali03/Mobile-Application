@@ -37,7 +37,7 @@ class EmptyCartState extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.restaurant_menu),
-              label: const Text('Browse Menu'),
+              label: Text(AppLocalizations.of(context).t('browseMenu')),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,

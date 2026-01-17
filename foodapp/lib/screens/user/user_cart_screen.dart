@@ -3,9 +3,9 @@ import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/providers/order_provider.dart';
-import 'package:foodapp/screens/user/widgets/user_cart_order.dart';
 import 'package:foodapp/screens/user/widgets/user_home_unsynced_items.dart';
 import 'package:foodapp/screens/user/widgets/user_cart_states.dart';
+import 'package:foodapp/screens/widgets/order_card.dart';
 import 'package:provider/provider.dart';
 
 class UserCartScreen extends StatefulWidget {
@@ -97,28 +97,31 @@ class _UserCartScreenState extends State<UserCartScreen>
             .where((item) => item.synced == false)
             .toList();
         final processingOrders = orderProvider.orders
-            .where((order) => order.status.toLowerCase() != 'delivered')
+            .where(
+              (order) =>
+                  order.status.toLowerCase() != 'delivered' &&
+                  order.status.toLowerCase() != 'canceled',
+            )
             .toList();
         final deliveredOrders = orderProvider.orders
-            .where((order) => order.status.toLowerCase() == 'delivered')
+            .where(
+              (order) =>
+                  order.status.toLowerCase() == 'delivered' ||
+                  order.status.toLowerCase() == 'canceled',
+            )
             .toList();
 
         return TabBarView(
           controller: tabController,
           children: [
-            _CartTabView(
-              orderItems: unorderedItems,
-              onRefresh: () => orderProvider.fetchAllOrders(),
-            ),
+            _CartTabView(orderItems: unorderedItems),
             _OrdersTabView(
               orders: processingOrders,
               orderItems: orderProvider.orderItems,
-              onRefresh: () => orderProvider.fetchAllOrders(),
             ),
             _OrdersTabView(
               orders: deliveredOrders,
               orderItems: orderProvider.orderItems,
-              onRefresh: () => orderProvider.fetchAllOrders(),
             ),
           ],
         );
@@ -129,31 +132,22 @@ class _UserCartScreenState extends State<UserCartScreen>
 
 class _CartTabView extends StatelessWidget {
   final List<OrderItemModel> orderItems;
-  final VoidCallback onRefresh;
 
-  const _CartTabView({required this.orderItems, required this.onRefresh});
+  const _CartTabView({required this.orderItems});
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      child: orderItems.isEmpty
-          ? EmptyCartState()
-          : UnsyncedItems(orderItems: orderItems),
-    );
+    return orderItems.isEmpty
+        ? EmptyCartState()
+        : UnsyncedItems(orderItems: orderItems);
   }
 }
 
 class _OrdersTabView extends StatelessWidget {
   final List<OrderModel> orders;
   final List<OrderItemModel> orderItems;
-  final VoidCallback onRefresh;
 
-  const _OrdersTabView({
-    required this.orders,
-    required this.orderItems,
-    required this.onRefresh,
-  });
+  const _OrdersTabView({required this.orders, required this.orderItems});
 
   @override
   Widget build(BuildContext context) {
@@ -168,19 +162,16 @@ class _OrdersTabView extends StatelessWidget {
         return bTime.compareTo(aTime);
       });
 
-    return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: sortedOrders.length,
-        itemBuilder: (context, index) => OrderCard(
-          order: sortedOrders[index],
-          orderItems: orderItems
-              .where(
-                (orderItem) => orderItem.orderId == sortedOrders[index].orderId,
-              )
-              .toList(),
-        ),
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: sortedOrders.length,
+      itemBuilder: (context, index) => OrderCard(
+        order: sortedOrders[index],
+        orderItems: orderItems
+            .where(
+              (orderItem) => orderItem.orderId == sortedOrders[index].orderId,
+            )
+            .toList(),
       ),
     );
   }

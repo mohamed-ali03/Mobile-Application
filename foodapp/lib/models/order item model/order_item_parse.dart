@@ -20,6 +20,9 @@ extension OrderItemModelJson on OrderItemModel {
       ..itemId = json['item_id']
       ..quantity = json['quantity']
       ..price = json['price']
+      ..createdAt = json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null
       ..synced = true;
   }
 }

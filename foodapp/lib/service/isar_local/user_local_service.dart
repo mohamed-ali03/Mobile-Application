@@ -45,23 +45,30 @@ class UserLocalService {
   }
 
   /// ✏️ update current user profile
-  Future<void> updateUser({
+  Future<void> updateUser(
+    String userId, {
     String? name,
     String? phoneNumber,
+    int? buyingPoints,
     String? imageUrl,
+    String? role,
   }) async {
     try {
-      final user = await getUserOnce();
-      if (user == null) {
-        debugPrint('No user found to update');
-        return;
-      }
-
-      if (name != null) user.name = name;
-      if (phoneNumber != null) user.phoneNumber = phoneNumber;
-      if (imageUrl != null) user.imageUrl = imageUrl;
-
       await IsarService.isar.writeTxn(() async {
+        final user = await IsarService.isar.userModels
+            .filter()
+            .authIDEqualTo(userId)
+            .findFirst();
+        if (user == null) {
+          debugPrint('No user found to update');
+          return;
+        }
+
+        if (name != null) user.name = name;
+        if (phoneNumber != null) user.phoneNumber = phoneNumber;
+        if (imageUrl != null) user.imageUrl = imageUrl;
+        if (buyingPoints != null) user.buyingPoints = buyingPoints;
+        if (role != null) user.role = role;
         await IsarService.isar.userModels.put(user);
       });
     } catch (e) {

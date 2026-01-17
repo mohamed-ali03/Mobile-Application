@@ -127,42 +127,6 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, ItemModel item) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).t('deleteItem')),
-        content: Text(
-          AppLocalizations.of(
-            context,
-          ).t('areYouSureYouWantToDeleteItem', data: {'item': item.name}),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).t('cancel')),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<MenuProvider>().deleteItem(item);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '${item.name} ${AppLocalizations.of(context).t('deleted')}',
-                  ),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(AppLocalizations.of(context).t('delete')),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,30 +155,43 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
           final filteredItems = _getFilteredItems(menuProvider.items);
           final stats = _calculateStats(menuProvider.items);
 
-          return RefreshIndicator(
-            onRefresh: () => menuProvider.sync(),
-            child: CustomScrollView(
-              slivers: [
-                // Stats Section
-                SliverToBoxAdapter(child: AdminMenuStats(stats: stats)),
+          return CustomScrollView(
+            slivers: [
+              // Stats Section
+              SliverToBoxAdapter(child: AdminMenuStats(stats: stats)),
 
-                // Search and Filters
-                SliverToBoxAdapter(
-                  child: MenuSearchFilters(
-                    searchController: _searchController,
-                    searchQuery: _searchQuery,
-                    selectedCategoryId: _selectedCategoryId,
-                    showAvailableOnly: _showAvailableOnly,
-                    categories: menuProvider.categories,
-                    onSearchChanged: (value) {
-                      setState(() => _searchQuery = value);
-                    },
-                    onCategoryChanged: (value) {
-                      setState(() => _selectedCategoryId = value);
-                    },
-                    onAvailableToggle: (value) {
-                      setState(() => _showAvailableOnly = value);
-                    },
+              // Search and Filters
+              SliverToBoxAdapter(
+                child: MenuSearchFilters(
+                  searchController: _searchController,
+                  searchQuery: _searchQuery,
+                  selectedCategoryId: _selectedCategoryId,
+                  showAvailableOnly: _showAvailableOnly,
+                  categories: menuProvider.categories,
+                  onSearchChanged: (value) {
+                    setState(() => _searchQuery = value);
+                  },
+                  onCategoryChanged: (value) {
+                    setState(() => _selectedCategoryId = value);
+                  },
+                  onAvailableToggle: (value) {
+                    setState(() => _showAvailableOnly = value);
+                  },
+                  onClearFilters: () {
+                    setState(() {
+                      _searchQuery = '';
+                      _selectedCategoryId = null;
+                      _showAvailableOnly = false;
+                      _searchController.clear();
+                    });
+                  },
+                ),
+              ),
+
+              // Items List
+              if (filteredItems.isEmpty)
+                SliverFillRemaining(
+                  child: AdminMenuNoResultsState(
                     onClearFilters: () {
                       setState(() {
                         _searchQuery = '';
@@ -224,47 +201,29 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                       });
                     },
                   ),
-                ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final item = filteredItems[index];
+                      final category = menuProvider.categories.firstWhere(
+                        (cat) => cat.categoryId == item.categoryId,
+                        orElse: () => CategoryModel()
+                          ..name = AppLocalizations.of(context).t('unknown')
+                          ..categoryId = 0,
+                      );
 
-                // Items List
-                if (filteredItems.isEmpty)
-                  SliverFillRemaining(
-                    child: AdminMenuNoResultsState(
-                      onClearFilters: () {
-                        setState(() {
-                          _searchQuery = '';
-                          _selectedCategoryId = null;
-                          _showAvailableOnly = false;
-                          _searchController.clear();
-                        });
-                      },
-                    ),
-                  )
-                else
-                  SliverPadding(
-                    padding: const EdgeInsets.all(16),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final item = filteredItems[index];
-                        final category = menuProvider.categories.firstWhere(
-                          (cat) => cat.categoryId == item.categoryId,
-                          orElse: () => CategoryModel()
-                            ..name = AppLocalizations.of(context).t('unknown')
-                            ..categoryId = 0,
-                        );
-
-                        return ItemCard(
-                          item: item,
-                          categoryName: category.name,
-                          onEdit: () => _showEditItemDialog(context, item),
-                          onDelete: () =>
-                              _showDeleteConfirmation(context, item),
-                        );
-                      }, childCount: filteredItems.length),
-                    ),
+                      return ItemCard(
+                        item: item,
+                        categoryName: category.name,
+                        onEdit: () => _showEditItemDialog(context, item),
+                      );
+                    }, childCount: filteredItems.length),
                   ),
-              ],
-            ),
+                ),
+            ],
           );
         },
       ),

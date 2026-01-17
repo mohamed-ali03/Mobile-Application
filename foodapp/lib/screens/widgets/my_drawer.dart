@@ -148,6 +148,21 @@ class MyDrawer extends StatelessWidget {
                           Navigator.pushNamed(context, '/adminSettingsScreen');
                         },
                       ),
+
+                      // statistics
+                      ListTile(
+                        leading: const Icon(Icons.bar_chart),
+                        title: Text(
+                          AppLocalizations.of(context).t('statistics'),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(
+                            context,
+                            '/adminStatisticsScreen',
+                          );
+                        },
+                      ),
                     ],
                   ),
               ],
@@ -155,7 +170,7 @@ class MyDrawer extends StatelessWidget {
           ),
 
           Padding(
-            padding: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(bottom: 10, left: 16, right: 16),
             child: LogoutButton(),
           ),
         ],

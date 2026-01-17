@@ -72,9 +72,7 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
       ),
     );
     if (shouldDelete == true) {
-      final removed = widget.orderItems.removeAt(index);
-      // update local provider/cache immediately
-      orderProvider.deleteOrderItemLocally(id: removed.id);
+      orderProvider.deleteOrderItemLocally(id: widget.orderItems[index].id);
       isChanged = true;
       _calculateTotal();
       setState(() {});

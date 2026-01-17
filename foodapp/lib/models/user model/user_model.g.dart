@@ -22,28 +22,33 @@ const UserModelSchema = CollectionSchema(
       name: r'authID',
       type: IsarType.string,
     ),
-    r'createdAt': PropertySchema(
+    r'buyingPoints': PropertySchema(
       id: 1,
+      name: r'buyingPoints',
+      type: IsarType.long,
+    ),
+    r'createdAt': PropertySchema(
+      id: 2,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'imageUrl': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'imageUrl',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'name',
       type: IsarType.string,
     ),
     r'phoneNumber': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'phoneNumber',
       type: IsarType.string,
     ),
     r'role': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'role',
       type: IsarType.string,
     )
@@ -93,11 +98,12 @@ void _userModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.authID);
-  writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeString(offsets[2], object.imageUrl);
-  writer.writeString(offsets[3], object.name);
-  writer.writeString(offsets[4], object.phoneNumber);
-  writer.writeString(offsets[5], object.role);
+  writer.writeLong(offsets[1], object.buyingPoints);
+  writer.writeDateTime(offsets[2], object.createdAt);
+  writer.writeString(offsets[3], object.imageUrl);
+  writer.writeString(offsets[4], object.name);
+  writer.writeString(offsets[5], object.phoneNumber);
+  writer.writeString(offsets[6], object.role);
 }
 
 UserModel _userModelDeserialize(
@@ -108,12 +114,13 @@ UserModel _userModelDeserialize(
 ) {
   final object = UserModel();
   object.authID = reader.readString(offsets[0]);
-  object.createdAt = reader.readDateTimeOrNull(offsets[1]);
+  object.buyingPoints = reader.readLong(offsets[1]);
+  object.createdAt = reader.readDateTimeOrNull(offsets[2]);
   object.id = id;
-  object.imageUrl = reader.readStringOrNull(offsets[2]);
-  object.name = reader.readString(offsets[3]);
-  object.phoneNumber = reader.readStringOrNull(offsets[4]);
-  object.role = reader.readString(offsets[5]);
+  object.imageUrl = reader.readStringOrNull(offsets[3]);
+  object.name = reader.readString(offsets[4]);
+  object.phoneNumber = reader.readStringOrNull(offsets[5]);
+  object.role = reader.readString(offsets[6]);
   return object;
 }
 
@@ -127,14 +134,16 @@ P _userModelDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
-    case 4:
       return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
     case 5:
+      return (reader.readStringOrNull(offset)) as P;
+    case 6:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -358,6 +367,61 @@ extension UserModelQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'authID',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> buyingPointsEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'buyingPoints',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition>
+      buyingPointsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'buyingPoints',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition>
+      buyingPointsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'buyingPoints',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> buyingPointsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'buyingPoints',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -1066,6 +1130,18 @@ extension UserModelQuerySortBy on QueryBuilder<UserModel, UserModel, QSortBy> {
     });
   }
 
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByBuyingPoints() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'buyingPoints', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByBuyingPointsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'buyingPoints', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -1138,6 +1214,18 @@ extension UserModelQuerySortThenBy
   QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByAuthIDDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'authID', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByBuyingPoints() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'buyingPoints', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByBuyingPointsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'buyingPoints', Sort.desc);
     });
   }
 
@@ -1223,6 +1311,12 @@ extension UserModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<UserModel, UserModel, QDistinct> distinctByBuyingPoints() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'buyingPoints');
+    });
+  }
+
   QueryBuilder<UserModel, UserModel, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
@@ -1269,6 +1363,12 @@ extension UserModelQueryProperty
   QueryBuilder<UserModel, String, QQueryOperations> authIDProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'authID');
+    });
+  }
+
+  QueryBuilder<UserModel, int, QQueryOperations> buyingPointsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'buyingPoints');
     });
   }
 

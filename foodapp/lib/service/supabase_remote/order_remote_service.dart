@@ -42,6 +42,7 @@ class OrderRemoteService {
         items[i].orderItemId = response['items'][i]['id'];
         items[i].orderId = response['id'];
         items[i].synced = true;
+        items[i].createdAt = _parseDate(response['items'][i]['created_at']);
       }
       return {'order': order, 'items': items};
     } catch (e) {

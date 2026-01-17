@@ -12,4 +12,5 @@ class UserModel {
   String? phoneNumber;
   String? imageUrl;
   DateTime? createdAt;
+  int buyingPoints = 0;
 }

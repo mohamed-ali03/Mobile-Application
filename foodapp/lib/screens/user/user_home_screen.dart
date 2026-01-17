@@ -91,85 +91,82 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             // Normal content
             final filteredItems = _getFilteredItems(menuProvider.items);
 
-            return RefreshIndicator(
-              onRefresh: () => menuProvider.sync(),
-              child: CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.all(16.0),
-                    sliver: SliverToBoxAdapter(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 700),
-                        child: IntrinsicWidth(child: const WelcomeBox()),
-                      ),
+            return CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(16.0),
+                  sliver: SliverToBoxAdapter(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 700),
+                      child: IntrinsicWidth(child: const WelcomeBox()),
                     ),
                   ),
+                ),
 
-                  SliverToBoxAdapter(
-                    child: MenuSearchFilters(
-                      searchController: _searchController,
-                      searchQuery: _searchQuery,
-                      selectedCategoryId: _selectedCategoryId,
-                      showAvailableOnly: _showAvailableOnly,
-                      categories: menuProvider.categories,
-                      onSearchChanged: (value) {
-                        setState(() => _searchQuery = value);
-                      },
-                      onCategoryChanged: (value) {
-                        setState(() => _selectedCategoryId = value);
-                      },
-                      onAvailableToggle: (value) {
-                        setState(() => _showAvailableOnly = value);
-                      },
-                      onClearFilters: () {
-                        setState(() {
-                          _searchQuery = '';
-                          _selectedCategoryId = null;
-                          _showAvailableOnly = false;
-                          _searchController.clear();
-                        });
-                      },
-                    ),
+                SliverToBoxAdapter(
+                  child: MenuSearchFilters(
+                    searchController: _searchController,
+                    searchQuery: _searchQuery,
+                    selectedCategoryId: _selectedCategoryId,
+                    showAvailableOnly: _showAvailableOnly,
+                    categories: menuProvider.categories,
+                    onSearchChanged: (value) {
+                      setState(() => _searchQuery = value);
+                    },
+                    onCategoryChanged: (value) {
+                      setState(() => _selectedCategoryId = value);
+                    },
+                    onAvailableToggle: (value) {
+                      setState(() => _showAvailableOnly = value);
+                    },
+                    onClearFilters: () {
+                      setState(() {
+                        _searchQuery = '';
+                        _selectedCategoryId = null;
+                        _showAvailableOnly = false;
+                        _searchController.clear();
+                      });
+                    },
                   ),
+                ),
 
-                  SliverPadding(
-                    padding: const EdgeInsets.all(16),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final item = filteredItems[index];
-                        final category = menuProvider.categories.firstWhere(
-                          (cat) => cat.categoryId == item.categoryId,
-                          orElse: () => CategoryModel()
-                            ..name = AppLocalizations.of(
-                              context,
-                            ).t('unknownCategory')
-                            ..categoryId = 0,
-                        );
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final item = filteredItems[index];
+                      final category = menuProvider.categories.firstWhere(
+                        (cat) => cat.categoryId == item.categoryId,
+                        orElse: () => CategoryModel()
+                          ..name = AppLocalizations.of(
+                            context,
+                          ).t('unknownCategory')
+                          ..categoryId = 0,
+                      );
 
-                        return ItemCard(
-                          item: item,
-                          categoryName: category.name,
-                          onSelectItem: (selected) async {
-                            if (selected) {
-                              final orderItem = OrderItemModel()
-                                ..itemId = item.itemId
-                                ..price = item.price
-                                ..quantity = 1;
-                              await context
-                                  .read<OrderProvider>()
-                                  .upsertOrderItemLocally(orderItem);
-                            } else {
-                              await context
-                                  .read<OrderProvider>()
-                                  .deleteOrderItemLocally(id: item.itemId);
-                            }
-                          },
-                        );
-                      }, childCount: filteredItems.length),
-                    ),
+                      return ItemCard(
+                        item: item,
+                        categoryName: category.name,
+                        onSelectItem: (selected) async {
+                          if (selected) {
+                            final orderItem = OrderItemModel()
+                              ..itemId = item.itemId
+                              ..price = item.price
+                              ..quantity = 1;
+                            await context
+                                .read<OrderProvider>()
+                                .upsertOrderItemLocally(orderItem);
+                          } else {
+                            await context
+                                .read<OrderProvider>()
+                                .deleteOrderItemLocally(itemId: item.itemId);
+                          }
+                        },
+                      );
+                    }, childCount: filteredItems.length),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),

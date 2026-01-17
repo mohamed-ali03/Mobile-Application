@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:foodapp/core/functions.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/user%20model/user_model.dart';
+import 'package:foodapp/providers/app_settings_provider.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/screens/widgets/logout_button.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +15,7 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.read<AuthProvider>().user;
+    final lang = context.read<AppSettingsProvider>().lang == 'ar' ? 'En' : 'Ar';
     if (user == null) {
       return _EmptyState();
     }
@@ -24,10 +26,19 @@ class AccountScreen extends StatelessWidget {
         centerTitle: true,
         elevation: 0,
         actions: [
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/settings'),
-            icon: Icon(Icons.settings),
-          ),
+          user.role == 'admin'
+              ? IconButton(
+                  onPressed: () => Navigator.pushNamed(context, '/settings'),
+                  icon: Icon(Icons.settings),
+                )
+              : TextButton(
+                  onPressed: () {
+                    context.read<AppSettingsProvider>().setLanguage(
+                      lang.toLowerCase(),
+                    );
+                  },
+                  child: Text(lang, style: TextStyle(color: Colors.blue)),
+                ),
         ],
       ),
       body: SingleChildScrollView(
@@ -69,6 +80,19 @@ class AccountScreen extends StatelessWidget {
                     showEdit: false,
                     valueWidget: _RoleBadge(role: user.role),
                   ),
+                  if (user.role == 'user')
+                    Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        AccountInfoCard(
+                          icon: Icons.badge,
+                          label: AppLocalizations.of(context).t('points'),
+                          value: user.buyingPoints.toString(),
+                          showEdit: false,
+                        ),
+                      ],
+                    ),
+
                   const SizedBox(height: 12),
                   AccountInfoCard(
                     icon: Icons.calendar_today,
@@ -270,7 +294,10 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
   void _save() async {
     if (widget.field == 'image') {
       if (_imageUrl != null && _imageUrl!.isNotEmpty) {
-        await context.read<AuthProvider>().updateProfile(imageUrl: _imageUrl);
+        await context.read<AuthProvider>().updateProfile(
+          widget.user?.authID ?? '',
+          imageUrl: _imageUrl,
+        );
         if (mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -289,9 +316,13 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
     if (!_formKey.currentState!.validate()) return;
 
     if (widget.field == 'name') {
-      await context.read<AuthProvider>().updateProfile(name: _controller.text);
+      await context.read<AuthProvider>().updateProfile(
+        widget.user?.authID ?? '',
+        name: _controller.text,
+      );
     } else if (widget.field == 'phone') {
       await context.read<AuthProvider>().updateProfile(
+        widget.user?.authID ?? '',
         phoneNumber: _controller.text.isEmpty ? null : _controller.text,
       );
     }

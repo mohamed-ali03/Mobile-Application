@@ -6,7 +6,7 @@ import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:foodapp/screens/widgets/item_details_sheet.dart';
-import 'package:foodapp/screens/common/customer_details_screen.dart';
+import 'package:foodapp/screens/admin/widgets/customer_details_screen.dart';
 import 'package:provider/provider.dart';
 
 void showOrderDetails(
@@ -73,7 +73,9 @@ class OrderDetailsSheet extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${AppLocalizations.of(context).t('order')} #${order.orderId}',
+                    AppLocalizations.of(
+                      context,
+                    ).t('order', data: {'orderId': order.orderId.toString()}),
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -100,61 +102,48 @@ class OrderDetailsSheet extends StatelessWidget {
                         label: AppLocalizations.of(context).t('orderId'),
                         value: '#${order.orderId}',
                       ),
-                      Consumer<AuthProvider>(
-                        builder: (context, authProv, _) {
-                          if (authProv.isLoading) {
-                            return _DetailRow(
-                              label: AppLocalizations.of(
-                                context,
-                              ).t('customerName'),
-                              value: AppLocalizations.of(
-                                context,
-                              ).t('loading...'),
-                            );
-                          }
+                      if (context.read<AuthProvider>().user?.role != 'user')
+                        InkWell(
+                          onTap: () {
+                            final user = context
+                                .read<AuthProvider>()
+                                .users
+                                .where((u) => u.authID == order.userId)
+                                .firstOrNull;
 
-                          final users = authProv.users;
-                          return InkWell(
-                            onTap: () {
-                              final user = users
-                                  .where((u) => u.authID == order.userId)
-                                  .firstOrNull;
-
-                              if (user != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        CustomerDetailsScreen(user: user),
-                                  ),
-                                );
-                              }
-                            },
-                            child: _DetailRow(
-                              label: AppLocalizations.of(
+                            if (user != null) {
+                              Navigator.push(
                                 context,
-                              ).t('customerName'),
-                              value:
-                                  context
-                                      .read<AuthProvider>()
-                                      .users
-                                      .where(
-                                        (user) => user.authID == order.userId,
-                                      )
-                                      .firstOrNull
-                                      ?.name ??
-                                  'N/A',
-                            ),
-                          );
-                        },
-                      ),
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      CustomerDetailsScreen(user: user),
+                                ),
+                              );
+                            }
+                          },
+                          child: _DetailRow(
+                            label: AppLocalizations.of(
+                              context,
+                            ).t('customerName'),
+                            value:
+                                context
+                                    .read<AuthProvider>()
+                                    .users
+                                    .where(
+                                      (user) => user.authID == order.userId,
+                                    )
+                                    .firstOrNull
+                                    ?.name ??
+                                'N/A',
+                          ),
+                        ),
                       _DetailRow(
                         label: AppLocalizations.of(context).t('date'),
                         value: _formatDate(order.createdAt),
                       ),
                       _DetailRow(
                         label: AppLocalizations.of(context).t('status'),
-                        value: order.status.toUpperCase(),
+                        value: AppLocalizations.of(context).t(order.status),
                       ),
                       _DetailRow(
                         label: AppLocalizations.of(context).t('total'),

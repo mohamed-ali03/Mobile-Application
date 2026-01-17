@@ -22,57 +22,46 @@ class AdminHomeScreen extends StatelessWidget {
       ),
       drawer: const MyDrawer(),
       body: SafeArea(
-        child: Consumer2<OrderProvider, MenuProvider>(
-          builder: (context, orderProvider, menuProvider, child) {
-            return RefreshIndicator(
-              onRefresh: () async {
-                await Future.wait([
-                  orderProvider.fetchAllOrders(),
-                  menuProvider.sync(),
-                ]);
-              },
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Welcome Section
-                    const WelcomeBox(),
-                    const SizedBox(height: 24),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Section
+              const WelcomeBox(),
+              const SizedBox(height: 24),
 
-                    // Stats Cards
-                    AdminStatsGrid(
-                      orders: orderProvider.orders,
-                      menuItems: menuProvider.items,
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Quick Actions
-                    Text(
-                      AppLocalizations.of(context).t('quickActions'),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    AdminQuickActionsGrid(parentContext: context),
-                    const SizedBox(height: 24),
-
-                    // Recent Activity
-                    Text(
-                      AppLocalizations.of(context).t('recentActivity'),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    RecentActivityCard(orders: orderProvider.orders),
-                  ],
-                ),
+              // Stats Cards - Use Consumer for better performance
+              Consumer2<OrderProvider, MenuProvider>(
+                builder: (context, orderProvider, menuProvider, child) {
+                  return AdminStatsGrid(
+                    orders: orderProvider.orders,
+                    menuItems: menuProvider.items,
+                  );
+                },
               ),
-            );
-          },
+              const SizedBox(height: 24),
+
+              // Quick Actions
+              Text(
+                AppLocalizations.of(context).t('quickActions'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              AdminQuickActionsGrid(parentContext: context),
+              const SizedBox(height: 24),
+
+              // Recent Activity - Use Consumer for better performance
+              Consumer<OrderProvider>(
+                builder: (context, orderProvider, child) {
+                  return RecentActivityCard(orders: orderProvider.orders);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

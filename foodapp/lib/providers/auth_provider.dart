@@ -21,6 +21,11 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _init() async {
     try {
       user = await _repo.getCurrentUser();
+      if (user != null && user?.role == 'admin') {
+        final fetched = await _repo.fetchAllUsers();
+        // Exclude current user from the list
+        users = fetched.where((u) => u.authID != user?.authID).toList();
+      }
       _setLoading(false);
     } catch (e) {
       _setError('Failed to initialize: $e');
@@ -91,7 +96,9 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// ✏️ Update user profile
-  Future<void> updateProfile({
+  Future<void> updateProfile(
+    String userId, {
+    bool? buyingPoints,
     String? name,
     String? phoneNumber,
     String? imageUrl,
@@ -99,13 +106,20 @@ class AuthProvider extends ChangeNotifier {
     try {
       _setError(null);
       _setLoading(true);
-      if (user == null) {
-        _setError('No user logged in');
-        return;
-      }
-
+      int? points = buyingPoints != null
+          ? (buyingPoints
+                ? users
+                          .firstWhere((user) => user.authID == userId)
+                          .buyingPoints +
+                      5
+                : users
+                          .firstWhere((user) => user.authID == userId)
+                          .buyingPoints -
+                      5)
+          : null;
       await _repo.updateProfile(
-        user!.authID,
+        userId,
+        buyingPoints: points,
         name: name,
         phoneNumber: phoneNumber,
         imageUrl: imageUrl,

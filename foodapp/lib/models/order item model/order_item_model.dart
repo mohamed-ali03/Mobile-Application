@@ -9,7 +9,7 @@ class OrderItemModel {
   int? orderId; // remote order id (after sync)
   int? localOrderId; // 🔑 Isar OrderModel.id
   int? orderItemId;
-
+  DateTime? createdAt;
   late int itemId; // menu item remote id
   late int quantity;
   late double price;

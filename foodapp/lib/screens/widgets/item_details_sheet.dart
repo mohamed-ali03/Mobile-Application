@@ -10,7 +10,6 @@ void showItemDetails(
   required String categoryName,
   ValueChanged<bool>? onSelectItem,
   VoidCallback? onEdit,
-  VoidCallback? onDelete,
   bool selected = false,
   bool needButton = true,
 }) {
@@ -36,7 +35,6 @@ void showItemDetails(
         categoryName: categoryName,
         onSelectItem: onSelectItem,
         onEdit: onEdit,
-        onDelete: onDelete,
         ingredients: ingredients,
         role: role,
         selected: selected,
@@ -53,7 +51,6 @@ class ItemDetailsSheet extends StatefulWidget {
   final List<String> ingredients;
   final ValueChanged<bool>? onSelectItem;
   final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
   final bool selected;
   final bool needButton;
 
@@ -65,7 +62,6 @@ class ItemDetailsSheet extends StatefulWidget {
     required this.categoryName,
     this.onSelectItem,
     this.onEdit,
-    this.onDelete,
     this.selected = false,
     this.needButton = true,
   });
@@ -202,23 +198,14 @@ class _ItemDetailsSheetState extends State<ItemDetailsSheet> {
                             ),
                     ),
                     const SizedBox(width: 12),
-                    widget.role == 'user'
+                    ?widget.role == 'user'
                         ? Expanded(
                             child: OutlinedButton(
                               onPressed: () => Navigator.pop(context),
                               child: const Text('Close'),
                             ),
                           )
-                        : Expanded(
-                            child: TextButton.icon(
-                              onPressed: widget.onDelete,
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              label: const Text(
-                                'Delete',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ),
+                        : null,
                   ],
                 ),
               const SizedBox(height: 12),

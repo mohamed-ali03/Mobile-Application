@@ -1,30 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/order_provider.dart';
-import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/screens/admin/widgets/admin_orders_views.dart';
 import 'package:provider/provider.dart';
 
-class StaffOrdersScreen extends StatefulWidget {
+class StaffOrdersScreen extends StatelessWidget {
   const StaffOrdersScreen({super.key});
-  @override
-  State<StaffOrdersScreen> createState() => _StaffOrdersScreenState();
-}
-
-class _StaffOrdersScreenState extends State<StaffOrdersScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // safe to read provider in initState if using read()
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthProvider>().fetchAllUsers();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Staff Orders')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).t('staffOrders')),
+      ),
       body: Consumer<OrderProvider>(
         builder: (context, orderProv, _) {
           if (orderProv.isLoading && orderProv.orders.isEmpty) {
@@ -59,7 +46,6 @@ class _StaffOrdersScreenState extends State<StaffOrdersScreen> {
           return AdminOrderTabView(
             orders: orders,
             orderItems: orderProv.orderItems,
-            onRefresh: () => orderProv.fetchAllOrders(),
           );
         },
       ),
