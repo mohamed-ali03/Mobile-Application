@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/auth_provider.dart';
@@ -40,7 +41,9 @@ class MyDrawer extends StatelessWidget {
                             )
                           : CircleAvatar(
                               radius: 34,
-                              backgroundImage: NetworkImage(user.imageUrl!),
+                              backgroundImage: CachedNetworkImageProvider(
+                                user.imageUrl!,
+                              ),
                             ),
                       const SizedBox(width: 12),
                       Expanded(

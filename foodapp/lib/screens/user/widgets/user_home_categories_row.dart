@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:foodapp/models/category%20model/category_model.dart';
 
@@ -27,7 +28,7 @@ class CategoryTap extends StatelessWidget {
             CircleAvatar(
               radius: 20,
               backgroundColor: Colors.grey.shade300,
-              backgroundImage: NetworkImage(cat.imageUrl),
+              backgroundImage: CachedNetworkImageProvider(cat.imageUrl),
               onBackgroundImageError: (_, _) {},
               child: cat.imageUrl.isEmpty
                   ? const Icon(Icons.fastfood, size: 18)

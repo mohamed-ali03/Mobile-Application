@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
@@ -53,12 +54,12 @@ class _ItemCardState extends State<ItemCard> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      widget.item.imageUrl,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.item.imageUrl,
                       width: 96,
                       height: 96,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
+                      errorWidget: (context, error, stackTrace) => Container(
                         width: 96,
                         height: 96,
                         color: Colors.grey[200],

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:foodapp/core/functions.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
@@ -390,7 +391,10 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(_imageUrl!, fit: BoxFit.cover),
+                            child: CachedNetworkImage(
+                              imageUrl: _imageUrl!,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                           IconButton(
                             onPressed: () {

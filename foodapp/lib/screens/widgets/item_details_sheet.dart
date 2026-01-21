@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
@@ -105,10 +106,10 @@ class _ItemDetailsSheetState extends State<ItemDetailsSheet> {
                   borderRadius: BorderRadius.circular(8),
                   child: AspectRatio(
                     aspectRatio: 16 / 9,
-                    child: Image.network(
-                      widget.item.imageUrl,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.item.imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
+                      errorWidget: (context, error, stackTrace) => Container(
                         color: Colors.grey[200],
                         child: Icon(
                           Icons.image_not_supported,

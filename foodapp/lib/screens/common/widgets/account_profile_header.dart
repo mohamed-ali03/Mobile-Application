@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class AccountProfileHeader extends StatelessWidget {
@@ -26,7 +27,7 @@ class AccountProfileHeader extends StatelessWidget {
                 backgroundColor: Colors.white,
                 backgroundImage:
                     user.imageUrl != null && user.imageUrl!.isNotEmpty
-                    ? NetworkImage(user.imageUrl!)
+                    ? CachedNetworkImageProvider(user.imageUrl!)
                     : null,
                 child: user.imageUrl == null || user.imageUrl!.isEmpty
                     ? Icon(Icons.person, size: 60, color: Colors.grey[400])

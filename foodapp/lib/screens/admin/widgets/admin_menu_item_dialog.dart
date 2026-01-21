@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:foodapp/core/functions.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
@@ -131,7 +132,10 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
                     ? Stack(
                         fit: StackFit.expand,
                         children: [
-                          Image.network(imageUrl!, fit: BoxFit.cover),
+                          CachedNetworkImage(
+                            imageUrl: imageUrl!,
+                            fit: BoxFit.cover,
+                          ),
                           Positioned(
                             top: 8,
                             right: 8,

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/user model/user_model.dart';
@@ -35,7 +36,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
               backgroundImage:
                   widget.user.imageUrl != null &&
                       widget.user.imageUrl!.isNotEmpty
-                  ? NetworkImage(widget.user.imageUrl!) as ImageProvider
+                  ? CachedNetworkImageProvider(widget.user.imageUrl!)
                   : null,
               child:
                   (widget.user.imageUrl == null ||

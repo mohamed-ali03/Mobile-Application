@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/user model/user_model.dart';
@@ -152,7 +153,7 @@ class _UserTile extends StatelessWidget {
             CircleAvatar(
               backgroundImage:
                   user.imageUrl != null && user.imageUrl!.isNotEmpty
-                  ? NetworkImage(user.imageUrl!) as ImageProvider
+                  ? CachedNetworkImageProvider(user.imageUrl!)
                   : null,
               child: user.imageUrl == null || user.imageUrl!.isEmpty
                   ? Text(
