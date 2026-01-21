@@ -48,7 +48,9 @@ class AdminUsersScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${AppLocalizations.of(context).t('roleUpdatedTo')} $selected ${AppLocalizations.of(context).t('for')}${user.name}',
+            AppLocalizations.of(
+              context,
+            ).t('roleUpdatedTo', data: {'role': selected, 'name': user.name}),
           ),
         ),
       );
@@ -57,7 +59,9 @@ class AdminUsersScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${AppLocalizations.of(context).t('failedToUpdateRole')} $e',
+            AppLocalizations.of(
+              context,
+            ).t('failedToUpdateRole', data: {'error': e.toString()}),
           ),
         ),
       );
@@ -104,28 +108,25 @@ class AdminUsersScreen extends StatelessWidget {
             );
           }
 
-          return RefreshIndicator(
-            onRefresh: () => auth.fetchAllUsers(),
-            child: ListView.separated(
-              padding: const EdgeInsets.all(12),
-              itemCount: users.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final user = users[index];
-                return InkWell(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CustomerDetailsScreen(user: user),
-                    ),
+          return ListView.separated(
+            padding: const EdgeInsets.all(12),
+            itemCount: users.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final user = users[index];
+              return InkWell(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CustomerDetailsScreen(user: user),
                   ),
-                  child: _UserTile(
-                    user: user,
-                    onChangeRole: () => _changeRole(context, user),
-                  ),
-                );
-              },
-            ),
+                ),
+                child: _UserTile(
+                  user: user,
+                  onChangeRole: () => _changeRole(context, user),
+                ),
+              );
+            },
           );
         },
       ),
@@ -146,17 +147,43 @@ class _UserTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(
-          backgroundImage: user.imageUrl != null && user.imageUrl!.isNotEmpty
-              ? NetworkImage(user.imageUrl!) as ImageProvider
-              : null,
-          child: user.imageUrl == null || user.imageUrl!.isEmpty
-              ? Text(user.name.isNotEmpty ? user.name[0].toUpperCase() : '?')
-              : null,
+        leading: Stack(
+          children: [
+            CircleAvatar(
+              backgroundImage:
+                  user.imageUrl != null && user.imageUrl!.isNotEmpty
+                  ? NetworkImage(user.imageUrl!) as ImageProvider
+                  : null,
+              child: user.imageUrl == null || user.imageUrl!.isEmpty
+                  ? Text(
+                      user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
+                    )
+                  : null,
+            ),
+            if (user.blocked)
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.block, color: Colors.white, size: 12),
+                ),
+              ),
+          ],
         ),
         title: Text(user.name),
         subtitle: Text(
-          '${AppLocalizations.of(context).t('role')}: ${user.role}',
+          AppLocalizations.of(context).t(
+            'rolePermission',
+            data: {
+              'role': AppLocalizations.of(context).t(user.role).toUpperCase(),
+            },
+          ),
         ),
         trailing: IconButton(
           icon: const Icon(Icons.edit),

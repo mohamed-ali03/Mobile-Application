@@ -6,7 +6,7 @@
   "active": "شغال",
   "currentLanguage": "اللغة الحالية",
   "languageChangeInfo": "تغيير اللغة هيغير واجهة التطبيق. اقفل التطبيق وافتحه تاني عشان تشوف التغييرات.",
-  "languageChangedTo": "اللغة اتغيرت للعربية بنجاح",
+  "languageChangedTo": "Language changed to English",
   
   "welcomeTitle": "نورت",
   "welcome": "أهلاً بك 👋",
@@ -19,13 +19,15 @@
   "login": "تسجيل دخول",
   "signIn": "تسجيل دخول",
   "logout": "تسجيل خروج",
+  "blocked": "موقوف",
   "logoutConfirm": "متأكد إنك عاوز تخرج؟",
   "pleaseLogin": "يا ريت تسجل دخول عشان تكمل",
   "createAccount": "اعمل حساب جديد",
   "createAccountTitle": "فتح حساب",
   "dontHaveAccount": "معندكش حساب؟",
   "alreadyHaveAccount": "عندك حساب فعلاً؟",
-  
+  "yourAccountIsBlocked": "حسابك موقوف",
+
   "email": "البريد الإلكتروني",
   "emailRequired": "لازم تكتب البريد الإلكتروني",
   "validEmail": "اكتب بريد إلكتروني صح",
@@ -42,6 +44,7 @@
   "phone": "رقم التليفون",
   "phoneNumber": "رقم التليفون",
   "phoneOptional": "رقم التليفون (اختياري)",
+  "phoneRequired": "رقم التليفون مطلوب",
   
   "home": "الرئيسية",
   "cart": "السلة",
@@ -74,6 +77,7 @@
   "pendingOrders": "طلبات مستنية",
   "menuItems": "أصناف المنيو",
   "revenue": "الأرباح",
+  "currency": "{amount} ج.م",
   "viewOrders": "عرض الطلبات",
   "noActiveOrders": "مفيش طلبات شغالة دلوقتي",
   "noRecentActivity": "مفيش نشاط حديث",
@@ -116,6 +120,9 @@
   "availableItems": "متاح",
   "outOfStockItems": "خلصان",
   "deleted": "تم حذف",
+  "errorLoadingMenu": "خطأ في تحميل المنيو",
+  "noMenuItems": "لا يوجد أصناف",
+  "theMenuIsCurrentlyEmpty": "المنيو فاضي دلوقتي",
   
   "addToCart": "إضافة للسلة",
   "yourCartIsEmpty": "سلتك لسه فاضية",
@@ -129,6 +136,7 @@
   "item": "صنف",
   "itemsCount": "أصناف",
   "quantity": "الكمية",
+  "quantityXprice": "الكمية : {quantity} × EGP{price}",
   "total": "الإجمالي",
   "orderTotal": "إجمالي الطلب",
   
@@ -138,6 +146,7 @@
   "orderSummary": "ملخص الطلب",
   "orderInformation": "بيانات الطلب",
   "orderItems": "أصناف الطلب",
+  "orderItemsLength": "أصناف الطلب ({length})",
   "noOrdersYet": "لسه مفيش طلبات",
   "yourOrdersWillAppearHere": "طلباتك هتظهر هنا",
   "editOrder": "تعديل الطلب",
@@ -156,8 +165,8 @@
   "cancelOrder": "إلغاء الطلب",
   "status": "الحالة",
   "orderStatusUpdated": "حالة الطلب بقت {status}",
-  "orderStatusUpdatedTo": "حالة الطلب اتحدثت لـ ",
-  "markAs": "تحديد كـ",
+  "orderStatusUpdatedTo": "حالة الطلب اتحدثت لـ {status}",
+  "markAs": "تحديد كـ {status}",
   
   "deliveryAddress": "عنوان التوصيل",
   "deliveryAddressLabel": "عنوان التوصيل",
@@ -174,10 +183,12 @@
   "unsynced": "مش متزامن",
   "unsyncedLabel": "غير متزامن",
   "unsyncedLocalOnly": "غير متزامن (على الجهاز بس)",
-  
+  "syncedFailed": "فشل في المزامنة: {error}",
+
   "noUsersFound": "ملقناش مستخدمين",
   "noUserData": "مفيش بيانات للمستخدم",
   "unableToLoadUserInfo": "مش عارفين نحمل بياناتك",
+  "rolePermission": "الصلاحية : {role}",
   "changeRoleTo": "تغيير الصلاحية لـ",
   "roleUpdated": "الصلاحية اتغيرت لـ {role} لـ {name}",
   "roleUpdatedTo": "الصلاحية اتغيرت لـ",
@@ -203,10 +214,13 @@
   "deleteItemWithName": "متأكد إنك عاوز تمسح {name}؟",
   "areYouSureYouWantToDeleteItem": "متأكد إنك عاوز تمسح صنف {item}؟",
   "areYouSureYouWantToDeleteOrder": "متأكد إنك عاوز تمسح طلب {order}؟",
+  "areYouSureYouWantToCancelOrder" : "متأكد إنك عاوز تلغي الطلب {order}؟",
+  "areYouSureYouWantToRetrieveOrder" : "متأكد إنك عاوز ترجع الطلب {order}؟",
   "close": "قفل",
   "cancel": "إلغاء",
   "canceled": "ملغي",
   "confirm": "تأكيد",
+  "retrieve": "استرجاع",
   "save": "حفظ",
   "update": "تحديث",
   "add": "إضافة",
@@ -219,6 +233,9 @@
   "date": "التاريخ",
   "settingsSavedSuccessfully": "الإعدادات اتحفظت بنجاح!",
   "settingsResetToDefaults": "رجعنا الإعدادات زي الأول",
+  "leaveAMessage": "اترك رسالة",
+  "enterAMessage": "اكتب رسالة",
+  "editMessage": "تعديل الرسالة",
   
   "ago": "قبل",
   "just_now": "دلوقتي حالا",

@@ -8,6 +8,7 @@ extension OrderModelJson on OrderModel {
       'user_id': userId,
       'status': status,
       'total_price': totalPrice,
+      'message': message,
       'address': address,
     };
   }
@@ -19,6 +20,7 @@ extension OrderModelJson on OrderModel {
       ..userId = json['user_id'] as String
       ..status = json['status'] as String
       ..totalPrice = (json['total_price'] as num).toDouble()
+      ..message = json['message'] as String?
       ..address = json['address'] as String
       ..synced = true
       ..createdAt = json['created_at'] != null

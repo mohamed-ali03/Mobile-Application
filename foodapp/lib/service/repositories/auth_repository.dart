@@ -23,6 +23,7 @@ class AuthRepository {
         ..phoneNumber = profile['phone_number']
         ..imageUrl = profile['image_url']
         ..buyingPoints = profile['buying_points']
+        ..blocked = profile['blocked']
         ..createdAt = _parseDate(profile['created_at']);
 
       await _local.saveUser(localUser);
@@ -37,8 +38,8 @@ class AuthRepository {
     required String name,
     required String email,
     required String password,
+    required String phoneNumber,
     String role = 'user',
-    String? phoneNumber,
     String? imageUrl,
   }) async {
     try {
@@ -88,18 +89,22 @@ class AuthRepository {
   Future<void> updateProfile(
     String userId, {
     String? name,
+    String? role,
     String? phoneNumber,
     int? buyingPoints,
     String? imageUrl,
+    bool? blocked,
   }) async {
     try {
       await _remote
           .updateProfile(
             userId,
             name: name,
+            role: role,
             phoneNumber: phoneNumber,
             imageUrl: imageUrl,
             buyingPoints: buyingPoints,
+            blocked: blocked,
           )
           .timeout(_timeout);
 
@@ -111,6 +116,7 @@ class AuthRepository {
           phoneNumber: phoneNumber,
           imageUrl: imageUrl,
           buyingPoints: buyingPoints,
+          blocked: blocked,
         );
       } catch (e) {
         debugPrint('Failed to update local cache: $e');
@@ -166,6 +172,7 @@ class AuthRepository {
           ..phoneNumber = profile['phone_number']
           ..imageUrl = profile['image_url']
           ..buyingPoints = profile['buying_points'] ?? 0
+          ..blocked = profile['blocked']
           ..createdAt = _parseDate(profile['created_at']);
       }).toList();
 
@@ -179,7 +186,7 @@ class AuthRepository {
   /// Update a user's role remotely and update local cache
   Future<void> updateUserRole(String userId, String role) async {
     try {
-      await _remote.updateUserRole(userId, role).timeout(_timeout);
+      await _remote.updateProfile(userId, role: role).timeout(_timeout);
 
       // Update local cache by fetching profile and updating single user
       try {
@@ -191,6 +198,7 @@ class AuthRepository {
           ..phoneNumber = profile['phone_number']
           ..imageUrl = profile['image_url']
           ..buyingPoints = profile['buying_points'] ?? 0
+          ..blocked = profile['blocked']
           ..createdAt = _parseDate(profile['created_at']);
 
         await _local.updateUser(
@@ -200,6 +208,7 @@ class AuthRepository {
           phoneNumber: user.phoneNumber,
           imageUrl: user.imageUrl,
           buyingPoints: user.buyingPoints,
+          blocked: user.blocked,
         );
       } catch (e) {
         debugPrint('Failed to update local cache after role change: $e');
@@ -224,6 +233,7 @@ class AuthRepository {
             ..phoneNumber = profile['phone_number']
             ..imageUrl = profile['image_url']
             ..buyingPoints = profile['buying_points']
+            ..blocked = profile['blocked']
             ..createdAt = _parseDate(profile['created_at']);
         }).toList();
 

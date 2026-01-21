@@ -13,4 +13,5 @@ class UserModel {
   String? imageUrl;
   DateTime? createdAt;
   int buyingPoints = 0;
+  bool blocked = false;
 }

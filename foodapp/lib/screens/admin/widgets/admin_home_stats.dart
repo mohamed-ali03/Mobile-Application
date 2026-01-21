@@ -60,8 +60,9 @@ class AdminStatsGrid extends StatelessWidget {
         ),
         _StatCard(
           title: AppLocalizations.of(context).t('revenue'),
-          value:
-              '${stats['revenue'].toStringAsFixed(0)} ${AppLocalizations.of(context).t('egp')}',
+          value: AppLocalizations.of(
+            context,
+          ).t('currency', data: {'amount': stats['revenue'].toString()}),
           icon: Icons.attach_money,
           color: Colors.purple,
         ),

@@ -87,7 +87,7 @@ class RecentActivityCard extends StatelessWidget {
                 Icon(Icons.inbox, size: 48, color: Colors.grey[400]),
                 const SizedBox(height: 12),
                 Text(
-                  AppLocalizations.of(context).t('no_recent_activity'),
+                  AppLocalizations.of(context).t('noRecentActivity'),
                   style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 ),
               ],
@@ -120,7 +120,7 @@ class RecentActivityCard extends StatelessWidget {
                 _ActivityItem(
                   icon: _getStatusIcon(order.status),
                   title:
-                      '${AppLocalizations.of(context).t('order')} #${order.orderId ?? 'N/A'} - ${AppLocalizations.of(context).t(order.status).toUpperCase()}',
+                      '${AppLocalizations.of(context).t('order', data: {'orderId': order.orderId.toString()})} - ${AppLocalizations.of(context).t(order.status).toUpperCase()}',
                   time: _formatTimeAgo(context, order.createdAt),
                   color: _getStatusColor(order.status),
                 ),

@@ -19,7 +19,11 @@ class StaffOrdersScreen extends StatelessWidget {
           }
 
           final orders = orderProv.orders
-              .where((o) => o.status.toLowerCase() != 'delivered')
+              .where(
+                (o) =>
+                    o.status.toLowerCase() != 'delivered' &&
+                    o.status.toLowerCase() != 'canceled',
+              )
               .toList();
 
           if (orders.isEmpty) {

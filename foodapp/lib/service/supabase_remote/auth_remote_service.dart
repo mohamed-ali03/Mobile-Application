@@ -79,35 +79,26 @@ class AuthRemoteService {
   Future<void> updateProfile(
     String userId, {
     String? name,
+    String? role,
     String? phoneNumber,
     int? buyingPoints,
     String? imageUrl,
+    bool? blocked,
   }) async {
     try {
       await SupabaseService.client
           .from('profiles')
           .update({
             if (name != null) 'name': name,
+            if (role != null) 'role': role,
             if (phoneNumber != null) 'phone_number': phoneNumber,
             if (imageUrl != null) 'image_url': imageUrl,
             if (buyingPoints != null) 'buying_points': buyingPoints,
+            if (blocked != null) 'blocked': blocked,
           })
           .eq('id', userId);
     } catch (e) {
       debugPrint('Update profile error: $e');
-      rethrow;
-    }
-  }
-
-  /// Update user's role (admin only)
-  Future<void> updateUserRole(String userId, String role) async {
-    try {
-      await SupabaseService.client
-          .from('profiles')
-          .update({'role': role})
-          .eq('id', userId);
-    } catch (e) {
-      debugPrint('Update user role error: $e');
       rethrow;
     }
   }

@@ -94,7 +94,13 @@ class _ItemCardState extends State<ItemCard> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  '${AppLocalizations.of(context).t("egp")} ${widget.item.price.toStringAsFixed(2)}',
+                                  AppLocalizations.of(context).t(
+                                    'currency',
+                                    data: {
+                                      'amount': widget.item.price
+                                          .toStringAsFixed(2),
+                                    },
+                                  ),
                                   style: TextStyle(
                                     color: Colors.green[700],
                                     fontWeight: FontWeight.bold,
@@ -121,7 +127,7 @@ class _ItemCardState extends State<ItemCard> {
                 children: role == 'user'
                     ? [
                         Text(
-                          '${AppLocalizations.of(context).t('price')}: ${AppLocalizations.of(context).t("egp")}${widget.item.price.toStringAsFixed(2)}',
+                          '${AppLocalizations.of(context).t('price')}: ${AppLocalizations.of(context).t("currency", data: {'amount': widget.item.price.toStringAsFixed(2)})}',
                         ),
                         const SizedBox(width: 12),
                         widget.item.available

@@ -12,5 +12,6 @@ class OrderModel {
   late double totalPrice;
   late String address;
   late bool synced;
+  String? message;
   DateTime? createdAt;
 }

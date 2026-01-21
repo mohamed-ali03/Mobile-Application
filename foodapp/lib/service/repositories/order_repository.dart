@@ -164,11 +164,11 @@ class OrderRepository {
             schema: 'public',
             table: 'orders',
             callback: (payload) {
-              _local.deleteOrder(payload.oldRecord['id'] as int).catchError((
-                e,
-              ) {
-                debugPrint('Error syncing deleted order: $e');
-              });
+              _local
+                  .deleteOrder(remoteId: payload.oldRecord['id'] as int)
+                  .catchError((e) {
+                    debugPrint('Error syncing deleted order: $e');
+                  });
             },
           )
           .subscribe();
@@ -259,9 +259,9 @@ class OrderRepository {
     }
   }
 
-  Future<void> updateOrder(int orderId, String status) async {
+  Future<void> updateOrder(int orderId, String status, {String? msg}) async {
     try {
-      await _remote.updateOrder(orderId, status: status);
+      await _remote.updateOrder(orderId, status: status, msg: msg);
     } catch (e) {
       debugPrint('Error Deleting order: $e');
       rethrow;
@@ -269,9 +269,13 @@ class OrderRepository {
   }
 
   /// delete Order
-  Future<void> deleteOrder(int orderId) async {
+  Future<void> deleteOrder({int? orderId, int? id}) async {
     try {
-      await _remote.deleteOrder(orderId);
+      if (orderId != null) {
+        await _remote.deleteOrder(orderId);
+      } else if (id != null) {
+        await _local.deleteOrder(localId: id);
+      }
     } catch (e) {
       debugPrint('Error Deleting order: $e');
       rethrow;
@@ -291,10 +295,25 @@ class OrderRepository {
           await _local.upsertOrder(response['order'], response['items']);
         } catch (e) {
           debugPrint('Error syncing order: $e');
+          rethrow;
         }
       }
     } catch (e) {
       debugPrint('Error syncing orders: $e');
+      rethrow;
+    }
+  }
+
+  /// sync specific order
+  Future<void> syncOrder(int id) async {
+    try {
+      final orderWithItems = await _local.getUnsyncedOrder(id);
+      final order = orderWithItems['order'] as OrderModel;
+      final items = orderWithItems['items'] as List<OrderItemModel>;
+      final response = await _remote.createOrderRPC(order, items);
+      await _local.upsertOrder(response['order'], response['items']);
+    } catch (e) {
+      debugPrint('Error syncing order: $e');
       rethrow;
     }
   }

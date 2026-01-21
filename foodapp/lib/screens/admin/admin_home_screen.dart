@@ -55,6 +55,13 @@ class AdminHomeScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Recent Activity - Use Consumer for better performance
+              Text(
+                AppLocalizations.of(context).t('recentActivity'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
               Consumer<OrderProvider>(
                 builder: (context, orderProvider, child) {
                   return RecentActivityCard(orders: orderProvider.orders);

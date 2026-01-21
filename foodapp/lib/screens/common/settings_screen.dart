@@ -13,8 +13,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   String _selectedLanguageCode = 'en';
 
-  final Map<String, String> _languages = {'en': 'English', 'ar': 'Arabic'};
-
   @override
   void initState() {
     super.initState();
@@ -206,9 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // Show a snackbar to confirm the change
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          '${AppLocalizations.of(context).t('languageChangedTo')} ${_languages[languageCode]}',
-        ),
+        content: Text(AppLocalizations.of(context).t('languageChangedTo')),
         duration: const Duration(seconds: 2),
       ),
     );

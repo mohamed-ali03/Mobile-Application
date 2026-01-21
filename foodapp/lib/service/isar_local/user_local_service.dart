@@ -52,6 +52,7 @@ class UserLocalService {
     int? buyingPoints,
     String? imageUrl,
     String? role,
+    bool? blocked,
   }) async {
     try {
       await IsarService.isar.writeTxn(() async {
@@ -69,30 +70,11 @@ class UserLocalService {
         if (imageUrl != null) user.imageUrl = imageUrl;
         if (buyingPoints != null) user.buyingPoints = buyingPoints;
         if (role != null) user.role = role;
+        if (blocked != null) user.blocked = blocked;
         await IsarService.isar.userModels.put(user);
       });
     } catch (e) {
       debugPrint('Error updating user: $e');
-      rethrow;
-    }
-  }
-
-  /// Update role for a specific user identified by authID
-  Future<void> updateUserRole(String authId, String role) async {
-    try {
-      final user = await IsarService.isar.userModels
-          .filter()
-          .authIDEqualTo(authId)
-          .findFirst();
-      if (user == null) return;
-
-      user.role = role;
-
-      await IsarService.isar.writeTxn(() async {
-        await IsarService.isar.userModels.put(user);
-      });
-    } catch (e) {
-      debugPrint('Error updating user role locally: $e');
       rethrow;
     }
   }
@@ -133,20 +115,6 @@ class UserLocalService {
       return users.sublist(1);
     } catch (e) {
       debugPrint('Error fetching users: $e');
-      rethrow;
-    }
-  }
-
-  /// Fetch all users from local DB (including current). Use caller to filter if needed.
-  Future<List<UserModel>> fetchAllUsers() async {
-    try {
-      final users = await IsarService.isar.userModels
-          .where()
-          .sortByCreatedAt()
-          .findAll();
-      return users;
-    } catch (e) {
-      debugPrint('Error fetching all users: $e');
       rethrow;
     }
   }

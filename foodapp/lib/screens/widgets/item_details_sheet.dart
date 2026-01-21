@@ -198,14 +198,13 @@ class _ItemDetailsSheetState extends State<ItemDetailsSheet> {
                             ),
                     ),
                     const SizedBox(width: 12),
-                    ?widget.role == 'user'
-                        ? Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Close'),
-                            ),
-                          )
-                        : null,
+                    if (widget.role == 'user')
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Close'),
+                        ),
+                      ),
                   ],
                 ),
               const SizedBox(height: 12),

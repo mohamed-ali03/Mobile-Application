@@ -146,11 +146,11 @@ class OrderProvider extends ChangeNotifier {
   }
 
   /// Delete order
-  Future<void> deleteOrder(int orderId) async {
+  Future<void> deleteOrder({int? orderId, int? id}) async {
     try {
       _setError(null);
       _setLoading(true);
-      await _repo.deleteOrder(orderId);
+      await _repo.deleteOrder(orderId: orderId, id: id);
       _setLoading(false);
     } catch (e) {
       _setError('Failed to delete order: $e');
@@ -173,12 +173,26 @@ class OrderProvider extends ChangeNotifier {
     }
   }
 
-  /// update order
-  Future<void> updateOrder(int orderId, String status) async {
+  /// sync specific order
+  Future<void> syncOrder(int id) async {
     try {
       _setError(null);
       _setLoading(true);
-      await _repo.updateOrder(orderId, status);
+      await _repo.syncOrder(id);
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to sync order: $e');
+      debugPrint('Error syncing order: $e');
+      _setLoading(false);
+    }
+  }
+
+  /// update order
+  Future<void> updateOrder(int orderId, String status, {String? msg}) async {
+    try {
+      _setError(null);
+      _setLoading(true);
+      await _repo.updateOrder(orderId, status, msg: msg);
       _setLoading(false);
     } catch (e) {
       _setError('Failed to update orders: $e');

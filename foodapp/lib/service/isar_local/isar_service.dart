@@ -19,4 +19,10 @@ class IsarService {
       UserModelSchema,
     ], directory: dir.path);
   }
+
+  static Future<void> clear() async {
+    await isar.writeTxn(() async {
+      await isar.clear();
+    });
+  }
 }

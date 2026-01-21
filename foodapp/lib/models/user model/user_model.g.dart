@@ -22,33 +22,38 @@ const UserModelSchema = CollectionSchema(
       name: r'authID',
       type: IsarType.string,
     ),
-    r'buyingPoints': PropertySchema(
+    r'blocked': PropertySchema(
       id: 1,
+      name: r'blocked',
+      type: IsarType.bool,
+    ),
+    r'buyingPoints': PropertySchema(
+      id: 2,
       name: r'buyingPoints',
       type: IsarType.long,
     ),
     r'createdAt': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'imageUrl': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'imageUrl',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'name',
       type: IsarType.string,
     ),
     r'phoneNumber': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'phoneNumber',
       type: IsarType.string,
     ),
     r'role': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'role',
       type: IsarType.string,
     )
@@ -98,12 +103,13 @@ void _userModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.authID);
-  writer.writeLong(offsets[1], object.buyingPoints);
-  writer.writeDateTime(offsets[2], object.createdAt);
-  writer.writeString(offsets[3], object.imageUrl);
-  writer.writeString(offsets[4], object.name);
-  writer.writeString(offsets[5], object.phoneNumber);
-  writer.writeString(offsets[6], object.role);
+  writer.writeBool(offsets[1], object.blocked);
+  writer.writeLong(offsets[2], object.buyingPoints);
+  writer.writeDateTime(offsets[3], object.createdAt);
+  writer.writeString(offsets[4], object.imageUrl);
+  writer.writeString(offsets[5], object.name);
+  writer.writeString(offsets[6], object.phoneNumber);
+  writer.writeString(offsets[7], object.role);
 }
 
 UserModel _userModelDeserialize(
@@ -114,13 +120,14 @@ UserModel _userModelDeserialize(
 ) {
   final object = UserModel();
   object.authID = reader.readString(offsets[0]);
-  object.buyingPoints = reader.readLong(offsets[1]);
-  object.createdAt = reader.readDateTimeOrNull(offsets[2]);
+  object.blocked = reader.readBool(offsets[1]);
+  object.buyingPoints = reader.readLong(offsets[2]);
+  object.createdAt = reader.readDateTimeOrNull(offsets[3]);
   object.id = id;
-  object.imageUrl = reader.readStringOrNull(offsets[3]);
-  object.name = reader.readString(offsets[4]);
-  object.phoneNumber = reader.readStringOrNull(offsets[5]);
-  object.role = reader.readString(offsets[6]);
+  object.imageUrl = reader.readStringOrNull(offsets[4]);
+  object.name = reader.readString(offsets[5]);
+  object.phoneNumber = reader.readStringOrNull(offsets[6]);
+  object.role = reader.readString(offsets[7]);
   return object;
 }
 
@@ -134,16 +141,18 @@ P _userModelDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 2:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
-    case 5:
       return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readString(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -367,6 +376,16 @@ extension UserModelQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'authID',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> blockedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'blocked',
+        value: value,
       ));
     });
   }
@@ -1130,6 +1149,18 @@ extension UserModelQuerySortBy on QueryBuilder<UserModel, UserModel, QSortBy> {
     });
   }
 
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByBlocked() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'blocked', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByBlockedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'blocked', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByBuyingPoints() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'buyingPoints', Sort.asc);
@@ -1214,6 +1245,18 @@ extension UserModelQuerySortThenBy
   QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByAuthIDDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'authID', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByBlocked() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'blocked', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByBlockedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'blocked', Sort.desc);
     });
   }
 
@@ -1311,6 +1354,12 @@ extension UserModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<UserModel, UserModel, QDistinct> distinctByBlocked() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'blocked');
+    });
+  }
+
   QueryBuilder<UserModel, UserModel, QDistinct> distinctByBuyingPoints() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'buyingPoints');
@@ -1363,6 +1412,12 @@ extension UserModelQueryProperty
   QueryBuilder<UserModel, String, QQueryOperations> authIDProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'authID');
+    });
+  }
+
+  QueryBuilder<UserModel, bool, QQueryOperations> blockedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'blocked');
     });
   }
 

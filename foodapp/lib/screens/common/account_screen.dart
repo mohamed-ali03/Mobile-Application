@@ -4,18 +4,25 @@ import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/user%20model/user_model.dart';
 import 'package:foodapp/providers/app_settings_provider.dart';
 import 'package:foodapp/providers/auth_provider.dart';
+import 'package:foodapp/screens/common/login_screen.dart';
 import 'package:foodapp/screens/widgets/logout_button.dart';
 import 'package:provider/provider.dart';
 import 'package:foodapp/screens/common/widgets/account_profile_header.dart';
 import 'package:foodapp/screens/common/widgets/account_info_card.dart';
 
-class AccountScreen extends StatelessWidget {
+class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
+  @override
+  State<AccountScreen> createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     final user = context.read<AuthProvider>().user;
     final lang = context.read<AppSettingsProvider>().lang == 'ar' ? 'En' : 'Ar';
+
     if (user == null) {
       return _EmptyState();
     }
@@ -26,101 +33,111 @@ class AccountScreen extends StatelessWidget {
         centerTitle: true,
         elevation: 0,
         actions: [
-          user.role == 'admin'
-              ? IconButton(
-                  onPressed: () => Navigator.pushNamed(context, '/settings'),
-                  icon: Icon(Icons.settings),
-                )
-              : TextButton(
-                  onPressed: () {
-                    context.read<AppSettingsProvider>().setLanguage(
-                      lang.toLowerCase(),
-                    );
-                  },
-                  child: Text(lang, style: TextStyle(color: Colors.blue)),
-                ),
+          TextButton(
+            onPressed: () {
+              context.read<AppSettingsProvider>().setLanguage(
+                lang.toLowerCase(),
+              );
+            },
+            child: Text(lang, style: TextStyle(color: Colors.blue)),
+          ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Profile Header Section
-            AccountProfileHeader(
-              user: user,
-              onEditImage: () =>
-                  _showEditProfileDialog(context, user, field: 'image'),
-            ),
-            const SizedBox(height: 24),
-
-            // Information Cards
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  AccountInfoCard(
-                    icon: Icons.person,
-                    label: AppLocalizations.of(context).t('fullName'),
-                    value: user.name,
-                    onEdit: () =>
-                        _showEditProfileDialog(context, user, field: 'name'),
-                  ),
-                  const SizedBox(height: 12),
-                  AccountInfoCard(
-                    icon: Icons.phone,
-                    label: AppLocalizations.of(context).t('phoneNumber'),
-                    value: user.phoneNumber ?? 'Not provided',
-                    onEdit: () =>
-                        _showEditProfileDialog(context, user, field: 'phone'),
-                  ),
-                  const SizedBox(height: 12),
-                  AccountInfoCard(
-                    icon: Icons.badge,
-                    label: AppLocalizations.of(context).t('role'),
-                    value: user.role.toUpperCase(),
-                    showEdit: false,
-                    valueWidget: _RoleBadge(role: user.role),
-                  ),
-                  if (user.role == 'user')
-                    Column(
-                      children: [
-                        const SizedBox(height: 12),
-                        AccountInfoCard(
-                          icon: Icons.badge,
-                          label: AppLocalizations.of(context).t('points'),
-                          value: user.buyingPoints.toString(),
-                          showEdit: false,
-                        ),
-                      ],
-                    ),
-
-                  const SizedBox(height: 12),
-                  AccountInfoCard(
-                    icon: Icons.calendar_today,
-                    label: AppLocalizations.of(context).t('memberSince'),
-                    value: _formatDate(user.createdAt),
-                    showEdit: false,
-                  ),
-                  const SizedBox(height: 12),
-                  AccountInfoCard(
-                    icon: Icons.fingerprint,
-                    label: AppLocalizations.of(context).t('userID'),
-                    value: '${user.authID.substring(0, 20)}...',
-                    showEdit: false,
-                  ),
-                ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {});
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              // Profile Header Section
+              AccountProfileHeader(
+                user: user,
+                onEditImage: () =>
+                    _showEditProfileDialog(context, user, field: 'image'),
               ),
-            ),
+              const SizedBox(height: 24),
 
-            const SizedBox(height: 32),
+              // Information Cards
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    AccountInfoCard(
+                      icon: Icons.person,
+                      label: AppLocalizations.of(context).t('fullName'),
+                      value: user.name,
+                      onEdit: () =>
+                          _showEditProfileDialog(context, user, field: 'name'),
+                    ),
+                    const SizedBox(height: 12),
+                    AccountInfoCard(
+                      icon: Icons.phone,
+                      label: AppLocalizations.of(context).t('phoneNumber'),
+                      value: user.phoneNumber ?? 'Not provided',
+                      onEdit: () =>
+                          _showEditProfileDialog(context, user, field: 'phone'),
+                    ),
+                    const SizedBox(height: 12),
+                    AccountInfoCard(
+                      icon: Icons.badge,
+                      label: AppLocalizations.of(context).t('role'),
+                      value: user.role.toUpperCase(),
+                      showEdit: false,
+                      valueWidget: _RoleBadge(role: user.role),
+                    ),
+                    const SizedBox(height: 12),
+                    AccountInfoCard(
+                      icon: Icons.block,
+                      label: AppLocalizations.of(context).t('status'),
+                      value: user.blocked
+                          ? AppLocalizations.of(context).t('blocked')
+                          : AppLocalizations.of(context).t('active'),
+                      showEdit: false,
+                    ),
+                    if (user.role == 'user')
+                      Column(
+                        children: [
+                          const SizedBox(height: 12),
+                          AccountInfoCard(
+                            icon: Icons.badge,
+                            label: AppLocalizations.of(context).t('points'),
+                            value: user.buyingPoints.toString(),
+                            showEdit: false,
+                          ),
+                        ],
+                      ),
 
-            // Logout Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: LogoutButton(),
-            ),
+                    const SizedBox(height: 12),
+                    AccountInfoCard(
+                      icon: Icons.calendar_today,
+                      label: AppLocalizations.of(context).t('memberSince'),
+                      value: _formatDate(user.createdAt),
+                      showEdit: false,
+                    ),
+                    const SizedBox(height: 12),
+                    AccountInfoCard(
+                      icon: Icons.fingerprint,
+                      label: AppLocalizations.of(context).t('userID'),
+                      value: '${user.authID.substring(0, 20)}...',
+                      showEdit: false,
+                    ),
+                  ],
+                ),
+              ),
 
-            const SizedBox(height: 32),
-          ],
+              const SizedBox(height: 32),
+
+              // Logout Button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: LogoutButton(),
+              ),
+
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );
@@ -147,7 +164,7 @@ class AccountScreen extends StatelessWidget {
 
   void _showEditProfileDialog(
     BuildContext context,
-    user, {
+    UserModel user, {
     required String field,
   }) {
     showDialog(
@@ -221,6 +238,17 @@ class _EmptyState extends StatelessWidget {
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+              child: Text(AppLocalizations.of(context).t('goToLogin')),
             ),
           ],
         ),

@@ -87,6 +87,7 @@ class OrderRemoteService {
     String? status,
     double? totalPrice,
     String? address,
+    String? msg,
   }) async {
     try {
       final data = <String, dynamic>{};
@@ -94,6 +95,7 @@ class OrderRemoteService {
       if (status != null) data['status'] = status;
       if (totalPrice != null) data['total_price'] = totalPrice;
       if (address != null) data['address'] = address;
+      if (msg != null) data['message'] = msg;
 
       if (data.isEmpty) return;
 

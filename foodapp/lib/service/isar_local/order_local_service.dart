@@ -9,8 +9,14 @@ class OrderLocalService {
   Future<void> clearAllOrdersAndItems() async {
     try {
       await IsarService.isar.writeTxn(() async {
-        await IsarService.isar.orderItemModels.clear();
-        await IsarService.isar.orderModels.clear();
+        await IsarService.isar.orderItemModels
+            .filter()
+            .syncedEqualTo(true)
+            .deleteAll();
+        await IsarService.isar.orderModels
+            .filter()
+            .syncedEqualTo(true)
+            .deleteAll();
       });
     } catch (e) {
       debugPrint('Error clearing local orders and items: $e');
@@ -133,6 +139,28 @@ class OrderLocalService {
     }
   }
 
+  Future<Map<String, dynamic>> getUnsyncedOrder(int id) async {
+    try {
+      final order = await IsarService.isar.orderModels.get(id);
+      if (order == null) {
+        throw Exception('Order not found');
+      }
+      var result = <String, dynamic>{};
+
+      final items = await IsarService.isar.orderItemModels
+          .filter()
+          .localOrderIdEqualTo(id)
+          .findAll();
+
+      result = {'order': order, 'items': items};
+
+      return result;
+    } catch (e) {
+      debugPrint('Error getting unsynced orders: $e');
+      rethrow;
+    }
+  }
+
   /// 🔍 unsynced orders with items
   Future<List<Map<String, dynamic>>> getUnsyncedOrders() async {
     try {
@@ -241,13 +269,18 @@ class OrderLocalService {
   }
 
   /// 🗑️ delete entire order + all its items
-  Future<void> deleteOrder(int remoteId) async {
+  Future<void> deleteOrder({int? remoteId, int? localId}) async {
     try {
       await IsarService.isar.writeTxn(() async {
-        final existing = await IsarService.isar.orderModels
-            .filter()
-            .orderIdEqualTo(remoteId)
-            .findFirst();
+        OrderModel? existing;
+        if (remoteId != null) {
+          existing = await IsarService.isar.orderModels
+              .filter()
+              .orderIdEqualTo(remoteId)
+              .findFirst();
+        } else if (localId != null) {
+          existing = await IsarService.isar.orderModels.get(localId);
+        }
 
         if (existing != null) {
           // Delete items first

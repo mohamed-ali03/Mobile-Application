@@ -27,28 +27,33 @@ const OrderModelSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'orderId': PropertySchema(
+    r'message': PropertySchema(
       id: 2,
+      name: r'message',
+      type: IsarType.string,
+    ),
+    r'orderId': PropertySchema(
+      id: 3,
       name: r'orderId',
       type: IsarType.long,
     ),
     r'status': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'status',
       type: IsarType.string,
     ),
     r'synced': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'synced',
       type: IsarType.bool,
     ),
     r'totalPrice': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'totalPrice',
       type: IsarType.double,
     ),
     r'userId': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'userId',
       type: IsarType.string,
     )
@@ -74,6 +79,12 @@ int _orderModelEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.address.length * 3;
+  {
+    final value = object.message;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.status.length * 3;
   bytesCount += 3 + object.userId.length * 3;
   return bytesCount;
@@ -87,11 +98,12 @@ void _orderModelSerialize(
 ) {
   writer.writeString(offsets[0], object.address);
   writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeLong(offsets[2], object.orderId);
-  writer.writeString(offsets[3], object.status);
-  writer.writeBool(offsets[4], object.synced);
-  writer.writeDouble(offsets[5], object.totalPrice);
-  writer.writeString(offsets[6], object.userId);
+  writer.writeString(offsets[2], object.message);
+  writer.writeLong(offsets[3], object.orderId);
+  writer.writeString(offsets[4], object.status);
+  writer.writeBool(offsets[5], object.synced);
+  writer.writeDouble(offsets[6], object.totalPrice);
+  writer.writeString(offsets[7], object.userId);
 }
 
 OrderModel _orderModelDeserialize(
@@ -104,11 +116,12 @@ OrderModel _orderModelDeserialize(
   object.address = reader.readString(offsets[0]);
   object.createdAt = reader.readDateTimeOrNull(offsets[1]);
   object.id = id;
-  object.orderId = reader.readLongOrNull(offsets[2]);
-  object.status = reader.readString(offsets[3]);
-  object.synced = reader.readBool(offsets[4]);
-  object.totalPrice = reader.readDouble(offsets[5]);
-  object.userId = reader.readString(offsets[6]);
+  object.message = reader.readStringOrNull(offsets[2]);
+  object.orderId = reader.readLongOrNull(offsets[3]);
+  object.status = reader.readString(offsets[4]);
+  object.synced = reader.readBool(offsets[5]);
+  object.totalPrice = reader.readDouble(offsets[6]);
+  object.userId = reader.readString(offsets[7]);
   return object;
 }
 
@@ -124,14 +137,16 @@ P _orderModelDeserializeProp<P>(
     case 1:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 4:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
+      return (reader.readDouble(offset)) as P;
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -482,6 +497,155 @@ extension OrderModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition> messageIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'message',
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition>
+      messageIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'message',
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition> messageEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'message',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition>
+      messageGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'message',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition> messageLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'message',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition> messageBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'message',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition> messageStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'message',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition> messageEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'message',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition> messageContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'message',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition> messageMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'message',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition> messageIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'message',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterFilterCondition>
+      messageIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'message',
+        value: '',
       ));
     });
   }
@@ -926,6 +1090,18 @@ extension OrderModelQuerySortBy
     });
   }
 
+  QueryBuilder<OrderModel, OrderModel, QAfterSortBy> sortByMessage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'message', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterSortBy> sortByMessageDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'message', Sort.desc);
+    });
+  }
+
   QueryBuilder<OrderModel, OrderModel, QAfterSortBy> sortByOrderId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'orderId', Sort.asc);
@@ -1025,6 +1201,18 @@ extension OrderModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<OrderModel, OrderModel, QAfterSortBy> thenByMessage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'message', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OrderModel, OrderModel, QAfterSortBy> thenByMessageDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'message', Sort.desc);
+    });
+  }
+
   QueryBuilder<OrderModel, OrderModel, QAfterSortBy> thenByOrderId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'orderId', Sort.asc);
@@ -1101,6 +1289,13 @@ extension OrderModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<OrderModel, OrderModel, QDistinct> distinctByMessage(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'message', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<OrderModel, OrderModel, QDistinct> distinctByOrderId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'orderId');
@@ -1151,6 +1346,12 @@ extension OrderModelQueryProperty
   QueryBuilder<OrderModel, DateTime?, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<OrderModel, String?, QQueryOperations> messageProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'message');
     });
   }
 

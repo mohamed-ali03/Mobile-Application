@@ -16,7 +16,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(AppLocalizations.of(context).t('settings')),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: ListView(

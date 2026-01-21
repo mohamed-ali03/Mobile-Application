@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 
 class UserErrorState extends StatelessWidget {
   final String error;
@@ -17,7 +18,7 @@ class UserErrorState extends StatelessWidget {
             Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
             const SizedBox(height: 24),
             Text(
-              'Error Loading Menu',
+              AppLocalizations.of(context).t('errorLoadingMenu'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Colors.grey[700],
                 fontWeight: FontWeight.bold,
@@ -35,7 +36,7 @@ class UserErrorState extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context).t('retry')),
             ),
           ],
         ),
@@ -60,7 +61,7 @@ class UserEmptyState extends StatelessWidget {
             Icon(Icons.restaurant_menu, size: 100, color: Colors.grey[400]),
             const SizedBox(height: 24),
             Text(
-              'No Menu Items',
+              AppLocalizations.of(context).t('noMenuItems'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Colors.grey[700],
                 fontWeight: FontWeight.bold,
@@ -68,7 +69,7 @@ class UserEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'The menu is currently empty',
+              AppLocalizations.of(context).t('theMenuIsCurrentlyEmpty'),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
@@ -78,7 +79,7 @@ class UserEmptyState extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Refresh'),
+              label: Text(AppLocalizations.of(context).t('refresh')),
             ),
           ],
         ),

@@ -155,10 +155,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         decoration: InputDecoration(
                           labelText: AppLocalizations.of(
                             context,
-                          ).t('phoneOptional'),
+                          ).t('phoneNumber'),
                           prefixIcon: const Icon(Icons.phone),
                           border: const OutlineInputBorder(),
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            ).t('phoneRequired');
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 18),
 
@@ -185,10 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       name: nameController.text.trim(),
                                       email: emailController.text.trim(),
                                       password: passwordController.text.trim(),
-                                      phoneNumber:
-                                          phoneController.text.trim().isEmpty
-                                          ? null
-                                          : phoneController.text.trim(),
+                                      phoneNumber: phoneController.text.trim(),
                                     );
 
                                     if (!context.mounted) return;

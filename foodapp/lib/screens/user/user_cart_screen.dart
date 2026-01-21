@@ -86,13 +86,6 @@ class _UserCartScreenState extends State<UserCartScreen>
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (orderProvider.error != null) {
-          return ErrorState(
-            error: orderProvider.error!,
-            onRetry: () => orderProvider.fetchAllOrders(),
-          );
-        }
-
         final unorderedItems = orderProvider.orderItems
             .where((item) => item.synced == false)
             .toList();
@@ -169,7 +162,7 @@ class _OrdersTabView extends StatelessWidget {
         order: sortedOrders[index],
         orderItems: orderItems
             .where(
-              (orderItem) => orderItem.orderId == sortedOrders[index].orderId,
+              (orderItem) => orderItem.localOrderId == sortedOrders[index].id,
             )
             .toList(),
       ),

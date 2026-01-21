@@ -21,10 +21,10 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _init() async {
     try {
       user = await _repo.getCurrentUser();
-      if (user != null && user?.role == 'admin') {
-        final fetched = await _repo.fetchAllUsers();
+      if (user != null && user?.role != 'user') {
+        final fetchedUsers = await _repo.fetchAllUsers();
         // Exclude current user from the list
-        users = fetched.where((u) => u.authID != user?.authID).toList();
+        users = fetchedUsers.where((u) => u.authID != user?.authID).toList();
       }
       _setLoading(false);
     } catch (e) {
@@ -41,6 +41,11 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(true);
       await _repo.login(email, password);
       user = await _repo.getCurrentUser();
+      if (user != null && user?.role != 'user') {
+        final fetched = await _repo.fetchAllUsers();
+        // Exclude current user from the list
+        users = fetched.where((u) => u.authID != user?.authID).toList();
+      }
       _setLoading(false);
     } catch (e) {
       _setError('Login failed: $e');
@@ -54,8 +59,8 @@ class AuthProvider extends ChangeNotifier {
     required String name,
     required String email,
     required String password,
+    required String phoneNumber,
     String role = 'user',
-    String? phoneNumber,
     String? imageUrl,
   }) async {
     try {
@@ -102,6 +107,7 @@ class AuthProvider extends ChangeNotifier {
     String? name,
     String? phoneNumber,
     String? imageUrl,
+    bool? blocked,
   }) async {
     try {
       _setError(null);
@@ -123,26 +129,13 @@ class AuthProvider extends ChangeNotifier {
         name: name,
         phoneNumber: phoneNumber,
         imageUrl: imageUrl,
+        blocked: blocked,
       );
       user = await _repo.getCurrentUser();
       _setLoading(false);
     } catch (e) {
       _setError('Update failed: $e');
       debugPrint('Update profile error: $e');
-      _setLoading(false);
-    }
-  }
-
-  /// 🔄 Sync all profiles from remote
-  Future<void> syncProfiles() async {
-    try {
-      _setError(null);
-      _setLoading(true);
-      await _repo.syncProfiles();
-      _setLoading(false);
-    } catch (e) {
-      _setError('Sync failed: $e');
-      debugPrint('Sync profiles error: $e');
       _setLoading(false);
     }
   }

@@ -82,6 +82,9 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
           content: Text(AppLocalizations.of(context).t('failedToPickImage')),
         ),
       );
+      setState(() {
+        isUploadingImage = false;
+      });
       return;
     }
 
@@ -95,6 +98,8 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
           content: Text(AppLocalizations.of(context).t('failedToUploadImage')),
         ),
       );
+      setState(() => isUploadingImage = false);
+      return;
     }
     setState(() => isUploadingImage = false);
   }

@@ -161,8 +161,10 @@ class OrderDetailsSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   _DetailSection(
-                    title:
-                        '${AppLocalizations.of(context).t('orderItems')} (${orderItems.length})',
+                    title: AppLocalizations.of(context).t(
+                      'orderItemsLength',
+                      data: {'length': orderItems.length.toString()},
+                    ),
                     children: [
                       const SizedBox(height: 8),
                       ...orderItems.map(
@@ -293,14 +295,25 @@ class _OrderItemRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${AppLocalizations.of(context).t('quantity')}: ${item.quantity} × EGP${item.price.toStringAsFixed(2)}',
+                    AppLocalizations.of(context).t(
+                      'quantityXprice',
+                      data: {
+                        'quantity': item.quantity.toString(),
+                        'price': item.price.toStringAsFixed(2),
+                      },
+                    ),
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
               ),
             ),
             Text(
-              'EGP${(item.quantity * item.price).toStringAsFixed(2)}',
+              AppLocalizations.of(context).t(
+                'currency',
+                data: {
+                  'amount': (item.quantity * item.price).toStringAsFixed(2),
+                },
+              ),
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
           ],

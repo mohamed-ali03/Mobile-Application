@@ -83,6 +83,7 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
 
   Future<void> _handleCheckout() async {
     final authProvider = context.read<AuthProvider>();
+    final orderprovider = context.read<OrderProvider>();
 
     if (authProvider.user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -173,34 +174,7 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
       ..totalPrice = totalPrice.value
       ..userId = authProvider.user!.authID;
 
-    try {
-      if (!mounted) return;
-      await context.read<OrderProvider>().placeOrder(order, widget.orderItems);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).t('failedToPlaceOrder')),
-          ),
-        );
-      }
-      return;
-    }
-
-    if (!mounted) return;
-
-    // Clear local list on success
-    widget.orderItems.clear();
-    isChanged = true;
-    _calculateTotal();
-    setState(() {});
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          AppLocalizations.of(context).t('orderPlacedSuccessfully'),
-        ),
-      ),
-    );
+    await orderprovider.placeOrder(order, widget.orderItems);
   }
 
   @override
@@ -210,30 +184,23 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
     return Column(
       children: [
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              // re-calc and refresh view
-              _calculateTotal();
-              setState(() {});
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            itemCount: widget.orderItems.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 6),
+            itemBuilder: (context, index) {
+              final orderItem = widget.orderItems[index];
+              return OrderItemCard(
+                orderItem: orderItem,
+                onChangeQty: (qty) {
+                  orderItem.quantity = qty;
+                  isChanged = true;
+                  _calculateTotal();
+                  setState(() {});
+                },
+                onDeleteOrderItem: () => _onDeleteItem(index),
+              );
             },
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: widget.orderItems.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 6),
-              itemBuilder: (context, index) {
-                final orderItem = widget.orderItems[index];
-                return OrderItemCard(
-                  orderItem: orderItem,
-                  onChangeQty: (qty) {
-                    orderItem.quantity = qty;
-                    isChanged = true;
-                    _calculateTotal();
-                    setState(() {});
-                  },
-                  onDeleteOrderItem: () => _onDeleteItem(index),
-                );
-              },
-            ),
           ),
         ),
         _buildCheckoutSection(),
@@ -284,7 +251,10 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${value.toStringAsFixed(2)} ${AppLocalizations.of(context).t('egp')}',
+                          AppLocalizations.of(context).t(
+                            'currency',
+                            data: {'amount': value.toStringAsFixed(2)},
+                          ),
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,

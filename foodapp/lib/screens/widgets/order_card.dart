@@ -35,10 +35,12 @@ class OrderCard extends StatelessWidget {
                   orderId: order.orderId,
                   status: order.status,
                   isUnsynced: !order.synced,
+                  orderItems: orderItems,
                 )
               else
                 _AdminOrderHeader(
                   orderId: order.orderId!,
+                  status: order.status,
                   userId: order.userId,
                 ),
               const SizedBox(height: 12),
@@ -50,9 +52,15 @@ class OrderCard extends StatelessWidget {
                 _UserOrderFooter(
                   totalPrice: order.totalPrice,
                   isUnsynced: !order.synced,
+                  id: order.id,
+                  msg: order.message ?? '',
                 )
               else
-                _AdminOrderFooter(order: order, orderItems: orderItems),
+                _AdminOrderFooter(
+                  order: order,
+                  orderItems: orderItems,
+                  msg: order.message ?? '',
+                ),
             ],
           ),
         ),
@@ -66,11 +74,13 @@ class _UserOrderHeader extends StatelessWidget {
   final int? orderId;
   final String status;
   final bool isUnsynced;
+  final List<OrderItemModel> orderItems;
   const _UserOrderHeader({
     required this.id,
     required this.orderId,
     required this.status,
     required this.isUnsynced,
+    required this.orderItems,
   });
 
   @override
@@ -85,7 +95,11 @@ class _UserOrderHeader extends StatelessWidget {
               Text(
                 AppLocalizations.of(context).t(
                   'order',
-                  data: {'orderId': orderId?.toString() ?? 'unsynced'},
+                  data: {
+                    'orderId':
+                        orderId?.toString() ??
+                        AppLocalizations.of(context).t('unsynced'),
+                  },
                 ),
                 style: const TextStyle(
                   fontSize: 20,
@@ -93,137 +107,33 @@ class _UserOrderHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Row(
-                children: [
-                  Text(
-                    'ID: ${orderId ?? 'unsynced'}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              if (isUnsynced) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
                   ),
-                  if (isUnsynced) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context).t('unsyncedLabel'),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context).t('unsyncedLabel'),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ],
-              ),
-            ],
-          ),
-        ),
-        _MyPupupMenuButton(
-          status: status,
-          orderId: orderId,
-          isUnsynced: isUnsynced,
-        ),
-      ],
-    );
-  }
-}
-
-class _MyPupupMenuButton extends StatelessWidget {
-  final String status;
-  final int? orderId;
-  final bool isUnsynced;
-  const _MyPupupMenuButton({
-    required this.status,
-    required this.orderId,
-    required this.isUnsynced,
-  });
-
-  Future<void> _syncOrders(BuildContext context) async {
-    final provider = context.read<OrderProvider>();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context).t('syncingOrders')),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-    try {
-      await provider.syncOrders();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).t('syncCompleted')),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Sync failed: $e')));
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton<int>(
-      icon: const Icon(Icons.more_horiz),
-      onSelected: (value) {
-        // handled in item entries' onTap
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          child: Row(
-            children: [
-              Icon(Icons.edit, size: 18),
-              SizedBox(width: 8),
-              Text(AppLocalizations.of(context).t('editOrder')),
-            ],
-          ),
-          onTap: () {
-            if (status.toLowerCase() == 'pending') {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.blue,
-                  content: Text(
-                    AppLocalizations.of(context).t('editOrderComingSoon'),
                   ),
-                  duration: const Duration(seconds: 2),
                 ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.lightBlue,
-                  content: Text(
-                    AppLocalizations.of(context).t('ordersCannotBeEdited'),
-                  ),
-                  duration: const Duration(seconds: 3),
-                ),
-              );
-            }
-          },
-        ),
-        PopupMenuItem(
-          child: Row(
-            children: [
-              Icon(Icons.delete, size: 18, color: Colors.red),
-              SizedBox(width: 8),
-              Text(
-                AppLocalizations.of(context).t('deleteOrder'),
-                style: TextStyle(color: Colors.red),
-              ),
+              ],
             ],
           ),
-          onTap: () {
-            if (status.toLowerCase() == 'pending') {
+        ),
+        if (status.toLowerCase() == 'pending')
+          IconButton(
+            onPressed: () {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
@@ -238,7 +148,10 @@ class _MyPupupMenuButton extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        context.read<OrderProvider>().deleteOrder(orderId ?? 0);
+                        context.read<OrderProvider>().deleteOrder(
+                          orderId: orderId,
+                          id: id,
+                        );
                         Navigator.pop(context);
                       },
                       child: Text(
@@ -249,29 +162,8 @@ class _MyPupupMenuButton extends StatelessWidget {
                   ],
                 ),
               );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.lightBlue,
-                  content: Text(
-                    AppLocalizations.of(context).t('ordersCannotBeDeleted'),
-                  ),
-                  duration: const Duration(seconds: 3),
-                ),
-              );
-            }
-          },
-        ),
-        if (isUnsynced)
-          PopupMenuItem(
-            child: Row(
-              children: [
-                Icon(Icons.sync, size: 18, color: Colors.green),
-                SizedBox(width: 8),
-                Text(AppLocalizations.of(context).t('syncOrders')),
-              ],
-            ),
-            onTap: () => _syncOrders(context),
+            },
+            icon: Icon(Icons.close),
           ),
       ],
     );
@@ -280,19 +172,104 @@ class _MyPupupMenuButton extends StatelessWidget {
 
 class _AdminOrderHeader extends StatelessWidget {
   final int orderId;
+  final String status;
   final String userId;
-  const _AdminOrderHeader({required this.orderId, required this.userId});
+  final TextEditingController _messageController = TextEditingController();
+  _AdminOrderHeader({
+    required this.orderId,
+    required this.userId,
+    required this.status,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(
-            context,
-          ).t('order', data: {'orderId': orderId.toString()}),
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              AppLocalizations.of(
+                context,
+              ).t('order', data: {'orderId': orderId.toString()}),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            if (status.toLowerCase() == 'pending')
+              IconButton(
+                onPressed: () async {
+                  // show dialog
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text(AppLocalizations.of(context).t('confirm')),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context).t(
+                              'areYouSureYouWantToCancelOrder',
+                              data: {'order': orderId.toString()},
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(AppLocalizations.of(context).t('leaveAMessage')),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _messageController,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: AppLocalizations.of(
+                                context,
+                              ).t('enterAMessage'),
+                            ),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text(AppLocalizations.of(context).t('cancel')),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text(
+                            AppLocalizations.of(context).t('confirm'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed != true) return;
+                  if (context.mounted) {
+                    await context.read<OrderProvider>().updateOrder(
+                      orderId,
+                      'canceled',
+                      msg: _messageController.text,
+                    );
+                  }
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context).t(
+                            'orderStatusUpdatedTo',
+                            data: {
+                              'status': AppLocalizations.of(
+                                context,
+                              ).t('canceled'),
+                            },
+                          ),
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                icon: Icon(Icons.remove),
+              ),
+          ],
         ),
         const SizedBox(height: 4),
         Row(
@@ -509,8 +486,15 @@ class _InfoItem extends StatelessWidget {
 class _UserOrderFooter extends StatelessWidget {
   final double? totalPrice;
   final bool isUnsynced;
+  final String msg;
+  final int id; // local order id
 
-  const _UserOrderFooter({required this.totalPrice, required this.isUnsynced});
+  const _UserOrderFooter({
+    required this.totalPrice,
+    required this.isUnsynced,
+    required this.id,
+    this.msg = "",
+  });
 
   Future<void> _syncOrders(BuildContext context) async {
     final provider = context.read<OrderProvider>();
@@ -521,19 +505,40 @@ class _UserOrderFooter extends StatelessWidget {
       ),
     );
     try {
-      await provider.syncOrders();
+      await provider.syncOrder(id);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).t('syncCompleted')),
-          ),
-        );
+        final error = provider.error;
+        if (error != null && error.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              duration: Duration(seconds: 5),
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                ).t('syncedFailed', data: {'error': error}),
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).t('syncCompleted')),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Sync failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: Duration(seconds: 5),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              ).t('syncedFailed', data: {'error': e.toString()}),
+            ),
+          ),
+        );
       }
     }
   }
@@ -556,7 +561,10 @@ class _UserOrderFooter extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${AppLocalizations.of(context).t('egp')} ${totalPrice?.toStringAsFixed(2) ?? "0.00"}',
+              AppLocalizations.of(context).t(
+                'currency',
+                data: {'amount': totalPrice?.toStringAsFixed(2) ?? "0.00"},
+              ),
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -565,21 +573,28 @@ class _UserOrderFooter extends StatelessWidget {
             ),
           ],
         ),
-        Row(
-          children: [
-            if (isUnsynced)
-              TextButton.icon(
-                onPressed: () => _syncOrders(context),
-                icon: const Icon(Icons.sync, color: Colors.green),
-                label: Text(
-                  AppLocalizations.of(context).t('sync'),
-                  style: const TextStyle(color: Colors.green),
+        if (isUnsynced)
+          TextButton.icon(
+            onPressed: () => _syncOrders(context),
+            icon: const Icon(Icons.sync, color: Colors.green),
+            label: Text(
+              AppLocalizations.of(context).t('sync'),
+              style: const TextStyle(color: Colors.green),
+            ),
+          ),
+        if (msg.isNotEmpty)
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(AppLocalizations.of(context).t('message')),
+                  content: Text(msg),
                 ),
-              ),
-            const SizedBox(width: 8),
-            const Icon(Icons.check_circle, color: Colors.green, size: 28),
-          ],
-        ),
+              );
+            },
+            icon: Icon(Icons.message),
+          ),
       ],
     );
   }
@@ -588,8 +603,15 @@ class _UserOrderFooter extends StatelessWidget {
 class _AdminOrderFooter extends StatelessWidget {
   final OrderModel order;
   final List<OrderItemModel> orderItems;
+  final String msg;
 
-  const _AdminOrderFooter({required this.order, required this.orderItems});
+  final TextEditingController _messageController = TextEditingController();
+
+  _AdminOrderFooter({
+    required this.order,
+    required this.orderItems,
+    this.msg = '',
+  });
 
   static const List<String> statusVal = [
     'pending',
@@ -632,7 +654,10 @@ class _AdminOrderFooter extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${AppLocalizations.of(context).t('egp')} ${order.totalPrice.toStringAsFixed(2)}',
+              AppLocalizations.of(context).t(
+                'currency',
+                data: {'amount': order.totalPrice.toStringAsFixed(2)},
+              ),
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -641,53 +666,6 @@ class _AdminOrderFooter extends StatelessWidget {
             ),
           ],
         ),
-        if (order.status.toLowerCase() == 'pending')
-          ElevatedButton.icon(
-            onPressed: () async {
-              // show dialog
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text(AppLocalizations.of(context).t('confirm')),
-                  content: Text(
-                    AppLocalizations.of(context).t(
-                      'areYouSureYouWantToDeleteOrder',
-                      data: {'order': order.orderId.toString()},
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text(AppLocalizations.of(context).t('cancel')),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text(AppLocalizations.of(context).t('confirm')),
-                    ),
-                  ],
-                ),
-              );
-              if (confirmed != true) return;
-              if (context.mounted) {
-                await context.read<OrderProvider>().updateOrder(
-                  order.orderId!,
-                  'canceled',
-                );
-              }
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      '${AppLocalizations.of(context).t('orderStatusUpdatedTo')} ${AppLocalizations.of(context).t('canceled')}',
-                    ),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            icon: Icon(Icons.remove),
-            label: Text(AppLocalizations.of(context).t('cancelOrder')),
-          ),
         if (canUpdate)
           ElevatedButton.icon(
             onPressed: () async {
@@ -708,7 +686,14 @@ class _AdminOrderFooter extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      '${AppLocalizations.of(context).t('orderStatusUpdatedTo')} ${AppLocalizations.of(context).t(nextStatus.toLowerCase())}',
+                      AppLocalizations.of(context).t(
+                        'orderStatusUpdatedTo',
+                        data: {
+                          'status': AppLocalizations.of(
+                            context,
+                          ).t(nextStatus.toLowerCase()),
+                        },
+                      ),
                     ),
                     backgroundColor: Colors.green,
                   ),
@@ -717,11 +702,80 @@ class _AdminOrderFooter extends StatelessWidget {
             },
             icon: const Icon(Icons.arrow_forward, size: 18),
             label: Text(
-              '${AppLocalizations.of(context).t('markAs')}${AppLocalizations.of(context).t(nextStatus.toLowerCase())}',
+              AppLocalizations.of(context).t(
+                'markAs',
+                data: {
+                  'status': AppLocalizations.of(
+                    context,
+                  ).t(nextStatus.toLowerCase()),
+                },
+              ),
             ),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
+          ),
+        if (msg.isNotEmpty)
+          IconButton(
+            onPressed: () async {
+              _messageController.text = msg;
+              // show dialog
+              final confirmed = await showDialog<String>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(AppLocalizations.of(context).t('confirm')),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(AppLocalizations.of(context).t('editMessage')),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _messageController,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: AppLocalizations.of(
+                            context,
+                          ).t('enterAMessage'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, 'cancel'),
+                      child: Text(AppLocalizations.of(context).t('cancel')),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, 'confirm'),
+                      child: Text(AppLocalizations.of(context).t('confirm')),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, 'retrieve'),
+                      child: Text(AppLocalizations.of(context).t('retrieve')),
+                    ),
+                  ],
+                ),
+              );
+              if (context.mounted) {
+                if (confirmed == 'retrieve') {
+                  await context.read<OrderProvider>().updateOrder(
+                    order.orderId!,
+                    'pending',
+                    msg: '',
+                  );
+                } else if (confirmed == 'confirm') {
+                  await context.read<OrderProvider>().updateOrder(
+                    order.orderId!,
+                    'canceled',
+                    msg: _messageController.text,
+                  );
+                } else {
+                  return;
+                }
+              }
+            },
+            icon: Icon(Icons.message),
           ),
       ],
     );
