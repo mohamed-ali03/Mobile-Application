@@ -1,10 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/user model/user_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/screens/admin/widgets/customer_details_screen.dart';
 import 'package:provider/provider.dart';
+
+// responsive : done
 
 class AdminUsersScreen extends StatelessWidget {
   const AdminUsersScreen({super.key});
@@ -29,9 +32,9 @@ class AdminUsersScreen extends StatelessWidget {
                     Icon(
                       r == currentRole ? Icons.check_circle : Icons.circle,
                       color: r == currentRole ? Colors.blue : Colors.grey,
-                      size: 18,
+                      size: SizeConfig.blockHight * 2.25,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: SizeConfig.blockHight),
                     Text(AppLocalizations.of(context).t(r).toUpperCase()),
                   ],
                 ),
@@ -49,9 +52,10 @@ class AdminUsersScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(
-              context,
-            ).t('roleUpdatedTo', data: {'role': selected, 'name': user.name}),
+            AppLocalizations.of(context).t(
+              'roleUpdatedTo',
+              data: {'role': AppLocalizations.of(context).t(selected)},
+            ),
           ),
         ),
       );
@@ -88,17 +92,21 @@ class AdminUsersScreen extends StatelessWidget {
           if (users.isEmpty) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(SizeConfig.blockHight * 2.5),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.group_off, size: 56, color: Colors.grey),
-                    const SizedBox(height: 12),
+                    Icon(
+                      Icons.group_off,
+                      size: SizeConfig.blockHight * 7,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: SizeConfig.blockHight * 1.5),
                     Text(
                       AppLocalizations.of(context).t('noUsersFound'),
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: SizeConfig.blockHight * 2),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: SizeConfig.blockHight),
                     ElevatedButton(
                       onPressed: () => auth.fetchAllUsers(),
                       child: Text(AppLocalizations.of(context).t('retry')),
@@ -110,9 +118,9 @@ class AdminUsersScreen extends StatelessWidget {
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(SizeConfig.blockHight * 1.5),
             itemCount: users.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => SizedBox(height: SizeConfig.blockHight),
             itemBuilder: (context, index) {
               final user = users[index];
               return InkWell(
@@ -145,9 +153,12 @@ class _UserTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(SizeConfig.blockHight * 1.5),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: SizeConfig.blockHight * 2,
+          vertical: SizeConfig.blockHight,
+        ),
         leading: Stack(
           children: [
             CircleAvatar(
@@ -166,18 +177,28 @@ class _UserTile extends StatelessWidget {
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  width: 20,
-                  height: 20,
+                  width: SizeConfig.blockHight * 2.5,
+                  height: SizeConfig.blockHight * 2.5,
                   decoration: const BoxDecoration(
                     color: Colors.red,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.block, color: Colors.white, size: 12),
+                  child: Icon(
+                    Icons.block,
+                    color: Colors.white,
+                    size: SizeConfig.blockHight * 1.5,
+                  ),
                 ),
               ),
           ],
         ),
-        title: Text(user.name),
+        title: Text(
+          user.name,
+          style: TextStyle(
+            fontSize: SizeConfig.blockHight * 2,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         subtitle: Text(
           AppLocalizations.of(context).t(
             'rolePermission',
@@ -185,9 +206,13 @@ class _UserTile extends StatelessWidget {
               'role': AppLocalizations.of(context).t(user.role).toUpperCase(),
             },
           ),
+          style: TextStyle(
+            fontSize: SizeConfig.blockHight * 1.75,
+            color: Colors.grey[600],
+          ),
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.edit),
+          icon: Icon(Icons.edit, size: SizeConfig.blockHight * 2.5),
           onPressed: onChangeRole,
         ),
       ),

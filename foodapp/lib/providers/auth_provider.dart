@@ -13,25 +13,20 @@ class AuthProvider extends ChangeNotifier {
   String? error;
   bool _isDisposed = false;
 
-  AuthProvider() {
-    _init();
-  }
+  StreamSubscription? usersSub;
 
-  /// Initialize provider and get current user
-  Future<void> _init() async {
-    try {
-      user = await _repo.getCurrentUser();
-      if (user != null && user?.role != 'user') {
-        final fetchedUsers = await _repo.fetchAllUsers();
-        // Exclude current user from the list
-        users = fetchedUsers.where((u) => u.authID != user?.authID).toList();
+  AuthProvider() {
+    usersSub = _repo.watchUsers().listen((users) {
+      if (users.isNotEmpty) {
+        user = users[0];
+        users.removeAt(0);
+        this.users = users;
+      } else {
+        user = null;
+        this.users = [];
       }
       _setLoading(false);
-    } catch (e) {
-      _setError('Failed to initialize: $e');
-      debugPrint('AuthProvider init error: $e');
-      _setLoading(false);
-    }
+    });
   }
 
   /// 🔑 Login with email and password
@@ -39,14 +34,10 @@ class AuthProvider extends ChangeNotifier {
     try {
       _setError(null);
       _setLoading(true);
-      await _repo.login(email, password);
-      user = await _repo.getCurrentUser();
-      if (user != null && user?.role != 'user') {
-        final fetched = await _repo.fetchAllUsers();
-        // Exclude current user from the list
-        users = fetched.where((u) => u.authID != user?.authID).toList();
+      final isUser = await _repo.login(email, password);
+      if (!isUser) {
+        await fetchAllUsers();
       }
-      _setLoading(false);
     } catch (e) {
       _setError('Login failed: $e');
       debugPrint('Login error: $e');
@@ -74,8 +65,6 @@ class AuthProvider extends ChangeNotifier {
         phoneNumber: phoneNumber,
         imageUrl: imageUrl,
       );
-      user = await _repo.getCurrentUser();
-      _setLoading(false);
     } catch (e) {
       _setError('Registration failed: $e');
       debugPrint('Register error: $e');
@@ -90,9 +79,6 @@ class AuthProvider extends ChangeNotifier {
       _setError(null);
       _setLoading(true);
       await _repo.logout();
-      user = null;
-      users = [];
-      _setLoading(false);
     } catch (e) {
       _setError('Logout failed: $e');
       debugPrint('Logout error: $e');
@@ -131,8 +117,6 @@ class AuthProvider extends ChangeNotifier {
         imageUrl: imageUrl,
         blocked: blocked,
       );
-      user = await _repo.getCurrentUser();
-      _setLoading(false);
     } catch (e) {
       _setError('Update failed: $e');
       debugPrint('Update profile error: $e');
@@ -145,10 +129,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       _setError(null);
       _setLoading(true);
-      final fetched = await _repo.fetchAllUsers();
-      // Exclude current user from the list
-      users = fetched.where((u) => u.authID != user?.authID).toList();
-      _setLoading(false);
+      await _repo.fetchAllUsers();
     } catch (e) {
       _setError('Failed to fetch users: $e');
       debugPrint('Fetch all users error: $e');
@@ -162,9 +143,6 @@ class AuthProvider extends ChangeNotifier {
       _setError(null);
       _setLoading(true);
       await _repo.updateUserRole(userAuthId, newRole);
-      // Refresh the local users list
-      users = await _repo.fetchAllUsers();
-      _setLoading(false);
     } catch (e) {
       _setError('Failed to change user role: $e');
       debugPrint('Change user role error: $e');

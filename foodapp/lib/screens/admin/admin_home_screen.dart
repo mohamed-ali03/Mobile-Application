@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
@@ -9,6 +10,7 @@ import 'package:foodapp/screens/admin/widgets/admin_home_stats.dart';
 import 'package:foodapp/screens/admin/widgets/admin_home_quick_action.dart';
 import 'package:provider/provider.dart';
 
+// responsive : done
 class AdminHomeScreen extends StatelessWidget {
   const AdminHomeScreen({super.key});
 
@@ -23,43 +25,47 @@ class AdminHomeScreen extends StatelessWidget {
       drawer: const MyDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(SizeConfig.blockWidth * 2),
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Welcome Section
               const WelcomeBox(),
-              const SizedBox(height: 24),
+              SizedBox(height: SizeConfig.blockHight * 3),
 
               // Stats Cards - Use Consumer for better performance
               Consumer2<OrderProvider, MenuProvider>(
                 builder: (context, orderProvider, menuProvider, child) {
                   return AdminStatsGrid(
-                    orders: orderProvider.orders,
+                    orders: orderProvider.orders
+                        .where((o) => o.createdAt?.day == DateTime.now().day)
+                        .toList(),
                     menuItems: menuProvider.items,
                   );
                 },
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: SizeConfig.blockHight * 2.5),
 
               // Quick Actions
               Text(
                 AppLocalizations.of(context).t('quickActions'),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: SizeConfig.blockHight * 3,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: SizeConfig.blockHight * 2),
               AdminQuickActionsGrid(parentContext: context),
-              const SizedBox(height: 24),
+              SizedBox(height: SizeConfig.blockHight * 2),
 
               // Recent Activity - Use Consumer for better performance
               Text(
                 AppLocalizations.of(context).t('recentActivity'),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: SizeConfig.blockHight * 3,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
               Consumer<OrderProvider>(

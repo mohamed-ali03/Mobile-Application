@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 
+// responsive : done
 class StaffStatCard extends StatelessWidget {
   final String label;
   final String value;
@@ -27,19 +29,19 @@ class StaffStatCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(width: 12),
+          Icon(icon, color: color),
+          SizedBox(width: SizeConfig.blockHight),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 18,
+                style: TextStyle(
+                  fontSize: SizeConfig.blockHight * 2,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: SizeConfig.blockHight),
               Text(label, style: TextStyle(color: Colors.grey[700])),
             ],
           ),

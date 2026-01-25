@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/screens/widgets/order_card.dart';
+
+// responsive : done
 
 class AdminOrderTabView extends StatelessWidget {
   final List<OrderModel> orders;
@@ -19,14 +22,14 @@ class AdminOrderTabView extends StatelessWidget {
     if (orders.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: EdgeInsets.all(SizeConfig.blockHight * 8),
           child: Text(AppLocalizations.of(context).t('noOrdersYet')),
         ),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.only(bottom: SizeConfig.blockHight * 2),
       itemCount: orders.length,
       itemBuilder: (context, index) => OrderCard(
         order: orders[index],

@@ -1,11 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
+import 'package:foodapp/providers/order_provider.dart';
 import 'package:foodapp/screens/widgets/availability_badge.dart';
 import 'package:foodapp/screens/widgets/item_details_sheet.dart';
 import 'package:provider/provider.dart';
+
+// Responsive : done
 
 class ItemCard extends StatefulWidget {
   final ItemModel item;
@@ -26,13 +30,12 @@ class ItemCard extends StatefulWidget {
 }
 
 class _ItemCardState extends State<ItemCard> {
-  bool selected = false;
   @override
   Widget build(BuildContext context) {
-    final role = context.watch<AuthProvider>().user?.role ?? 'user';
+    final role = context.read<AuthProvider>().user?.role ?? 'user';
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: EdgeInsets.only(bottom: SizeConfig.blockHight * 1.5),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
       child: InkWell(
@@ -43,12 +46,11 @@ class _ItemCardState extends State<ItemCard> {
           categoryName: widget.categoryName,
           onSelectItem: widget.onSelectItem,
           onEdit: widget.onEdit,
-          selected: selected,
         ),
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(SizeConfig.blockHight * 1),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -56,12 +58,12 @@ class _ItemCardState extends State<ItemCard> {
                     borderRadius: BorderRadius.circular(10),
                     child: CachedNetworkImage(
                       imageUrl: widget.item.imageUrl,
-                      width: 96,
-                      height: 96,
+                      width: SizeConfig.blockWidth * 25,
+                      height: SizeConfig.blockWidth * 25,
                       fit: BoxFit.cover,
                       errorWidget: (context, error, stackTrace) => Container(
-                        width: 96,
-                        height: 96,
+                        width: SizeConfig.blockWidth * 25,
+                        height: SizeConfig.blockWidth * 25,
                         color: Colors.grey[200],
                         child: Icon(
                           Icons.image_not_supported,
@@ -77,13 +79,13 @@ class _ItemCardState extends State<ItemCard> {
                       children: [
                         Text(
                           widget.item.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: SizeConfig.blockHight * 2,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: SizeConfig.blockHight),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -91,9 +93,12 @@ class _ItemCardState extends State<ItemCard> {
                               children: [
                                 Text(
                                   widget.categoryName,
-                                  style: TextStyle(color: Colors.grey[700]),
+                                  style: TextStyle(
+                                    color: Colors.grey[700],
+                                    fontSize: SizeConfig.blockHight * 1.7,
+                                  ),
                                 ),
-                                const SizedBox(height: 8),
+                                SizedBox(height: SizeConfig.blockHight),
                                 Text(
                                   AppLocalizations.of(context).t(
                                     'currency',
@@ -105,12 +110,12 @@ class _ItemCardState extends State<ItemCard> {
                                   style: TextStyle(
                                     color: Colors.green[700],
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                    fontSize: SizeConfig.blockHight * 2,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: SizeConfig.blockWidth),
                             AvailabilityBadge(available: widget.item.available),
                           ],
                         ),
@@ -122,38 +127,44 @@ class _ItemCardState extends State<ItemCard> {
             ),
             const Divider(height: 1),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHight),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: role == 'user'
                     ? [
                         Text(
                           '${AppLocalizations.of(context).t('price')}: ${AppLocalizations.of(context).t("currency", data: {'amount': widget.item.price.toStringAsFixed(2)})}',
+                          style: TextStyle(fontSize: SizeConfig.blockHight * 2),
                         ),
-                        const SizedBox(width: 12),
                         widget.item.available
-                            ? selected
-                                  ? IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          selected = false;
-                                          widget.onSelectItem!(selected);
-                                        });
-                                      },
-                                      icon: const Icon(
-                                        Icons.check_circle,
-                                        color: Colors.green,
-                                      ),
-                                    )
-                                  : IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          selected = true;
-                                          widget.onSelectItem!(selected);
-                                        });
-                                      },
-                                      icon: const Icon(Icons.add_shopping_cart),
-                                    )
+                            ? Selector<OrderProvider, bool>(
+                                selector: (_, provider) =>
+                                    provider.orderItems.any(
+                                      (o) =>
+                                          o.itemId == widget.item.itemId &&
+                                          o.synced == false,
+                                    ),
+                                builder: (context, isSelected, child) {
+                                  if (!widget.item.available) {
+                                    return const Icon(
+                                      Icons.block,
+                                      color: Colors.red,
+                                    );
+                                  }
+
+                                  return IconButton(
+                                    icon: Icon(
+                                      isSelected
+                                          ? Icons.check_circle
+                                          : Icons.add_shopping_cart,
+                                      color: isSelected ? Colors.green : null,
+                                    ),
+                                    onPressed: () {
+                                      widget.onSelectItem?.call(!isSelected);
+                                    },
+                                  );
+                                },
+                              )
                             : IconButton(
                                 onPressed: () {},
                                 icon: const Icon(
@@ -166,7 +177,10 @@ class _ItemCardState extends State<ItemCard> {
                         if (widget.onEdit != null)
                           TextButton.icon(
                             onPressed: widget.onEdit,
-                            icon: const Icon(Icons.edit, size: 18),
+                            icon: Icon(
+                              Icons.edit,
+                              size: SizeConfig.blockHight * 3,
+                            ),
                             label: Text(AppLocalizations.of(context).t('edit')),
                           ),
                       ],

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/auth_provider.dart';
-import 'package:foodapp/screens/common/register_screen.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final VoidCallback onToggle;
+  const LoginScreen({super.key, required this.onToggle});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -39,6 +39,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Text(
+                        AppLocalizations.of(context).t('welcomeBack'),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
                       TextFormField(
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -104,29 +112,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     return;
                                   }
 
-                                  try {
-                                    await authProvider.login(
-                                      emailController.text.trim(),
-                                      passwordController.text.trim(),
-                                    );
+                                  await authProvider.login(
+                                    emailController.text.trim(),
+                                    passwordController.text.trim(),
+                                  );
 
-                                    // If there was an error set by provider, show it
-                                    if (authProvider.error != null) {
-                                      if (!context.mounted) return;
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(authProvider.error!),
-                                        ),
-                                      );
-                                    }
-                                    // On success, the app's top-level Consumer will rebuild and
-                                    // show the appropriate home screen based on role.
-                                  } catch (e) {
-                                    if (!context.mounted) return;
+                                  if (authProvider.error != null &&
+                                      context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(e.toString())),
+                                      SnackBar(
+                                        content: Text(authProvider.error!),
+                                      ),
                                     );
                                   }
                                 },
@@ -148,12 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const RegisterScreen(),
-                                ),
-                              );
+                              widget.onToggle();
                             },
                             child: Text(
                               AppLocalizations.of(context).t('createAccount'),

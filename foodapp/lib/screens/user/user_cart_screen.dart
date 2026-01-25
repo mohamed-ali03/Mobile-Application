@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
@@ -7,6 +8,8 @@ import 'package:foodapp/screens/user/widgets/user_home_unsynced_items.dart';
 import 'package:foodapp/screens/user/widgets/user_cart_states.dart';
 import 'package:foodapp/screens/widgets/order_card.dart';
 import 'package:provider/provider.dart';
+
+// responsive : done
 
 class UserCartScreen extends StatefulWidget {
   const UserCartScreen({super.key});
@@ -41,12 +44,13 @@ class _UserCartScreenState extends State<UserCartScreen>
         bottom: TabBar(
           controller: tabController,
           indicatorColor: Colors.white,
+          isScrollable: true,
           tabs: [
             Tab(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart, size: 18),
+                  Icon(Icons.shopping_cart, size: SizeConfig.blockWidth * 5),
                   SizedBox(width: 8),
                   Text(AppLocalizations.of(context).t('cart')),
                 ],
@@ -56,7 +60,7 @@ class _UserCartScreenState extends State<UserCartScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.restaurant, size: 18),
+                  Icon(Icons.restaurant, size: SizeConfig.blockWidth * 5),
                   SizedBox(width: 8),
                   Text(AppLocalizations.of(context).t('processing')),
                 ],
@@ -66,7 +70,7 @@ class _UserCartScreenState extends State<UserCartScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle, size: 18),
+                  Icon(Icons.check_circle, size: SizeConfig.blockWidth * 5),
                   SizedBox(width: 8),
                   Text(AppLocalizations.of(context).t('delivered')),
                 ],
@@ -156,7 +160,7 @@ class _OrdersTabView extends StatelessWidget {
       });
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(SizeConfig.blockHight),
       itemCount: sortedOrders.length,
       itemBuilder: (context, index) => OrderCard(
         order: sortedOrders[index],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
@@ -7,6 +8,7 @@ import 'package:foodapp/providers/order_provider.dart';
 import 'package:foodapp/screens/widgets/order_details_sheet.dart';
 import 'package:provider/provider.dart';
 
+// responsive : done
 class OrderCard extends StatelessWidget {
   final OrderModel order;
   final List<OrderItemModel> orderItems;
@@ -17,7 +19,7 @@ class OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.read<AuthProvider>().user;
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: SizeConfig.blockHight * 1.5),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
@@ -25,7 +27,7 @@ class OrderCard extends StatelessWidget {
             showOrderDetails(context, order: order, orderItems: orderItems),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(SizeConfig.blockHight * 2),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -43,11 +45,11 @@ class OrderCard extends StatelessWidget {
                   status: order.status,
                   userId: order.userId,
                 ),
-              const SizedBox(height: 12),
+              SizedBox(height: SizeConfig.blockHight * 1.5),
               _OrderInfo(order: order, itemCount: orderItems.length),
-              const SizedBox(height: 12),
+              SizedBox(height: SizeConfig.blockHight * 1.5),
               const Divider(),
-              const SizedBox(height: 8),
+              SizedBox(height: SizeConfig.blockHight),
               if (user?.role == 'user')
                 _UserOrderFooter(
                   totalPrice: order.totalPrice,
@@ -101,18 +103,18 @@ class _UserOrderHeader extends StatelessWidget {
                         AppLocalizations.of(context).t('unsynced'),
                   },
                 ),
-                style: const TextStyle(
-                  fontSize: 20,
+                style: TextStyle(
+                  fontSize: SizeConfig.blockHight * 2.5,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: SizeConfig.blockHight * 0.5),
               if (isUnsynced) ...[
-                const SizedBox(width: 8),
+                SizedBox(width: SizeConfig.blockHight),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockHight,
+                    vertical: SizeConfig.blockHight * 0.5,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.orange,
@@ -120,8 +122,8 @@ class _UserOrderHeader extends StatelessWidget {
                   ),
                   child: Text(
                     AppLocalizations.of(context).t('unsyncedLabel'),
-                    style: const TextStyle(
-                      fontSize: 10,
+                    style: TextStyle(
+                      fontSize: SizeConfig.blockHight * 1.25,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -193,7 +195,10 @@ class _AdminOrderHeader extends StatelessWidget {
               AppLocalizations.of(
                 context,
               ).t('order', data: {'orderId': orderId.toString()}),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: SizeConfig.blockHight * 2.5,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             if (status.toLowerCase() == 'pending')
               IconButton(
@@ -271,11 +276,15 @@ class _AdminOrderHeader extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: SizeConfig.blockHight * 0.5),
         Row(
           children: [
-            Icon(Icons.person, size: 14, color: Colors.grey[600]),
-            const SizedBox(width: 4),
+            Icon(
+              Icons.person,
+              size: SizeConfig.blockHight * 1.75,
+              color: Colors.grey[600],
+            ),
+            SizedBox(width: SizeConfig.blockHight * 0.5),
             Expanded(
               child: Text(
                 AppLocalizations.of(context).t(
@@ -289,7 +298,10 @@ class _AdminOrderHeader extends StatelessWidget {
                         (userId.length > 20 ? '...' : ''),
                   },
                 ),
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: SizeConfig.blockHight * 1.5,
+                  color: Colors.grey[600],
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -355,7 +367,7 @@ class _OrderInfo extends StatelessWidget {
                 icon: Icons.calendar_today,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: SizeConfig.blockHight * 2),
             _InfoItem(
               label: AppLocalizations.of(context).t('items'),
               value:
@@ -367,8 +379,12 @@ class _OrderInfo extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
-            const SizedBox(width: 4),
+            Icon(
+              Icons.location_on,
+              size: SizeConfig.blockHight * 2,
+              color: Colors.grey[600],
+            ),
+            SizedBox(width: SizeConfig.blockHight * 0.5),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,15 +392,15 @@ class _OrderInfo extends StatelessWidget {
                   Text(
                     AppLocalizations.of(context).t('deliveryAddressLabel'),
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: SizeConfig.blockHight * 1.375,
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: SizeConfig.blockHight * 0.5),
                   Text(
                     order.address,
-                    style: const TextStyle(fontSize: 13),
+                    style: TextStyle(fontSize: SizeConfig.blockHight * 1.625),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -393,9 +409,12 @@ class _OrderInfo extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: SizeConfig.blockHight * 1.5),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.blockHight * 1.5,
+            vertical: SizeConfig.blockHight,
+          ),
           decoration: BoxDecoration(
             color: _getStatusColor(order.status).withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
@@ -406,14 +425,14 @@ class _OrderInfo extends StatelessWidget {
             children: [
               Icon(
                 _getStatusIcon(order.status),
-                size: 16,
+                size: SizeConfig.blockHight * 2,
                 color: _getStatusColor(order.status),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: SizeConfig.blockHight),
               Text(
                 AppLocalizations.of(context).t(order.status).toUpperCase(),
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: SizeConfig.blockHight * 1.5,
                   color: _getStatusColor(order.status),
                   fontWeight: FontWeight.bold,
                 ),
@@ -461,22 +480,29 @@ class _InfoItem extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon, size: 14, color: Colors.grey[600]),
-            const SizedBox(width: 4),
+            Icon(
+              icon,
+              size: SizeConfig.blockHight * 1.75,
+              color: Colors.grey[600],
+            ),
+            SizedBox(width: SizeConfig.blockHight * 0.5),
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: SizeConfig.blockHight * 1.375,
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w600,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: SizeConfig.blockHight * 0.5),
         Text(
           value,
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: SizeConfig.blockHight * 1.625,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -565,8 +591,8 @@ class _UserOrderFooter extends StatelessWidget {
                 'currency',
                 data: {'amount': totalPrice?.toStringAsFixed(2) ?? "0.00"},
               ),
-              style: const TextStyle(
-                fontSize: 18,
+              style: TextStyle(
+                fontSize: SizeConfig.blockHight * 2.25,
                 fontWeight: FontWeight.bold,
                 color: Colors.green,
               ),
@@ -658,8 +684,8 @@ class _AdminOrderFooter extends StatelessWidget {
                 'currency',
                 data: {'amount': order.totalPrice.toStringAsFixed(2)},
               ),
-              style: const TextStyle(
-                fontSize: 20,
+              style: TextStyle(
+                fontSize: SizeConfig.blockHight * 2.5,
                 fontWeight: FontWeight.bold,
                 color: Colors.green,
               ),
@@ -700,7 +726,7 @@ class _AdminOrderFooter extends StatelessWidget {
                 );
               }
             },
-            icon: const Icon(Icons.arrow_forward, size: 18),
+            icon: Icon(Icons.arrow_forward, size: SizeConfig.blockHight * 2.25),
             label: Text(
               AppLocalizations.of(context).t(
                 'markAs',
@@ -710,9 +736,13 @@ class _AdminOrderFooter extends StatelessWidget {
                   ).t(nextStatus.toLowerCase()),
                 },
               ),
+              style: TextStyle(fontSize: SizeConfig.blockHight * 1.8),
             ),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.blockHight * 2,
+                vertical: SizeConfig.blockHight * 1.5,
+              ),
             ),
           ),
         if (msg.isNotEmpty)

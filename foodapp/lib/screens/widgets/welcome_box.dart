@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
+
+// responsive : Done
 
 /// A unified welcome box that adapts to user role (user, admin, staff).
 class WelcomeBox extends StatelessWidget {
@@ -22,7 +25,7 @@ class WelcomeBox extends StatelessWidget {
             : AppLocalizations.of(context).t('subtitleUser'));
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(SizeConfig.blockHight * 3),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.blue.shade600, Colors.blue.shade400],
@@ -36,18 +39,18 @@ class WelcomeBox extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: SizeConfig.blockHight * 3,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: SizeConfig.blockHight),
           Text(
             subtitle,
             style: TextStyle(
               color: Colors.white.withOpacity(0.9),
-              fontSize: 16,
+              fontSize: SizeConfig.blockHight * 2,
             ),
           ),
         ],

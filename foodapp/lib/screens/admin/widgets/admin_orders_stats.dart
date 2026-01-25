@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
+
+// responsive : done
 
 class AdminOrdersStats extends StatelessWidget {
   final Map<String, int> stats;
@@ -9,8 +12,7 @@ class AdminOrdersStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(SizeConfig.blockHight * 2),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -72,18 +74,24 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 28),
+        Icon(icon, color: color, size: SizeConfig.blockHight * 4),
         const SizedBox(height: 8),
         Text(
           value,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: SizeConfig.blockHight * 3,
             fontWeight: FontWeight.bold,
             color: color,
           ),
         ),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: SizeConfig.blockHight * 1.8,
+            color: Colors.grey[600],
+          ),
+        ),
       ],
     );
   }

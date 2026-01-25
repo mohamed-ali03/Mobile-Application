@@ -1,10 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:foodapp/core/functions.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:provider/provider.dart';
+
+// responsive : done
 
 class MenuItemFormDialog extends StatefulWidget {
   final bool isEdit;
@@ -89,9 +92,7 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
       return;
     }
 
-    final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-    imageUrl = await uploadImage.uploadImage('item_pic', fileName, file!);
+    imageUrl = await uploadImage.uploadImage('item_pic', file!);
 
     if (mounted && imageUrl!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,7 +123,7 @@ class _MenuItemFormDialogState extends State<MenuItemFormDialog> {
               // Image Upload Section
               Container(
                 width: double.infinity,
-                height: 200,
+                height: SizeConfig.blockHight * 30,
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(8),

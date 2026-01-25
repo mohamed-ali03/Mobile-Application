@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
@@ -9,6 +10,7 @@ import 'package:foodapp/screens/widgets/item_details_sheet.dart';
 import 'package:foodapp/screens/admin/widgets/customer_details_screen.dart';
 import 'package:provider/provider.dart';
 
+// responsive : done
 void showOrderDetails(
   BuildContext context, {
   required OrderModel order,
@@ -49,26 +51,34 @@ class OrderDetailsSheet extends StatelessWidget {
       minChildSize: 0.5,
       maxChildSize: 0.95,
       builder: (context, scrollController) => Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(SizeConfig.blockHight * 2.5),
+          ),
         ),
         child: Column(
           children: [
             // Handle
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 12),
-              width: 40,
-              height: 4,
+              margin: EdgeInsets.symmetric(
+                vertical: SizeConfig.blockHight * 1.5,
+              ),
+              width: SizeConfig.blockHight * 5,
+              height: SizeConfig.blockHight * 0.5,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(
+                  SizeConfig.blockHight * 0.25,
+                ),
               ),
             ),
 
             // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.blockHight * 2,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -76,8 +86,8 @@ class OrderDetailsSheet extends StatelessWidget {
                     AppLocalizations.of(
                       context,
                     ).t('order', data: {'orderId': order.orderId.toString()}),
-                    style: const TextStyle(
-                      fontSize: 24,
+                    style: TextStyle(
+                      fontSize: SizeConfig.blockHight * 3,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -93,7 +103,7 @@ class OrderDetailsSheet extends StatelessWidget {
             Expanded(
               child: ListView(
                 controller: scrollController,
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(SizeConfig.blockHight * 2),
                 children: [
                   _DetailSection(
                     title: AppLocalizations.of(context).t('orderInformation'),
@@ -152,21 +162,26 @@ class OrderDetailsSheet extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: SizeConfig.blockHight * 3),
                   _DetailSection(
                     title: AppLocalizations.of(context).t('deliveryAddress'),
                     children: [
-                      Text(order.address, style: const TextStyle(fontSize: 14)),
+                      Text(
+                        order.address,
+                        style: TextStyle(
+                          fontSize: SizeConfig.blockHight * 1.75,
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: SizeConfig.blockHight * 3),
                   _DetailSection(
                     title: AppLocalizations.of(context).t(
                       'orderItemsLength',
                       data: {'length': orderItems.length.toString()},
                     ),
                     children: [
-                      const SizedBox(height: 8),
+                      SizedBox(height: SizeConfig.blockHight),
                       ...orderItems.map(
                         (item) => Consumer<MenuProvider>(
                           builder: (context, menuProvider, child) {
@@ -216,9 +231,12 @@ class _DetailSection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: SizeConfig.blockHight * 2.25,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: SizeConfig.blockHight * 1.5),
         ...children,
       ],
     );
@@ -239,15 +257,21 @@ class _DetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: SizeConfig.blockHight * 1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: SizeConfig.blockHight * 1.75,
+              color: Colors.grey[600],
+            ),
+          ),
           Text(
             value,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: SizeConfig.blockHight * 1.75,
               fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
               color: isHighlighted ? Colors.green : Colors.black,
             ),
@@ -279,7 +303,7 @@ class _OrderItemRow extends StatelessWidget {
         needButton: false,
       ),
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: EdgeInsets.only(bottom: SizeConfig.blockHight * 1.5),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -289,8 +313,8 @@ class _OrderItemRow extends StatelessWidget {
                 children: [
                   Text(
                     menuItem.name,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: TextStyle(
+                      fontSize: SizeConfig.blockHight * 1.75,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -302,7 +326,10 @@ class _OrderItemRow extends StatelessWidget {
                         'price': item.price.toStringAsFixed(2),
                       },
                     ),
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: TextStyle(
+                      fontSize: SizeConfig.blockHight * 1.5,
+                      color: Colors.grey[600],
+                    ),
                   ),
                 ],
               ),
@@ -314,7 +341,10 @@ class _OrderItemRow extends StatelessWidget {
                   'amount': (item.quantity * item.price).toStringAsFixed(2),
                 },
               ),
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: SizeConfig.blockHight * 1.75,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),

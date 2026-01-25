@@ -23,11 +23,9 @@ class UserLocalService {
   }
 
   /// 👀 watch user for real-time updates
-  Stream<UserModel?> watchUser() {
+  Stream<List<UserModel>> watchUsers() {
     try {
-      return IsarService.isar.userModels.where().watch().map(
-        (list) => list.isEmpty ? null : list.first,
-      );
+      return IsarService.isar.userModels.where().watch(fireImmediately: true);
     } catch (e) {
       debugPrint('Error watching user: $e');
       rethrow;

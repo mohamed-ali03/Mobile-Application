@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
@@ -6,6 +7,8 @@ import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
 import 'package:foodapp/screens/user/widgets/user_cart_order_item.dart';
 import 'package:provider/provider.dart';
+
+// responsive : done
 
 // ignore: must_be_immutable
 class UnsyncedItems extends StatefulWidget {
@@ -52,9 +55,14 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: Text(AppLocalizations.of(context).t('deleteItem')),
+        title: Text(
+          AppLocalizations.of(context).t('deleteItem'),
+          style: TextStyle(fontSize: SizeConfig.blockHight * 3),
+        ),
+
         content: Text(
-          AppLocalizations.of(context).t('areYouSureYouWantToDeleteThisItem'),
+          AppLocalizations.of(context).t('deleteItemConfirm'),
+          style: TextStyle(fontSize: SizeConfig.blockHight * 1.8),
         ),
         actions: [
           TextButton(
@@ -112,15 +120,25 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
       builder: (c) {
         return AlertDialog(
           title: Text(AppLocalizations.of(context).t('checkout')),
+          titleTextStyle: TextStyle(
+            fontSize: SizeConfig.blockHight * 3,
+            color: Colors.black,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AppLocalizations.of(context).t('confirmCheckout')),
-              const SizedBox(height: 12),
+              Text(
+                AppLocalizations.of(context).t('confirmCheckout'),
+                style: TextStyle(fontSize: SizeConfig.blockHight * 1.8),
+              ),
+              SizedBox(height: SizeConfig.blockHight * 2),
               TextField(
                 controller: addressController,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).t('deliveryAddress'),
+                  labelStyle: TextStyle(fontSize: SizeConfig.blockHight * 1.8),
+                  hintStyle: TextStyle(fontSize: SizeConfig.blockHight * 1.8),
                   hintText: AppLocalizations.of(
                     context,
                   ).t('enterDeliveryAddress'),
@@ -185,9 +203,9 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
       children: [
         Expanded(
           child: ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHight),
             itemCount: widget.orderItems.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 6),
+            separatorBuilder: (_, _) => SizedBox(height: SizeConfig.blockHight),
             itemBuilder: (context, index) {
               final orderItem = widget.orderItems[index];
               return OrderItemCard(
@@ -210,7 +228,7 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
 
   Widget _buildCheckoutSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(SizeConfig.blockHight * 2),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [BoxShadow(color: Colors.grey[300]!, blurRadius: 4)],
@@ -221,12 +239,12 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
           Text(
             AppLocalizations.of(context).t('orderSummary'),
             style: TextStyle(
-              fontSize: 14,
+              fontSize: SizeConfig.blockHight * 2,
               color: Colors.grey,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: SizeConfig.blockHight * 1.5),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -240,23 +258,26 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
                         Text(
                           '${AppLocalizations.of(context).t('countOfItems')} ${widget.orderItems.length.toString()} ',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: SizeConfig.blockHight * 1.5,
                             color: Colors.grey[700],
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: SizeConfig.blockHight),
                         Text(
                           AppLocalizations.of(context).t('total'),
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          style: TextStyle(
+                            fontSize: SizeConfig.blockHight * 1.5,
+                            color: Colors.grey,
+                          ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: SizeConfig.blockHight),
                         Text(
                           AppLocalizations.of(context).t(
                             'currency',
                             data: {'amount': value.toStringAsFixed(2)},
                           ),
-                          style: const TextStyle(
-                            fontSize: 20,
+                          style: TextStyle(
+                            fontSize: SizeConfig.blockHight * 2,
                             fontWeight: FontWeight.bold,
                             color: Colors.green,
                           ),
@@ -266,15 +287,14 @@ class _UnsyncedItemsState extends State<UnsyncedItems> {
                   },
                 ),
               ),
-              const SizedBox(width: 12),
               ElevatedButton.icon(
                 onPressed: widget.orderItems.isEmpty ? null : _handleCheckout,
                 icon: const Icon(Icons.shopping_bag_outlined),
                 label: Text(AppLocalizations.of(context).t('checkout')),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockHight * 3,
+                    vertical: SizeConfig.blockHight * 2,
                   ),
                 ),
               ),

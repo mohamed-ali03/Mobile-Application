@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
 import 'package:foodapp/providers/order_provider.dart';
@@ -6,6 +7,8 @@ import 'package:foodapp/screens/admin/widgets/admin_order_states.dart';
 import 'package:foodapp/screens/admin/widgets/admin_orders_stats.dart';
 import 'package:foodapp/screens/admin/widgets/admin_orders_views.dart';
 import 'package:provider/provider.dart';
+
+// reaponsive : done
 
 class AdminOrderScreen extends StatefulWidget {
   const AdminOrderScreen({super.key});
@@ -59,12 +62,13 @@ class _AdminOrderScreenState extends State<AdminOrderScreen>
         bottom: TabBar(
           controller: tabController,
           indicatorColor: Colors.white,
+          isScrollable: true,
           tabs: [
             Tab(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.pending, size: 18),
+                  Icon(Icons.pending, size: SizeConfig.blockHight * 2.8),
                   SizedBox(width: 8),
                   Text(AppLocalizations.of(context).t('pending')),
                 ],
@@ -74,7 +78,7 @@ class _AdminOrderScreenState extends State<AdminOrderScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.restaurant, size: 18),
+                  Icon(Icons.restaurant, size: SizeConfig.blockHight * 2.8),
                   SizedBox(width: 8),
                   Text(AppLocalizations.of(context).t('processing')),
                 ],
@@ -84,7 +88,7 @@ class _AdminOrderScreenState extends State<AdminOrderScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle, size: 18),
+                  Icon(Icons.check_circle, size: SizeConfig.blockHight * 2.8),
                   SizedBox(width: 8),
                   Text(AppLocalizations.of(context).t('delivered')),
                 ],
@@ -93,69 +97,75 @@ class _AdminOrderScreenState extends State<AdminOrderScreen>
           ],
         ),
       ),
-      body: Consumer<OrderProvider>(
-        builder: (context, orderProvider, child) {
-          if (orderProvider.isLoading && orderProvider.orders.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Padding(
+        padding: EdgeInsets.all(SizeConfig.blockWidth * 2),
+        child: Consumer<OrderProvider>(
+          builder: (context, orderProvider, child) {
+            if (orderProvider.isLoading && orderProvider.orders.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (orderProvider.error != null) {
-            return AdminOrdersErrorState(
-              error: orderProvider.error!,
-              onRetry: () => orderProvider.fetchAllOrders(),
-            );
-          }
+            if (orderProvider.error != null) {
+              return AdminOrdersErrorState(
+                error: orderProvider.error!,
+                onRetry: () => orderProvider.fetchAllOrders(),
+              );
+            }
 
-          final sortedOrders = List<OrderModel>.from(orderProvider.orders)
-            ..sort((a, b) => (b.orderId ?? 0).compareTo(a.orderId ?? 0));
+            final sortedOrders = List<OrderModel>.from(orderProvider.orders)
+              ..sort((a, b) => (b.orderId ?? 0).compareTo(a.orderId ?? 0));
 
-          final stats = _calculateStats(sortedOrders);
+            final stats = _calculateStats(sortedOrders);
 
-          return Column(
-            children: [
-              // Stats Section
-              AdminOrdersStats(stats: stats),
+            return Column(
+              children: [
+                // Stats Section
+                AdminOrdersStats(stats: stats),
 
-              // Orders List
-              Expanded(
-                child: TabBarView(
-                  controller: tabController,
-                  children: [
-                    AdminOrderTabView(
-                      orders: sortedOrders
-                          .where(
-                            (order) => order.status.toLowerCase() == 'pending',
-                          )
-                          .toList(),
-                      orderItems: orderProvider.orderItems,
-                    ),
-                    AdminOrderTabView(
-                      orders: sortedOrders
-                          .where(
-                            (order) =>
-                                order.status.toLowerCase() != 'pending' &&
-                                order.status.toLowerCase() != 'delivered' &&
-                                order.status.toLowerCase() != 'canceled',
-                          )
-                          .toList(),
-                      orderItems: orderProvider.orderItems,
-                    ),
-                    AdminOrderTabView(
-                      orders: sortedOrders
-                          .where(
-                            (order) =>
-                                order.status.toLowerCase() == 'delivered' ||
-                                order.status.toLowerCase() == 'canceled',
-                          )
-                          .toList(),
-                      orderItems: orderProvider.orderItems,
-                    ),
-                  ],
+                SizedBox(height: SizeConfig.blockHight * 2),
+
+                // Orders List
+                Expanded(
+                  child: TabBarView(
+                    controller: tabController,
+                    children: [
+                      AdminOrderTabView(
+                        orders: sortedOrders
+                            .where(
+                              (order) =>
+                                  order.status.toLowerCase() == 'pending',
+                            )
+                            .toList(),
+                        orderItems: orderProvider.orderItems,
+                      ),
+                      AdminOrderTabView(
+                        orders: sortedOrders
+                            .where(
+                              (order) =>
+                                  order.status.toLowerCase() != 'pending' &&
+                                  order.status.toLowerCase() != 'delivered' &&
+                                  order.status.toLowerCase() != 'canceled',
+                            )
+                            .toList(),
+                        orderItems: orderProvider.orderItems,
+                      ),
+                      AdminOrderTabView(
+                        orders: sortedOrders
+                            .where(
+                              (order) =>
+                                  order.status.toLowerCase() == 'delivered' ||
+                                  order.status.toLowerCase() == 'canceled',
+                            )
+                            .toList(),
+                        orderItems: orderProvider.orderItems,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

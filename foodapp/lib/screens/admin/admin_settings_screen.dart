@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/screens/common/settings_screen.dart';
+
+// responsive : done
 
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({super.key});
@@ -20,11 +23,11 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(SizeConfig.blockHight * 2),
         children: [
           SettingsScreen(),
 
-          const SizedBox(height: 24),
+          SizedBox(height: SizeConfig.blockHight * 3),
           _buildSectionHeader(AppLocalizations.of(context).t('workingHours')),
           _buildWorkHours(),
         ],
@@ -34,11 +37,11 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: EdgeInsets.only(bottom: SizeConfig.blockHight * 1.5),
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 18,
+          fontSize: SizeConfig.blockHight * 2.25,
           fontWeight: FontWeight.bold,
           color: Theme.of(context).colorScheme.primary,
         ),
@@ -49,28 +52,28 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   Widget _buildWorkHours() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(SizeConfig.blockHight * 2),
         child: Row(
           children: [
             Expanded(
               child: GestureDetector(
                 onTap: () => _selectTime('start'),
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(SizeConfig.blockHight * 1.5),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(SizeConfig.blockHight),
                   ),
                   child: Column(
                     children: [
                       Text(
                         AppLocalizations.of(context).t('startTime'),
-                        style: const TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: SizeConfig.blockHight * 1.5),
                       ),
                       Text(
                         _workStart.format(context),
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: TextStyle(
+                          fontSize: SizeConfig.blockHight * 2,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -79,26 +82,26 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: SizeConfig.blockHight * 2),
             Expanded(
               child: GestureDetector(
                 onTap: () => _selectTime('end'),
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(SizeConfig.blockHight * 1.5),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(SizeConfig.blockHight),
                   ),
                   child: Column(
                     children: [
                       Text(
                         AppLocalizations.of(context).t('endTime'),
-                        style: const TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: SizeConfig.blockHight * 1.5),
                       ),
                       Text(
                         _workEnd.format(context),
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: TextStyle(
+                          fontSize: SizeConfig.blockHight * 2,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

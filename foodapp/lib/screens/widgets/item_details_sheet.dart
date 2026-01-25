@@ -1,9 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/screens/widgets/availability_badge.dart';
 import 'package:provider/provider.dart';
+
+// Responsive : done
 
 void showItemDetails(
   BuildContext context, {
@@ -11,7 +15,6 @@ void showItemDetails(
   required String categoryName,
   ValueChanged<bool>? onSelectItem,
   VoidCallback? onEdit,
-  bool selected = false,
   bool needButton = true,
 }) {
   final rawIngredients = (item.ingreidents).trim();
@@ -38,7 +41,6 @@ void showItemDetails(
         onEdit: onEdit,
         ingredients: ingredients,
         role: role,
-        selected: selected,
         needButton: needButton,
       );
     },
@@ -52,7 +54,6 @@ class ItemDetailsSheet extends StatefulWidget {
   final List<String> ingredients;
   final ValueChanged<bool>? onSelectItem;
   final VoidCallback? onEdit;
-  final bool selected;
   final bool needButton;
 
   const ItemDetailsSheet({
@@ -63,7 +64,6 @@ class ItemDetailsSheet extends StatefulWidget {
     required this.categoryName,
     this.onSelectItem,
     this.onEdit,
-    this.selected = false,
     this.needButton = true,
   });
 
@@ -72,35 +72,19 @@ class ItemDetailsSheet extends StatefulWidget {
 }
 
 class _ItemDetailsSheetState extends State<ItemDetailsSheet> {
-  late bool _selected;
-
-  @override
-  void initState() {
-    super.initState();
-    _selected = widget.selected;
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: SizeConfig.blockWidth * 3,
+          vertical: SizeConfig.blockHight * 1,
+        ),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
               if (widget.item.imageUrl.isNotEmpty)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -113,102 +97,127 @@ class _ItemDetailsSheetState extends State<ItemDetailsSheet> {
                         color: Colors.grey[200],
                         child: Icon(
                           Icons.image_not_supported,
-                          size: 48,
+                          size: SizeConfig.blockHight * 8,
                           color: Colors.grey[500],
                         ),
                       ),
                     ),
                   ),
                 ),
-              const SizedBox(height: 12),
+              SizedBox(height: SizeConfig.blockHight * 2),
               Text(
                 widget.item.name,
-                style: const TextStyle(
-                  fontSize: 20,
+                style: TextStyle(
+                  fontSize: SizeConfig.blockHight * 2.5,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: SizeConfig.blockHight * 2),
               AvailabilityBadge(available: widget.item.available),
-              const SizedBox(height: 12),
+              SizedBox(height: SizeConfig.blockHight * 2),
+              Text(
+                AppLocalizations.of(context).t('description'),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: SizeConfig.blockHight * 2,
+                ),
+              ),
+              SizedBox(height: SizeConfig.blockHight),
+
               Text(
                 widget.item.description,
                 style: TextStyle(color: Colors.grey[700]),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: SizeConfig.blockHight * 2),
+
               if (widget.ingredients.isNotEmpty) ...[
-                const Text(
-                  'Ingredients',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                Text(
+                  AppLocalizations.of(context).t('ingredients'),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: SizeConfig.blockHight * 2,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: SizeConfig.blockHight),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
+                  spacing: SizeConfig.blockWidth * 2,
+                  runSpacing: SizeConfig.blockWidth * 2,
                   children: widget.ingredients
                       .map(
                         (ing) => Chip(
-                          label: Text(ing),
+                          label: Text(
+                            ing,
+                            style: TextStyle(
+                              fontSize: SizeConfig.blockHight * 1.5,
+                            ),
+                          ),
                           backgroundColor: Colors.grey[100],
                         ),
                       )
                       .toList(),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: SizeConfig.blockHight * 2),
               ],
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'EGP${widget.item.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 18,
+                    AppLocalizations.of(context).t(
+                      'currency',
+                      data: {'amount': widget.item.price.toStringAsFixed(2)},
+                    ),
+                    style: TextStyle(
+                      fontSize: SizeConfig.blockHight * 2.2,
                       fontWeight: FontWeight.w600,
                       color: Colors.green,
                     ),
                   ),
                   Text(
                     widget.categoryName,
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: SizeConfig.blockHight * 2,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: SizeConfig.blockHight * 2),
               if (widget.needButton)
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
                       child: widget.role == 'user'
                           ? ElevatedButton.icon(
                               onPressed: widget.item.available
                                   ? () {
-                                      setState(() {
-                                        _selected = true;
-                                        widget.onSelectItem?.call(_selected);
-                                      });
+                                      widget.onSelectItem?.call(true);
                                       Navigator.pop(context);
                                     }
                                   : null,
                               icon: const Icon(Icons.add_shopping_cart),
-                              label: const Text('Add to Cart'),
+                              label: Text(
+                                AppLocalizations.of(context).t('addToCart'),
+                              ),
                             )
                           : OutlinedButton.icon(
                               onPressed: widget.onEdit,
                               icon: const Icon(Icons.edit),
-                              label: const Text('Edit'),
+                              label: Text(
+                                AppLocalizations.of(context).t('edit'),
+                              ),
                             ),
                     ),
-                    const SizedBox(width: 12),
                     if (widget.role == 'user')
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Close'),
+                          child: Text(AppLocalizations.of(context).t('cancel')),
                         ),
                       ),
                   ],
                 ),
-              const SizedBox(height: 12),
+              SizedBox(height: SizeConfig.blockHight * 2),
             ],
           ),
         ),

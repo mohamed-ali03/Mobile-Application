@@ -4,14 +4,14 @@ import 'package:foodapp/providers/order_provider.dart';
 import 'package:foodapp/screens/admin/widgets/admin_orders_views.dart';
 import 'package:provider/provider.dart';
 
+// responsive : done
+
 class StaffOrdersScreen extends StatelessWidget {
   const StaffOrdersScreen({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).t('staffOrders')),
-      ),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).t('orders'))),
       body: Consumer<OrderProvider>(
         builder: (context, orderProv, _) {
           if (orderProv.isLoading && orderProv.orders.isEmpty) {

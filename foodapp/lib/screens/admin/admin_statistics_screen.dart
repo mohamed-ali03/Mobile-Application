@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
@@ -10,6 +11,8 @@ import 'package:foodapp/providers/order_provider.dart';
 import 'package:foodapp/screens/admin/widgets/customer_details_screen.dart';
 import 'package:foodapp/screens/widgets/item_details_sheet.dart';
 import 'package:provider/provider.dart';
+
+// responsive : done
 
 class AdminStatisticsScreen extends StatefulWidget {
   const AdminStatisticsScreen({super.key});
@@ -56,25 +59,27 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
       if (itemStats.containsKey(orderItem.itemId)) {
         itemStats[orderItem.itemId]!['itemQuantity'] += orderItem.quantity;
       } else {
-        final item = items.firstWhere(
-          (item) => item.itemId == orderItem.itemId,
-          orElse: () {
-            final fallbackItem = ItemModel();
-            fallbackItem.itemId = orderItem.itemId;
-            fallbackItem.name = AppLocalizations.of(context).t('unknown');
-            fallbackItem.price = 0.0;
-            fallbackItem.categoryId = 0;
-            return fallbackItem;
-          },
-        );
-        itemStats[orderItem.itemId] = {
-          'itemId': orderItem.itemId,
-          'itemName': item.name,
-          'itemPrice': item.price,
-          'itemQuantity': orderItem.quantity,
-          'categoryId': item.categoryId,
-          'createdTime': orderItem.createdAt ?? DateTime.now(),
-        };
+        if (items.isNotEmpty) {
+          final item = items.firstWhere(
+            (item) => item.itemId == orderItem.itemId,
+            orElse: () {
+              final fallbackItem = ItemModel();
+              fallbackItem.itemId = orderItem.itemId;
+              fallbackItem.name = AppLocalizations.of(context).t('unknown');
+              fallbackItem.price = 0.0;
+              fallbackItem.categoryId = 0;
+              return fallbackItem;
+            },
+          );
+          itemStats[orderItem.itemId] = {
+            'itemId': orderItem.itemId,
+            'itemName': item.name,
+            'itemPrice': item.price,
+            'itemQuantity': orderItem.quantity,
+            'categoryId': item.categoryId,
+            'createdTime': orderItem.createdAt ?? DateTime.now(),
+          };
+        }
       }
     }
 
@@ -253,17 +258,17 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
         foregroundColor: Colors.black87,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(SizeConfig.blockHight * 2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Time Range Selector
             _buildTimeRangeSelector(),
-            const SizedBox(height: 24),
+            SizedBox(height: SizeConfig.blockHight * 3),
 
             // Best Items Section
             _buildBestItemsSection(),
-            const SizedBox(height: 24),
+            SizedBox(height: SizeConfig.blockHight * 3),
 
             // Best Users Section
             _buildBestUsersSection(),
@@ -277,12 +282,12 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(SizeConfig.blockHight * 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            blurRadius: SizeConfig.blockHight * 1.25,
+            offset: Offset(0, SizeConfig.blockHight * 0.25),
           ),
         ],
       ),
@@ -290,7 +295,10 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
         child: DropdownButton<String>(
           value: _selectedRange,
           isExpanded: true,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.blockHight * 2,
+            vertical: SizeConfig.blockHight * 1.5,
+          ),
           items: [
             DropdownMenuItem(
               value: 'all',
@@ -346,13 +354,18 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(SizeConfig.blockHight * 2),
+        ),
       ),
       builder: (ctx) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: SizeConfig.blockHight * 2,
+              vertical: SizeConfig.blockHight * 1.5,
+            ),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -394,7 +407,7 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(SizeConfig.blockHight * 2),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -403,13 +416,13 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
                         Icon(
                           Icons.trending_up,
                           color: Colors.green[600],
-                          size: 24,
+                          size: SizeConfig.blockHight * 3,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: SizeConfig.blockHight),
                         Text(
                           AppLocalizations.of(context).t('bestItems'),
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: SizeConfig.blockHight * 2.25,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
@@ -448,20 +461,25 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(SizeConfig.blockHight * 2),
+        ),
       ),
       builder: (ctx) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: SizeConfig.blockHight * 2,
+              vertical: SizeConfig.blockHight * 1.5,
+            ),
             child: FutureBuilder<List<Map<String, dynamic>>>(
               future: getUsersByRange('all'),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: EdgeInsets.all(SizeConfig.blockHight * 3),
                       child: CircularProgressIndicator(),
                     ),
                   );
@@ -503,12 +521,12 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(SizeConfig.blockHight * 1.5),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+                blurRadius: SizeConfig.blockHight * 1.25,
+                offset: Offset(0, SizeConfig.blockHight * 0.25),
               ),
             ],
           ),
@@ -516,18 +534,22 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(SizeConfig.blockHight * 2),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.people, color: Colors.blue[600], size: 24),
-                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.people,
+                          color: Colors.blue[600],
+                          size: SizeConfig.blockHight * 3,
+                        ),
+                        SizedBox(width: SizeConfig.blockHight),
                         Text(
                           AppLocalizations.of(context).t('bestCustomers'),
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: SizeConfig.blockHight * 2.25,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
@@ -576,7 +598,10 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
         needButton: false,
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: SizeConfig.blockHight * 2,
+          vertical: SizeConfig.blockHight,
+        ),
         leading: CircleAvatar(
           backgroundColor: Colors.green[100],
           child: Text(
@@ -589,11 +614,23 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
         ),
         title: Text(
           item['itemName'],
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: SizeConfig.blockHight * 1.8,
+          ),
         ),
-        subtitle: Text('${item['itemQuantity']} orders'),
+        subtitle: Text(
+          '${item['itemQuantity']} ${AppLocalizations.of(context).t('orderOnly')}',
+          style: TextStyle(fontSize: SizeConfig.blockHight * 2),
+        ),
         trailing: Text(
-          'EGP ${(item['itemQuantity'] * item['itemPrice']).toStringAsFixed(0)}',
+          AppLocalizations.of(context).t(
+            'currency',
+            data: {
+              "amount": (item['itemQuantity'] * item['itemPrice'])
+                  .toStringAsFixed(0),
+            },
+          ),
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black87,
@@ -616,7 +653,10 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
         ),
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: SizeConfig.blockHight * 2,
+          vertical: SizeConfig.blockHight,
+        ),
         leading: CircleAvatar(
           backgroundColor: Colors.blue[100],
           child: Text(
@@ -629,11 +669,20 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
         ),
         title: Text(
           user['userName'],
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: SizeConfig.blockHight * 1.8,
+          ),
         ),
-        subtitle: Text('${user['userTotalOrders']} orders'),
+        subtitle: Text(
+          '${user['userTotalOrders']} ${AppLocalizations.of(context).t('orderOnly')}',
+          style: TextStyle(fontSize: SizeConfig.blockHight * 2),
+        ),
         trailing: Text(
-          'EGP ${user['userTotalSpent'].toStringAsFixed(0)}',
+          AppLocalizations.of(context).t(
+            'currency',
+            data: {"amount": user['userTotalSpent'].toStringAsFixed(0)},
+          ),
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black87,

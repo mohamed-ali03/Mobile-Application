@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
+
+// responsive  :done
 
 class AdminOrdersErrorState extends StatelessWidget {
   final String error;
@@ -15,12 +18,16 @@ class AdminOrdersErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: EdgeInsets.all(SizeConfig.blockWidth * 5),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
-            const SizedBox(height: 24),
+            Icon(
+              Icons.error_outline,
+              size: SizeConfig.blockWidth * 20,
+              color: Colors.red[300],
+            ),
+            SizedBox(height: SizeConfig.blockHight * 3),
             Text(
               AppLocalizations.of(context).t('error'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -28,7 +35,7 @@ class AdminOrdersErrorState extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.blockHight),
             Text(
               error,
               style: Theme.of(
@@ -36,7 +43,7 @@ class AdminOrdersErrorState extends StatelessWidget {
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: SizeConfig.blockHight * 4),
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),

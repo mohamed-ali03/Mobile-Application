@@ -138,12 +138,12 @@ class MenuProvider extends ChangeNotifier {
   }
 
   /// ✏️ Update category
-  Future<void> updateCat(CategoryModel category) async {
+  Future<void> updateCat(CategoryModel? category) async {
     try {
       _setLoading(true);
       _setError(null);
 
-      await _repo.updateCat(category);
+      await _repo.updateCat(category!);
 
       _setLoading(false);
     } catch (e) {

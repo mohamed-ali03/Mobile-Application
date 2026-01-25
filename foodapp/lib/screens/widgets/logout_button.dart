@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/auth_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
 import 'package:provider/provider.dart';
+
+// responsive : done
 
 class LogoutButton extends StatelessWidget {
   const LogoutButton({super.key});
@@ -41,22 +44,32 @@ class LogoutButton extends StatelessWidget {
                 );
 
                 if (confirm == true && context.mounted) {
-                  await orderProvider.clearAllData();
                   await authProvider.logout();
-
-                  if (!context.mounted) return;
-                  // Clear navigation stack to let main app's consumer handle routing
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  if (authProvider.error == null) {
+                    await orderProvider.clearAllData();
+                    if (!context.mounted) return;
+                    // Clear navigation stack to let main app's consumer handle routing
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(authProvider.error!)),
+                      );
+                    }
+                  }
                 }
               },
-        icon: const Icon(Icons.logout),
+        icon: Icon(Icons.logout, size: SizeConfig.blockHight * 2.5),
         label: Text(
           AppLocalizations.of(context).t('logout'),
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: SizeConfig.blockHight * 2),
         ),
         style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          side: const BorderSide(color: Colors.red, width: 2),
+          padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHight * 2),
+          side: BorderSide(
+            color: Colors.red,
+            width: SizeConfig.blockHight * 0.25,
+          ),
           foregroundColor: Colors.red,
         ),
       ),

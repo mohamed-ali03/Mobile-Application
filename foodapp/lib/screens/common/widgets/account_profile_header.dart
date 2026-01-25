@@ -1,5 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
+
+// responsive : done
 
 class AccountProfileHeader extends StatelessWidget {
   final dynamic user;
@@ -11,7 +14,7 @@ class AccountProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(SizeConfig.blockHight * 4),
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/images/background.jpg'),
@@ -23,14 +26,18 @@ class AccountProfileHeader extends StatelessWidget {
           Stack(
             children: [
               CircleAvatar(
-                radius: 60,
+                radius: SizeConfig.blockHight * 7.5,
                 backgroundColor: Colors.white,
                 backgroundImage:
                     user.imageUrl != null && user.imageUrl!.isNotEmpty
                     ? CachedNetworkImageProvider(user.imageUrl!)
                     : null,
                 child: user.imageUrl == null || user.imageUrl!.isEmpty
-                    ? Icon(Icons.person, size: 60, color: Colors.grey[400])
+                    ? Icon(
+                        Icons.person,
+                        size: SizeConfig.blockHight * 7.5,
+                        color: Colors.grey[400],
+                      )
                     : null,
               ),
               Positioned(
@@ -43,13 +50,16 @@ class AccountProfileHeader extends StatelessWidget {
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+                        blurRadius: SizeConfig.blockHight * 0.5,
+                        offset: Offset(0, SizeConfig.blockHight * 0.25),
                       ),
                     ],
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.camera_alt, size: 20),
+                    icon: Icon(
+                      Icons.camera_alt,
+                      size: SizeConfig.blockHight * 2.5,
+                    ),
                     color: Colors.blue,
                     onPressed: onEditImage,
                   ),
@@ -57,16 +67,16 @@ class AccountProfileHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: SizeConfig.blockHight * 2),
           Text(
             user.name,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: SizeConfig.blockHight * 3,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: SizeConfig.blockHight),
         ],
       ),
     );

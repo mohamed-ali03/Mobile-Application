@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
+// responsive : done
 
 class AccountInfoCard extends StatelessWidget {
   final IconData icon;
@@ -22,20 +24,26 @@ class AccountInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(SizeConfig.blockHight * 1.5),
+      ),
       child: ListTile(
         leading: Container(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(SizeConfig.blockHight),
           decoration: BoxDecoration(
             color: Colors.blue.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(SizeConfig.blockHight),
           ),
-          child: Icon(icon, color: Colors.blue, size: 24),
+          child: Icon(
+            icon,
+            color: Colors.blue,
+            size: SizeConfig.blockHight * 3,
+          ),
         ),
         title: Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: SizeConfig.blockHight * 1.5,
             color: Colors.grey[600],
             fontWeight: FontWeight.w500,
           ),
@@ -44,11 +52,14 @@ class AccountInfoCard extends StatelessWidget {
             valueWidget ??
             Text(
               value,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: SizeConfig.blockHight * 2,
+                fontWeight: FontWeight.w500,
+              ),
             ),
         trailing: showEdit
             ? IconButton(
-                icon: const Icon(Icons.edit, size: 20),
+                icon: Icon(Icons.edit, size: SizeConfig.blockHight * 2.5),
                 onPressed: onEdit,
                 color: Colors.blue,
               )

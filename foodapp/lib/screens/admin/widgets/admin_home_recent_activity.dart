@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
+
+// responsive : done
 
 class RecentActivityCard extends StatelessWidget {
   final List<OrderModel> orders;
@@ -67,7 +70,7 @@ class RecentActivityCard extends StatelessWidget {
 
     if (recentOrders.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(SizeConfig.blockHight * 2.5),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -80,25 +83,29 @@ class RecentActivityCard extends StatelessWidget {
           ],
         ),
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                Icon(Icons.inbox, size: 48, color: Colors.grey[400]),
-                const SizedBox(height: 12),
-                Text(
-                  AppLocalizations.of(context).t('noRecentActivity'),
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+          child: Column(
+            children: [
+              Icon(
+                Icons.inbox,
+                size: SizeConfig.blockHight * 7,
+                color: Colors.grey[400],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                AppLocalizations.of(context).t('noRecentActivity'),
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: SizeConfig.blockHight * 2,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );
     }
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(SizeConfig.blockHight * 2.5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -150,16 +157,16 @@ class _ActivityItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: SizeConfig.blockWidth * 2),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: color, size: SizeConfig.blockHight * 3),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -168,15 +175,18 @@ class _ActivityItem extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: SizeConfig.blockHight * 2,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   time,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: SizeConfig.blockHight * 1.8,
+                    color: Colors.grey[600],
+                  ),
                 ),
               ],
             ),

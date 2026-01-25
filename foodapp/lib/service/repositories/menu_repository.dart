@@ -256,7 +256,6 @@ class MenuRepository {
         return CategoryModel()
           ..categoryId = e['id']
           ..name = e['name']
-          ..imageUrl = e['image_url']
           ..createdAt = DateTime.parse(e['created_at']);
       }).toList();
 
@@ -271,7 +270,7 @@ class MenuRepository {
   Future<void> addCat(CategoryModel category) async {
     try {
       final res = await _remote
-          .addCategory(name: category.name, imageUrl: category.imageUrl)
+          .addCategory(name: category.name)
           .timeout(const Duration(seconds: 10));
 
       category.categoryId = res['id'];
@@ -287,11 +286,7 @@ class MenuRepository {
   Future<void> updateCat(CategoryModel category) async {
     try {
       await _remote
-          .updateCategory(
-            categoryId: category.categoryId,
-            name: category.name,
-            imageUrl: category.imageUrl,
-          )
+          .updateCategory(categoryId: category.categoryId, name: category.name)
           .timeout(const Duration(seconds: 10));
     } catch (e) {
       debugPrint('Failed to update category (id: ${category.categoryId}): $e');

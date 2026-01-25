@@ -6,7 +6,6 @@ extension CategoryModelJson on CategoryModel {
     return CategoryModel()
       ..categoryId = json['id'] as int
       ..name = json['name'] as String
-      ..imageUrl = json['image_url'] as String
       ..createdAt = json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null;
@@ -14,6 +13,6 @@ extension CategoryModelJson on CategoryModel {
 
   /// TO JSON
   Map<String, dynamic> toJson() {
-    return {'id': categoryId, 'name': name, 'image_url': imageUrl};
+    return {'id': categoryId, 'name': name};
   }
 }

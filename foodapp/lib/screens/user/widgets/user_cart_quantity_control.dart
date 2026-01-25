@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
+
+// responsive : done
 
 class QuantityControl extends StatefulWidget {
   final int quantity;
@@ -39,38 +42,44 @@ class _QuantityControlState extends State<QuantityControl> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: Icon(Icons.remove, size: 18),
+            icon: Icon(Icons.remove, size: SizeConfig.blockHight * 2),
             onPressed: () {
               if (quantity.value > 1) {
                 quantity.value--;
                 widget.onChangeQuantity(quantity.value);
               }
             },
-            splashRadius: 20,
-            constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+            splashRadius: SizeConfig.blockHight * 2,
+            constraints: BoxConstraints(
+              minWidth: SizeConfig.blockHight * 2,
+              minHeight: SizeConfig.blockHight * 2,
+            ),
             padding: EdgeInsets.zero,
           ),
           ValueListenableBuilder(
             valueListenable: quantity,
             builder: (context, value, child) {
-              return Container(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  '$value',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              return Text(
+                '$value',
+                style: TextStyle(
+                  fontSize: SizeConfig.blockHight * 2,
+                  fontWeight: FontWeight.w600,
                 ),
               );
             },
           ),
           IconButton(
-            icon: Icon(Icons.add, size: 18),
+            icon: Icon(Icons.add, size: SizeConfig.blockHight * 2),
             onPressed: () {
               // Increase quantity
               quantity.value++;
               widget.onChangeQuantity(quantity.value);
             },
-            splashRadius: 20,
-            constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+            splashRadius: SizeConfig.blockHight * 2,
+            constraints: BoxConstraints(
+              minWidth: SizeConfig.blockHight * 2,
+              minHeight: SizeConfig.blockHight * 2,
+            ),
             padding: EdgeInsets.zero,
           ),
         ],

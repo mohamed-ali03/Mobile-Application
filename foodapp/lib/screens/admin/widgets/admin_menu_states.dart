@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
+import 'package:foodapp/l10n/app_localizations.dart';
+
+// responsive : done
 
 class AdminMenuEmptyState extends StatelessWidget {
   final VoidCallback onAddItem;
@@ -9,12 +13,16 @@ class AdminMenuEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: EdgeInsets.all(SizeConfig.blockWidth * 5),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.restaurant_menu, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 24),
+            Icon(
+              Icons.restaurant_menu,
+              size: SizeConfig.blockWidth * 20,
+              color: Colors.grey[400],
+            ),
+            SizedBox(height: SizeConfig.blockHight * 3),
             Text(
               'No Menu Items',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -22,22 +30,22 @@ class AdminMenuEmptyState extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.blockHight),
             Text(
               'Start by adding your first menu item',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: SizeConfig.blockHight * 4),
             ElevatedButton.icon(
               onPressed: onAddItem,
               icon: const Icon(Icons.add),
               label: const Text('Add First Item'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.blockHight * 3,
+                  vertical: SizeConfig.blockHight * 1.5,
                 ),
               ),
             ),
@@ -57,31 +65,35 @@ class AdminMenuNoResultsState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: EdgeInsets.all(SizeConfig.blockWidth * 5),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 24),
+            Icon(
+              Icons.search_off,
+              size: SizeConfig.blockWidth * 20,
+              color: Colors.grey[400],
+            ),
+            SizedBox(height: SizeConfig.blockHight * 3),
             Text(
-              'No Items Found',
+              AppLocalizations.of(context).t('noItemsFound'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Colors.grey[700],
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.blockHight),
             Text(
-              'Try adjusting your filters',
+              AppLocalizations.of(context).t('tryadjustingyourfilters'),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: SizeConfig.blockHight * 4),
             OutlinedButton.icon(
               onPressed: onClearFilters,
               icon: const Icon(Icons.clear_all),
-              label: const Text('Clear Filters'),
+              label: Text(AppLocalizations.of(context).t('clearFilters')),
             ),
           ],
         ),

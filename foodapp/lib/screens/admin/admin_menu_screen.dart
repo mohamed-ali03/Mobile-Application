@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/category%20model/category_model.dart';
 import 'package:foodapp/models/item%20model/item_model.dart';
@@ -9,6 +10,8 @@ import 'package:foodapp/screens/admin/widgets/admin_menu_stats.dart';
 import 'package:foodapp/screens/widgets/menu_search_filters.dart';
 import 'package:foodapp/screens/admin/widgets/admin_menu_states.dart';
 import 'package:provider/provider.dart';
+
+// responsive : done
 
 class AdminMenuScreen extends StatefulWidget {
   const AdminMenuScreen({super.key});
@@ -127,6 +130,71 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     );
   }
 
+  void _showAddCategoryDialog(BuildContext context, {int? categoryId}) async {
+    MenuProvider menuProvider = context.read<MenuProvider>();
+    TextEditingController cat = TextEditingController();
+
+    late CategoryModel category;
+
+    if (categoryId != null) {
+      category = menuProvider.categories.firstWhere(
+        (c) => c.categoryId == categoryId,
+      );
+      cat.text = category.name;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context).t('addCategory')),
+        content: TextFormField(
+          controller: cat,
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).t('categoryName'),
+            hintText: AppLocalizations.of(context).t('e.g., Burger Pizza'),
+            border: const OutlineInputBorder(),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return AppLocalizations.of(context).t('pleaseEnterCategoryName');
+            }
+            return null;
+          },
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context).t('cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(AppLocalizations.of(context).t('confirm')),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == false || confirmed == null) return;
+
+    if (categoryId == null) {
+      await menuProvider.addCat(CategoryModel()..name = cat.text);
+    } else {
+      category.name = cat.text;
+      await menuProvider.updateCat(category);
+    }
+
+    if (!context.mounted) return;
+    if (menuProvider.error != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(menuProvider.error!)));
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Category add successfully')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,58 +208,52 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
         icon: const Icon(Icons.add),
         label: Text(AppLocalizations.of(context).t('addItem')),
       ),
-      body: Consumer<MenuProvider>(
-        builder: (context, menuProvider, child) {
-          if (menuProvider.isLoading && menuProvider.items.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Padding(
+        padding: EdgeInsets.all(SizeConfig.blockHight * 2),
+        child: Consumer<MenuProvider>(
+          builder: (context, menuProvider, child) {
+            if (menuProvider.isLoading && menuProvider.items.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (menuProvider.items.isEmpty || menuProvider.categories.isEmpty) {
-            return AdminMenuEmptyState(
-              onAddItem: () => _showAddItemDialog(context),
-            );
-          }
+            if (menuProvider.items.isEmpty || menuProvider.categories.isEmpty) {
+              return AdminMenuEmptyState(
+                onAddItem: () => _showAddItemDialog(context),
+              );
+            }
 
-          final filteredItems = _getFilteredItems(menuProvider.items);
-          final stats = _calculateStats(menuProvider.items);
+            final filteredItems = _getFilteredItems(menuProvider.items);
+            final stats = _calculateStats(menuProvider.items);
 
-          return CustomScrollView(
-            slivers: [
-              // Stats Section
-              SliverToBoxAdapter(child: AdminMenuStats(stats: stats)),
+            return CustomScrollView(
+              slivers: [
+                // Stats Section
+                SliverToBoxAdapter(child: AdminMenuStats(stats: stats)),
 
-              // Search and Filters
-              SliverToBoxAdapter(
-                child: MenuSearchFilters(
-                  searchController: _searchController,
-                  searchQuery: _searchQuery,
-                  selectedCategoryId: _selectedCategoryId,
-                  showAvailableOnly: _showAvailableOnly,
-                  categories: menuProvider.categories,
-                  onSearchChanged: (value) {
-                    setState(() => _searchQuery = value);
-                  },
-                  onCategoryChanged: (value) {
-                    setState(() => _selectedCategoryId = value);
-                  },
-                  onAvailableToggle: (value) {
-                    setState(() => _showAvailableOnly = value);
-                  },
-                  onClearFilters: () {
-                    setState(() {
-                      _searchQuery = '';
-                      _selectedCategoryId = null;
-                      _showAvailableOnly = false;
-                      _searchController.clear();
-                    });
-                  },
+                SliverToBoxAdapter(
+                  child: SizedBox(height: SizeConfig.blockHight * 2),
                 ),
-              ),
 
-              // Items List
-              if (filteredItems.isEmpty)
-                SliverFillRemaining(
-                  child: AdminMenuNoResultsState(
+                // Search and Filters
+                SliverToBoxAdapter(
+                  child: MenuSearchFilters(
+                    searchController: _searchController,
+                    searchQuery: _searchQuery,
+                    selectedCategoryId: _selectedCategoryId,
+                    showAvailableOnly: _showAvailableOnly,
+                    categories: menuProvider.categories,
+                    addCategory: () => _showAddCategoryDialog(context),
+                    editCategory: (value) =>
+                        _showAddCategoryDialog(context, categoryId: value),
+                    onSearchChanged: (value) {
+                      setState(() => _searchQuery = value);
+                    },
+                    onCategoryChanged: (value) {
+                      setState(() => _selectedCategoryId = value);
+                    },
+                    onAvailableToggle: (value) {
+                      setState(() => _showAvailableOnly = value);
+                    },
                     onClearFilters: () {
                       setState(() {
                         _searchQuery = '';
@@ -201,11 +263,28 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                       });
                     },
                   ),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverList(
+                ),
+
+                SliverToBoxAdapter(
+                  child: SizedBox(height: SizeConfig.blockHight * 2),
+                ),
+
+                // Items List
+                if (filteredItems.isEmpty)
+                  SliverFillRemaining(
+                    child: AdminMenuNoResultsState(
+                      onClearFilters: () {
+                        setState(() {
+                          _searchQuery = '';
+                          _selectedCategoryId = null;
+                          _showAvailableOnly = false;
+                          _searchController.clear();
+                        });
+                      },
+                    ),
+                  )
+                else
+                  SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final item = filteredItems[index];
                       final category = menuProvider.categories.firstWhere(
@@ -222,10 +301,10 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                       );
                     }, childCount: filteredItems.length),
                   ),
-                ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -116,14 +116,11 @@ class MenuRemoteService {
   }
 
   /// ➕ add category
-  Future<Map<String, dynamic>> addCategory({
-    required String name,
-    required String imageUrl,
-  }) async {
+  Future<Map<String, dynamic>> addCategory({required String name}) async {
     try {
       final res = await SupabaseService.client
           .from('categories')
-          .insert({'name': name, 'image_url': imageUrl})
+          .insert({'name': name})
           .select()
           .single();
 
@@ -138,13 +135,11 @@ class MenuRemoteService {
   Future<Map<String, dynamic>> updateCategory({
     required int categoryId,
     String? name,
-    String? imageUrl,
   }) async {
     try {
       final data = <String, dynamic>{};
 
       if (name != null) data['name'] = name;
-      if (imageUrl != null) data['image_url'] = imageUrl;
 
       if (data.isEmpty) return <String, dynamic>{};
 

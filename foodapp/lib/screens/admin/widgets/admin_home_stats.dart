@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20model/order_model.dart';
+
+// responsive : done
 
 class AdminStatsGrid extends StatelessWidget {
   final List<OrderModel> orders;
@@ -36,8 +39,8 @@ class AdminStatsGrid extends StatelessWidget {
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
+      crossAxisSpacing: SizeConfig.blockWidth * 3,
+      mainAxisSpacing: SizeConfig.blockHight * 3,
       childAspectRatio: 1.5,
       children: [
         _StatCard(
@@ -87,7 +90,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(SizeConfig.blockHight * 2),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -103,14 +106,14 @@ class _StatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(icon, color: color, size: 32),
+          Icon(icon, color: color, size: SizeConfig.blockHight * 3.5),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: SizeConfig.blockHight * 2,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey[900],
                 ),
@@ -118,7 +121,10 @@ class _StatCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 title,
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: SizeConfig.blockHight * 2,
+                  color: Colors.grey[600],
+                ),
               ),
             ],
           ),

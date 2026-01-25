@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/app_settings_provider.dart';
 import 'package:foodapp/providers/auth_provider.dart';
@@ -11,7 +12,7 @@ import 'package:foodapp/screens/admin/admin_order_screen.dart';
 import 'package:foodapp/screens/admin/admin_settings_screen.dart';
 import 'package:foodapp/screens/admin/admin_statistics_screen.dart';
 import 'package:foodapp/screens/admin/admin_users_screen.dart';
-import 'package:foodapp/screens/common/login_screen.dart';
+import 'package:foodapp/screens/common/auth.dart';
 import 'package:foodapp/screens/common/settings_screen.dart';
 import 'package:foodapp/screens/staff/staff_home_screen.dart';
 import 'package:foodapp/screens/common/account_screen.dart';
@@ -40,7 +41,10 @@ void main() async {
         ChangeNotifierProxyProvider<AuthProvider, OrderProvider>(
           create: (context) => OrderProvider('user'),
           update: (context, authProvider, orderProvider) {
-            return OrderProvider(authProvider.user?.role);
+            if (orderProvider?.orders.isNotEmpty ?? false) {
+              return orderProvider!;
+            }
+            return OrderProvider(authProvider.user?.role ?? 'user');
           },
         ),
       ],
@@ -54,6 +58,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return Consumer<AppSettingsProvider>(
       builder: (context, appSettingsProvider, child) {
         return MaterialApp(
@@ -92,7 +97,7 @@ class MyApp extends StatelessWidget {
 
               // Not authenticated
               if (authProvider.user == null) {
-                return const LoginScreen();
+                return const AuthScreen();
               }
 
               // Role-based routing

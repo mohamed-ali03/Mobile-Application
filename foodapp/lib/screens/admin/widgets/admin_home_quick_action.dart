@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
+
+// responsive : done
 
 class AdminQuickActionsGrid extends StatelessWidget {
   final BuildContext parentContext;
@@ -12,8 +15,8 @@ class AdminQuickActionsGrid extends StatelessWidget {
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
+      crossAxisSpacing: SizeConfig.blockWidth * 3,
+      mainAxisSpacing: SizeConfig.blockHight * 3,
       childAspectRatio: 2,
       children: [
         _QuickActionCard(
@@ -52,7 +55,7 @@ class _QuickActionCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(SizeConfig.blockHight * 2),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
@@ -60,19 +63,23 @@ class _QuickActionCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: color, size: 28),
+            Icon(icon, color: color, size: SizeConfig.blockHight * 3.5),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: SizeConfig.blockHight * 2.2,
                   fontWeight: FontWeight.w600,
                   color: Colors.grey[900],
                 ),
               ),
             ),
-            Icon(Icons.arrow_forward_ios, color: color, size: 16),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: color,
+              size: SizeConfig.blockHight * 2,
+            ),
           ],
         ),
       ),

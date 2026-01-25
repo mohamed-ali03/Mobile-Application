@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/providers/menu_provider.dart';
 import 'package:foodapp/providers/order_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:foodapp/screens/staff/widgets/staff_stat_card.dart';
+
+// responsive : done
 
 class StaffHomeScreen extends StatelessWidget {
   const StaffHomeScreen({super.key});
@@ -33,7 +36,7 @@ class StaffHomeScreen extends StatelessWidget {
 
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(SizeConfig.blockHight * 2),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -41,7 +44,7 @@ class StaffHomeScreen extends StatelessWidget {
                     AppLocalizations.of(context).t('welcomeBack'),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: SizeConfig.blockHight * 2),
 
                   // Stats row
                   Row(
@@ -54,7 +57,7 @@ class StaffHomeScreen extends StatelessWidget {
                           icon: Icons.pending,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: SizeConfig.blockHight * 2),
                       Expanded(
                         child: StaffStatCard(
                           label: AppLocalizations.of(context).t('processing'),
@@ -66,7 +69,7 @@ class StaffHomeScreen extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 18),
+                  SizedBox(height: SizeConfig.blockHight * 2),
 
                   // Quick actions
                   Text(
@@ -85,6 +88,9 @@ class StaffHomeScreen extends StatelessWidget {
                           icon: const Icon(Icons.list_alt),
                           label: Text(
                             AppLocalizations.of(context).t('viewOrders'),
+                            style: TextStyle(
+                              fontSize: SizeConfig.blockHight * 2,
+                            ),
                           ),
                         ),
                       ),
@@ -96,20 +102,23 @@ class StaffHomeScreen extends StatelessWidget {
                           icon: const Icon(Icons.person),
                           label: Text(
                             AppLocalizations.of(context).t('profile'),
+                            style: TextStyle(
+                              fontSize: SizeConfig.blockHight * 1.8,
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: SizeConfig.blockHight * 3),
 
                   // Menu summary
                   Text(
                     AppLocalizations.of(context).t('menuItems'),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: SizeConfig.blockHight),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -130,12 +139,12 @@ class StaffHomeScreen extends StatelessWidget {
                           children: [
                             Text(
                               '${menuProv.items.length}',
-                              style: const TextStyle(
-                                fontSize: 20,
+                              style: TextStyle(
+                                fontSize: SizeConfig.blockHight * 3,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: SizeConfig.blockHight * 0.5),
                             Text(
                               AppLocalizations.of(context).t('totalItems'),
                               style: TextStyle(color: Colors.grey[700]),
@@ -147,6 +156,9 @@ class StaffHomeScreen extends StatelessWidget {
                               Navigator.pushNamed(context, '/adminMenuScreen'),
                           child: Text(
                             AppLocalizations.of(context).t('manageMenu'),
+                            style: TextStyle(
+                              fontSize: SizeConfig.blockHight * 2,
+                            ),
                           ),
                         ),
                       ],

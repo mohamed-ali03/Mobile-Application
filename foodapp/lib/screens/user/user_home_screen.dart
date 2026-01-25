@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodapp/core/size_config.dart';
 import 'package:foodapp/l10n/app_localizations.dart';
 import 'package:foodapp/models/order%20item%20model/order_item_model.dart';
 import 'package:foodapp/providers/menu_provider.dart';
@@ -11,6 +12,8 @@ import 'package:foodapp/models/category%20model/category_model.dart';
 import 'package:foodapp/screens/widgets/item_card.dart';
 import 'package:provider/provider.dart';
 
+// responsive : done
+
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
 
@@ -20,6 +23,7 @@ class UserHomeScreen extends StatefulWidget {
 
 class _UserHomeScreenState extends State<UserHomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  ValueNotifier<List<ItemModel>> filteredItems = ValueNotifier([]);
   String _searchQuery = '';
   int? _selectedCategoryId;
   bool _showAvailableOnly = false;
@@ -61,17 +65,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(AppLocalizations.of(context).t('welcomeTitle')),
+        title: Text(
+          AppLocalizations.of(context).t('welcomeTitle'),
+          style: TextStyle(fontSize: SizeConfig.blockHight * 2.5),
+        ),
         leading: IconButton(
           onPressed: () => Navigator.pushNamed(context, '/accountScreen'),
-          icon: const Icon(Icons.person),
+          icon: Icon(Icons.person),
         ),
         actions: [CartButton()],
       ),
       backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Consumer<MenuProvider>(
-          builder: (context, menuProvider, child) {
+          builder: (context, menuProvider, _) {
             // Early full-screen states (match admin menu pattern)
             if (menuProvider.isLoading && menuProvider.items.isEmpty) {
               return const Center(child: CircularProgressIndicator());
@@ -89,84 +96,114 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             }
 
             // Normal content
-            final filteredItems = _getFilteredItems(menuProvider.items);
+            filteredItems.value = _getFilteredItems(menuProvider.items);
 
-            return CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.all(16.0),
-                  sliver: SliverToBoxAdapter(
+            return Padding(
+              padding: EdgeInsets.all(SizeConfig.blockHight * 2),
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 700),
                       child: IntrinsicWidth(child: const WelcomeBox()),
                     ),
                   ),
-                ),
 
-                SliverToBoxAdapter(
-                  child: MenuSearchFilters(
-                    searchController: _searchController,
-                    searchQuery: _searchQuery,
-                    selectedCategoryId: _selectedCategoryId,
-                    showAvailableOnly: _showAvailableOnly,
-                    categories: menuProvider.categories,
-                    onSearchChanged: (value) {
-                      setState(() => _searchQuery = value);
-                    },
-                    onCategoryChanged: (value) {
-                      setState(() => _selectedCategoryId = value);
-                    },
-                    onAvailableToggle: (value) {
-                      setState(() => _showAvailableOnly = value);
-                    },
-                    onClearFilters: () {
-                      setState(() {
-                        _searchQuery = '';
-                        _selectedCategoryId = null;
-                        _showAvailableOnly = false;
-                        _searchController.clear();
-                      });
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: SizeConfig.blockHight * 2),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: ValueListenableBuilder(
+                      valueListenable: filteredItems,
+                      builder: (context, value, _) {
+                        return MenuSearchFilters(
+                          searchController: _searchController,
+                          searchQuery: _searchQuery,
+                          selectedCategoryId: _selectedCategoryId,
+                          showAvailableOnly: _showAvailableOnly,
+                          categories: menuProvider.categories,
+                          onSearchChanged: (value) {
+                            _searchQuery = value;
+                            filteredItems.value = _getFilteredItems(
+                              menuProvider.items,
+                            );
+                          },
+                          onCategoryChanged: (value) {
+                            _selectedCategoryId = value;
+                            filteredItems.value = _getFilteredItems(
+                              menuProvider.items,
+                            );
+                          },
+                          onAvailableToggle: (value) {
+                            _showAvailableOnly = value;
+                            filteredItems.value = _getFilteredItems(
+                              menuProvider.items,
+                            );
+                          },
+                          onClearFilters: () {
+                            _searchQuery = '';
+                            _selectedCategoryId = null;
+                            _showAvailableOnly = false;
+                            _searchController.clear();
+                            filteredItems.value = _getFilteredItems(
+                              menuProvider.items,
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: SizeConfig.blockHight * 2),
+                  ),
+
+                  ValueListenableBuilder(
+                    valueListenable: filteredItems,
+                    builder: (context, value, _) {
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          childCount: value.length,
+                          (context, index) {
+                            final item = value[index];
+                            final category = menuProvider.categories.firstWhere(
+                              (cat) => cat.categoryId == item.categoryId,
+                              orElse: () => CategoryModel()
+                                ..name = AppLocalizations.of(
+                                  context,
+                                ).t('unknownCategory')
+                                ..categoryId = 0,
+                            );
+
+                            return ItemCard(
+                              item: item,
+                              categoryName: category.name,
+                              onSelectItem: (selected) async {
+                                if (selected) {
+                                  final orderItem = OrderItemModel()
+                                    ..itemId = item.itemId
+                                    ..price = item.price
+                                    ..quantity = 1;
+                                  await context
+                                      .read<OrderProvider>()
+                                      .upsertOrderItemLocally(orderItem);
+                                } else {
+                                  await context
+                                      .read<OrderProvider>()
+                                      .deleteOrderItemLocally(
+                                        itemId: item.itemId,
+                                      );
+                                }
+                              },
+                            );
+                          },
+                        ),
+                      );
                     },
                   ),
-                ),
-
-                SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final item = filteredItems[index];
-                      final category = menuProvider.categories.firstWhere(
-                        (cat) => cat.categoryId == item.categoryId,
-                        orElse: () => CategoryModel()
-                          ..name = AppLocalizations.of(
-                            context,
-                          ).t('unknownCategory')
-                          ..categoryId = 0,
-                      );
-
-                      return ItemCard(
-                        item: item,
-                        categoryName: category.name,
-                        onSelectItem: (selected) async {
-                          if (selected) {
-                            final orderItem = OrderItemModel()
-                              ..itemId = item.itemId
-                              ..price = item.price
-                              ..quantity = 1;
-                            await context
-                                .read<OrderProvider>()
-                                .upsertOrderItemLocally(orderItem);
-                          } else {
-                            await context
-                                .read<OrderProvider>()
-                                .deleteOrderItemLocally(itemId: item.itemId);
-                          }
-                        },
-                      );
-                    }, childCount: filteredItems.length),
-                  ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
@@ -189,6 +226,7 @@ class CartButton extends StatelessWidget {
               Icon(Icons.shopping_cart),
               Positioned(
                 right: 0,
+                top: 0,
                 child: Consumer<OrderProvider>(
                   builder: (context, orderProv, child) {
                     final itemCount = orderProv.orderItems
@@ -204,15 +242,15 @@ class CartButton extends StatelessWidget {
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
+                      constraints: BoxConstraints(
+                        minWidth: SizeConfig.blockWidth,
+                        minHeight: SizeConfig.blockHight,
                       ),
                       child: Text(
                         itemCount.toString(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: SizeConfig.blockHight,
                         ),
                         textAlign: TextAlign.center,
                       ),

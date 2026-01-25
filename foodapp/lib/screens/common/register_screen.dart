@@ -4,7 +4,8 @@ import 'package:foodapp/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  final VoidCallback onToggle;
+  const RegisterScreen({super.key, required this.onToggle});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -29,39 +30,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.read<AuthProvider>();
-    final authState = context.watch<AuthProvider>();
-
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
+      body: Consumer<AuthProvider>(
+        builder: (context, authProvider, child) {
+          return Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // header with avatar placeholder
-                      CircleAvatar(
-                        radius: 36,
-                        backgroundColor: Colors.blue.shade100,
-                        child: const Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
                       Text(
                         AppLocalizations.of(
                           context,
@@ -78,7 +60,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         decoration: InputDecoration(
                           labelText: AppLocalizations.of(context).t('fullName'),
                           prefixIcon: const Icon(Icons.person),
-                          border: const OutlineInputBorder(),
                         ),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
@@ -97,7 +78,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         decoration: InputDecoration(
                           labelText: AppLocalizations.of(context).t('email'),
                           prefixIcon: const Icon(Icons.email),
-                          border: const OutlineInputBorder(),
                         ),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
@@ -121,7 +101,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         decoration: InputDecoration(
                           labelText: AppLocalizations.of(context).t('password'),
                           prefixIcon: const Icon(Icons.lock),
-                          border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -139,10 +118,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               context,
                             ).t('passwordRequired');
                           }
-                          if (v.trim().length < 6) {
+                          if (v.trim().length < 8) {
                             return AppLocalizations.of(
                               context,
-                            ).t('passwordMinLengthRegister');
+                            ).t('passwordMinLength');
                           }
                           return null;
                         },
@@ -157,13 +136,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             context,
                           ).t('phoneNumber'),
                           prefixIcon: const Icon(Icons.phone),
-                          border: const OutlineInputBorder(),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return AppLocalizations.of(
                               context,
                             ).t('phoneRequired');
+                          }
+                          if (value.trim().length < 11) {
+                            return AppLocalizations.of(
+                              context,
+                            ).t('phoneMinLength');
                           }
                           return null;
                         },
@@ -172,7 +155,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       SizedBox(
                         width: double.infinity,
-                        child: authState.isLoading
+                        child: authProvider.isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : ElevatedButton(
                                 style: ElevatedButton.styleFrom(
@@ -188,29 +171,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     return;
                                   }
 
-                                  try {
-                                    await auth.register(
-                                      name: nameController.text.trim(),
-                                      email: emailController.text.trim(),
-                                      password: passwordController.text.trim(),
-                                      phoneNumber: phoneController.text.trim(),
-                                    );
+                                  await authProvider.register(
+                                    name: nameController.text.trim(),
+                                    email: emailController.text.trim(),
+                                    password: passwordController.text.trim(),
+                                    phoneNumber: phoneController.text.trim(),
+                                  );
 
-                                    if (!context.mounted) return;
-
-                                    if (auth.error != null) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(content: Text(auth.error!)),
-                                      );
-                                    } else {
-                                      Navigator.pop(context);
-                                    }
-                                  } catch (e) {
-                                    if (!context.mounted) return;
+                                  if (authProvider.error != null &&
+                                      context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(e.toString())),
+                                      SnackBar(
+                                        content: Text(authProvider.error!),
+                                      ),
                                     );
                                   }
                                 },
@@ -231,7 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ).t('alreadyHaveAccount'),
                           ),
                           TextButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: widget.onToggle,
                             child: Text(
                               AppLocalizations.of(context).t('signIn'),
                             ),
@@ -243,8 +216,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

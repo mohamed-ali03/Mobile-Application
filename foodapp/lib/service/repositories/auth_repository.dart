@@ -10,7 +10,7 @@ class AuthRepository {
   static const _timeout = Duration(seconds: 10);
 
   /// 🔑 login and sync profile to local DB (offline-safe)
-  Future<void> login(String email, String password) async {
+  Future<bool> login(String email, String password) async {
     try {
       final user = await _remote.login(email, password).timeout(_timeout);
 
@@ -27,6 +27,8 @@ class AuthRepository {
         ..createdAt = _parseDate(profile['created_at']);
 
       await _local.saveUser(localUser);
+
+      return localUser.role == 'user';
     } catch (e) {
       debugPrint('Failed to login or fetch profile: $e');
       rethrow;
@@ -59,6 +61,7 @@ class AuthRepository {
         ..name = name
         ..role = role
         ..phoneNumber = phoneNumber
+        ..createdAt = _parseDate(user.createdAt)
         ..imageUrl = imageUrl;
 
       await _local.saveUser(localUser);
@@ -72,16 +75,10 @@ class AuthRepository {
   Future<void> logout() async {
     try {
       await _remote.logout().timeout(_timeout);
+      await _local.clear();
     } catch (e) {
       debugPrint('Failed to logout remotely: $e');
       rethrow;
-    } finally {
-      // Always clear local data even if remote logout fails
-      try {
-        await _local.clear();
-      } catch (e) {
-        debugPrint('Failed to clear local data: $e');
-      }
     }
   }
 
@@ -150,9 +147,9 @@ class AuthRepository {
   }
 
   /// 👀 watch local user for UI updates
-  Stream<UserModel?> watchUser() {
+  Stream<List<UserModel>> watchUsers() {
     try {
-      return _local.watchUser();
+      return _local.watchUsers();
     } catch (e) {
       debugPrint('Failed to watch user: $e');
       rethrow;
@@ -220,7 +217,7 @@ class AuthRepository {
   }
 
   /// 📥 fetch all users from local database
-  Future<List<UserModel>> fetchAllUsers() async {
+  Future<void> fetchAllUsers() async {
     try {
       // Try to fetch from remote first and update local cache
       try {
@@ -242,11 +239,8 @@ class AuthRepository {
         // If remote fetch fails, fall back to local cache
         debugPrint('Failed to fetch remote profiles: $e');
       }
-
-      return await _local.fetchUsersSkipFirst();
     } catch (e) {
       debugPrint('fetchAllUsers error: $e');
-      return [];
     }
   }
 

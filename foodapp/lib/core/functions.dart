@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UploadImage {
@@ -29,14 +31,10 @@ class UploadImage {
   // ================================
   // UPLOAD IMAGE
   // ================================
-  Future<String> uploadImage(
-    String bucketName,
-    String filename,
-    File file,
-  ) async {
+  Future<String> uploadImage(String bucketName, File file) async {
     try {
-      if (bucketName.isEmpty || filename.isEmpty) {
-        debugPrint('❌ Bucket or filename is empty');
+      if (bucketName.isEmpty) {
+        debugPrint('❌ Bucket is empty');
         return '';
       }
 
@@ -45,25 +43,42 @@ class UploadImage {
         return '';
       }
 
-      final fileSizeInMB = file.lengthSync() / (1024 * 1024);
-      if (fileSizeInMB > 10) {
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}';
+
+      var fileSizeInMB = file.lengthSync() / 1024;
+      if (fileSizeInMB > 200) {
         debugPrint('❌ File too large: ${fileSizeInMB.toStringAsFixed(2)}MB');
-        return '';
+        file = await compressImage(file, fileName);
       }
 
       // Upload the file to the specified bucket
-      await supabase.storage.from(bucketName).upload(filename, file);
+      await supabase.storage.from(bucketName).upload(fileName, file);
+
+      fileSizeInMB = file.lengthSync() / 1024;
 
       // Get the public URL of the uploaded file
       final publicUrl = supabase.storage
           .from(bucketName)
-          .getPublicUrl(filename);
+          .getPublicUrl(fileName);
 
       return publicUrl; // return URL as String
     } catch (e) {
       debugPrint('❌ Upload failed: $e');
       return '';
     }
+  }
+
+  Future<File> compressImage(File file, String filename) async {
+    final dir = await getTemporaryDirectory();
+    final targetPath = '${dir.path}/compressed_$filename.jpg';
+    final result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 70,
+      minWidth: 800,
+      format: CompressFormat.jpeg,
+    );
+    return File(result!.path);
   }
 
   // ================================
